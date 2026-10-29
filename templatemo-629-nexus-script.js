@@ -129,9 +129,9 @@
   var caption = document.getElementById("matrixCaption");
 
   var captions = {
-    core: "FIG. 01 / CORE FRAME",
-    fluidics: "FIG. 02 / FLUIDICS MANIFOLD",
-    sync: "FIG. 03 / SYNC TIMING PLANE"
+    core: "FOTO 01 / EKIPA",
+    fluidics: "FOTO 02 / WSPOMNIENIA",
+    sync: "FOTO 03 / DOŁĄCZ"
   };
 
   tabs.forEach(function (tab) {
