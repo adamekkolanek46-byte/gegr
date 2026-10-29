@@ -123,6 +123,9 @@
     accordion.addEventListener("mouseleave", function () { setActiveSlice(null); });
   }
 
+  /* phones and touch screens: first column is open right away */
+  if (!hoverCapable) { setActiveSlice(slices[0]); }
+
   /* matrix tabs with data-goto switching */
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".matrix-tab"));
   var panels = Array.prototype.slice.call(document.querySelectorAll(".matrix-img"));
