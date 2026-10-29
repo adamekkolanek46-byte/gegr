@@ -1,166 +1,199 @@
 <!DOCTYPE html>
 <!--
-  Nexus System Template
+  Genzie - based on Nexus System Template
   https://templatemo.com/tm-629-nexus-system
 -->
-<html lang="en">
+<html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexus System - Industrial Tech HTML Template</title>
-<meta name="description" content="The Nexus is a Z-Depth scroll-stacking industrial tech template with a brushed titanium and acid volt design system.">
+<title>Genzie - grupa przyjaciół</title>
+<meta name="description" content="Genzie - ekipa, spotkania, wspomnienia i dobry vibe. Dołącz do nas na Instagramie, TikToku i Messengerze.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="templatemo-629-nexus-style.css">
+<style>
+  /* social links: HUD + CTA */
+  .hud-social { display: flex; align-items: center; gap: 8px; }
+  .soc {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; min-width: 40px; padding: 0 12px;
+    border: 1px solid var(--steel); background: var(--white); color: var(--carbon);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    transition: background 0.4s var(--ease-silk), border-color 0.4s var(--ease-silk);
+  }
+  .soc:hover, .soc:focus-visible { background: var(--volt); border-color: var(--carbon); outline: none; }
+  .soc svg { width: 16px; height: 16px; display: block; flex: none; }
+  .hud-social .soc span { display: none; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .cta-row .soc { height: 44px; padding: 0 16px; }
+  @media (min-width: 1100px) { .hud-social .soc span { display: inline; } }
+  @media (max-width: 900px) { .hud-brand { display: none; } .hud-social { margin-right: auto; } }
+  @media (max-height: 700px) { .cta-row { display: none; } }
+</style>
 </head>
 <body>
 
 <div class="scroll-spacer" aria-hidden="true"></div>
 
-<!-- card 1: the floating hero -->
+<!-- card 1: hero -->
 <section class="zcard card-hero" data-card="1">
   <div class="hero-grid" aria-hidden="true"></div>
   <div class="glass-shape glass-a" aria-hidden="true"></div>
   <div class="glass-shape glass-b" aria-hidden="true"></div>
   <div class="glass-shape glass-c" aria-hidden="true"></div>
   <div class="hero-stage">
-    <p class="hero-eyebrow">Modular Compute Systems</p>
-    <h1 class="hero-title">THE NEXUS</h1>
-    <p class="hero-sub">One chassis. Infinite configurations. Precision-engineered infrastructure for teams that build at the edge of what hardware allows.</p>
+    <p class="hero-eyebrow">Grupa przyjaciół</p>
+    <h1 class="hero-title">GENZIE</h1>
+    <p class="hero-sub">Jedna ekipa. Tysiące wspomnień. Miejsce dla ludzi, którzy lubią spotkania, żarty i dobry vibe.</p>
   </div>
-  <div class="hero-scroll-hint">Scroll to descend</div>
+  <div class="hero-scroll-hint">Przewiń w dół</div>
 </section>
 
-<!-- card 2: the engineered image overlay -->
+<!-- card 2: image overlay -->
 <section class="zcard card-macro" data-card="2">
-  <img class="macro-img" src="images/nexus-macro.jpg" alt="Macro view of the Nexus core module">
+  <img class="macro-img" src="images/nexus-macro.jpg" alt="Zdjęcie ekipy Genzie">
   <div class="macro-shade" aria-hidden="true"></div>
   <div class="crosshair-v" aria-hidden="true"></div>
   <div class="crosshair-h" aria-hidden="true"></div>
-  <div class="node-dot" aria-hidden="true"></div>
+  <div class="node-dot"></div>
   <div class="node-box">
-    <p class="node-box-tag">NODE / NX-07 TELEMETRY</p>
-    <div class="node-stat"><span>EFFICIENCY</span><span>98.4%</span></div>
-    <div class="node-stat"><span>THERMAL DELTA</span><span>-12.6 C</span></div>
-    <div class="node-stat"><span>SYNC LATENCY</span><span>0.8 ms</span></div>
+    <p class="node-box-tag">GENZIE / STATUS EKIPY</p>
+    <div class="node-stat"><span>VIBE</span><span>100%</span></div>
+    <div class="node-stat"><span>NUDA</span><span>0%</span></div>
+    <div class="node-stat"><span>INSIDE JOKES</span><span>BEZ LIMITU</span></div>
   </div>
   <div class="macro-caption">
-    <span class="mono">02 / Engineered in the open</span>
-    <h2>Every micron is accounted for.</h2>
+    <span class="mono">02 / Razem</span>
+    <h2>Najlepsze chwile robimy sami.</h2>
   </div>
 </section>
 
-<!-- card 3: the kinetic accordion fold -->
+<!-- card 3: accordion -->
 <section class="zcard card-fold" data-card="3">
   <div class="fold-head">
-    <h2>Four systems. One spine.</h2>
-    <span class="mono">03 / Hover or tap a column</span>
+    <h2>Cztery powody, żeby być z nami.</h2>
+    <span class="mono">03 / Najedź lub kliknij kolumnę</span>
   </div>
   <div class="accordion" id="accordion">
     <button class="slice" type="button" aria-expanded="false">
-      <img class="slice-img" src="images/nexus-core.jpg" alt="Core processing array">
+      <img class="slice-img" src="images/nexus-core.jpg" alt="Spotkania">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
         <span class="slice-num">A.01</span>
-        <span class="slice-idle-title">Core Array</span>
+        <span class="slice-idle-title">Spotkania</span>
         <span class="slice-num" aria-hidden="true">+</span>
       </div>
       <div class="slice-reveal">
-        <span class="mono">A.01 / Compute</span>
-        <h3>Core Array</h3>
-        <p>Sixty-four hot-swappable compute blades aligned on a single coherent fabric, tuned for sustained full-load operation.</p>
+        <span class="mono">A.01 / Wyjścia</span>
+        <h3>Spotkania</h3>
+        <p>Wspólne wyjścia, wieczory i spontaniczne plany. Zawsze ktoś wpadnie na pomysł, a reszta już jest w drodze.</p>
       </div>
     </button>
     <button class="slice" type="button" aria-expanded="false">
-      <img class="slice-img" src="images/nexus-flux.jpg" alt="Liquid cooling fluidics loop">
+      <img class="slice-img" src="images/nexus-flux.jpg" alt="Galeria">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
         <span class="slice-num">A.02</span>
-        <span class="slice-idle-title">Fluidics</span>
+        <span class="slice-idle-title">Galeria</span>
         <span class="slice-num" aria-hidden="true">+</span>
       </div>
       <div class="slice-reveal">
-        <span class="mono">A.02 / Thermal</span>
-        <h3>Fluidics Loop</h3>
-        <p>A sealed dielectric loop moves heat away from silicon at the source, holding the entire rack within a two degree band.</p>
+        <span class="mono">A.02 / Zdjęcia</span>
+        <h3>Galeria</h3>
+        <p>Zdjęcia i filmiki z każdego spotkania w jednym miejscu, żeby żadne wspomnienie nie przepadło.</p>
       </div>
     </button>
     <button class="slice" type="button" aria-expanded="false">
-      <img class="slice-img" src="images/nexus-grid.jpg" alt="Power distribution grid">
+      <img class="slice-img" src="images/nexus-grid.jpg" alt="Ekipa">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
         <span class="slice-num">A.03</span>
-        <span class="slice-idle-title">Power Grid</span>
+        <span class="slice-idle-title">Ekipa</span>
         <span class="slice-num" aria-hidden="true">+</span>
       </div>
       <div class="slice-reveal">
-        <span class="mono">A.03 / Energy</span>
-        <h3>Power Grid</h3>
-        <p>Redundant busbars and solid-state switching deliver clean power with zero transfer time when a feed drops.</p>
+        <span class="mono">A.03 / Ludzie</span>
+        <h3>Ekipa</h3>
+        <p>Każdy ma swoją rolę i swój styl. Razem tworzymy coś, czego nie da się podrobić.</p>
       </div>
     </button>
     <button class="slice" type="button" aria-expanded="false">
-      <img class="slice-img" src="images/nexus-sync.jpg" alt="Optical interconnect sync layer">
+      <img class="slice-img" src="images/nexus-sync.jpg" alt="Kontakt">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
         <span class="slice-num">A.04</span>
-        <span class="slice-idle-title">Sync Layer</span>
+        <span class="slice-idle-title">Kontakt</span>
         <span class="slice-num" aria-hidden="true">+</span>
       </div>
       <div class="slice-reveal">
-        <span class="mono">A.04 / Network</span>
-        <h3>Sync Layer</h3>
-        <p>Optical interconnects keep every node phase-locked, so distributed workloads behave like a single machine.</p>
+        <span class="mono">A.04 / Social media</span>
+        <h3>Zawsze online</h3>
+        <p>Instagram, TikTok i Messenger. Wybierz, gdzie wolisz nas złapać, i odezwij się.</p>
       </div>
     </button>
   </div>
 </section>
 
-<!-- card 4: the matrix tabs and signature -->
+<!-- card 4: tabs -->
 <section class="zcard card-matrix" data-card="4">
   <div class="matrix-left">
-    <p class="mono-tag">04 / Inside the platform</p>
-    <h2>Built as a matrix, not a stack.</h2>
+    <p class="mono-tag">04 / O nas</p>
+    <h2>Genzie to coś więcej niż grupa.</h2>
     <div class="matrix-tabs">
       <button class="matrix-tab active" type="button" data-goto="core" aria-selected="true">
-        <span class="tab-line"><span class="tab-num">01.</span><span class="tab-name">CORE</span></span>
-        <p>The structural heart of the Nexus. A milled aluminum frame that locates every module to within five microns.</p>
+        <span class="tab-line"><span class="tab-num">01.</span><span class="tab-name">EKIPA</span></span>
+        <p>Znamy się na wylot. Śmiejemy się z tych samych rzeczy i zawsze mamy czyjeś plecy.</p>
       </button>
       <button class="matrix-tab" type="button" data-goto="fluidics" aria-selected="false">
-        <span class="tab-line"><span class="tab-num">02.</span><span class="tab-name">FLUIDICS</span></span>
-        <p>Quick-disconnect manifolds route coolant through the chassis without a single exposed line.</p>
+        <span class="tab-line"><span class="tab-num">02.</span><span class="tab-name">WSPOMNIENIA</span></span>
+        <p>Każde spotkanie to nowa historia, którą później opowiadamy przez miesiące.</p>
       </button>
       <button class="matrix-tab" type="button" data-goto="sync" aria-selected="false">
-        <span class="tab-line"><span class="tab-num">03.</span><span class="tab-name">SYNC</span></span>
-        <p>A dedicated timing plane distributes a single clock to all nodes, end to end, rack to rack.</p>
+        <span class="tab-line"><span class="tab-num">03.</span><span class="tab-name">DOŁĄCZ</span></span>
+        <p>Napisz do nas na Instagramie, TikToku albo Messengerze i bądź na bieżąco.</p>
       </button>
+    </div>
+    <div class="cta-row">
+      <a class="soc" href="https://www.instagram.com/TWOJ_NICK" target="_blank" rel="noopener">Instagram</a>
+      <a class="soc" href="https://www.tiktok.com/@TWOJ_NICK" target="_blank" rel="noopener">TikTok</a>
+      <a class="soc" href="https://m.me/TWOJ_NICK" target="_blank" rel="noopener">Messenger</a>
     </div>
   </div>
   <div class="matrix-right">
-    <img class="matrix-img active" data-panel="core" src="images/nexus-tab-core.jpg" alt="The Nexus core frame">
-    <img class="matrix-img" data-panel="fluidics" src="images/nexus-tab-fluidics.jpg" alt="The Nexus fluidics manifold">
-    <img class="matrix-img" data-panel="sync" src="images/nexus-tab-sync.jpg" alt="The Nexus sync timing plane">
+    <img class="matrix-img active" data-panel="core" src="images/nexus-tab-core.jpg" alt="Ekipa Genzie">
+    <img class="matrix-img" data-panel="fluidics" src="images/nexus-tab-fluidics.jpg" alt="Wspomnienia Genzie">
+    <img class="matrix-img" data-panel="sync" src="images/nexus-tab-sync.jpg" alt="Dołącz do Genzie">
     <div class="matrix-img-shade" aria-hidden="true"></div>
-    <div class="matrix-caption" id="matrixCaption">FIG. 01 / CORE FRAME</div>
+    <div class="matrix-caption" id="matrixCaption">FOTO 01 / EKIPA</div>
   </div>
 </section>
 
-<!-- permanent hud signature bar -->
+<!-- permanent hud bar with social links -->
 <footer class="hud">
-  <a class="hud-brand" href="https://www.templatemo.com/tm-629-nexus-system" target="_blank" rel="nofollow noopener">
-    <span class="dot" aria-hidden="true"></span>Nexus System
-  </a>
-  <span class="hud-credit">FREE CSS TEMPLATES / <a href="https://templatemo.com" target="_blank" rel="nofollow noopener">TEMPLATEMO</a></span>
+  <span class="hud-brand"><span class="dot" aria-hidden="true"></span>Genzie</span>
+  <div class="hud-social">
+    <!-- PODMIEŃ linki na swoje -->
+    <a class="soc" href="https://www.instagram.com/TWOJ_NICK" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg><span>Instagram</span>
+    </a>
+    <a class="soc" href="https://www.tiktok.com/@TWOJ_NICK" target="_blank" rel="noopener" aria-label="TikTok">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.4 2.6 2.2 4.4 5 4.6"/></svg><span>TikTok</span>
+    </a>
+    <a class="soc" href="https://m.me/TWOJ_NICK" target="_blank" rel="noopener" aria-label="Messenger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3C7 3 3 6.8 3 11.5c0 2.6 1.2 4.9 3.2 6.4V21l3-1.7c.9.2 1.8.4 2.8.4 5 0 9-3.8 9-8.2S17 3 12 3z"/><path d="M7 14l3.5-3.7 2.5 2.4 3.5-2.7" stroke-linecap="round"/></svg><span>Messenger</span>
+    </a>
+  </div>
   <div class="hud-progress">
     <div class="hud-track"><div class="hud-fill" id="hudFill"></div></div>
     <span class="hud-pct" id="hudPct">000%</span>
   </div>
   <div class="hud-nav">
-    <button class="hud-arrow" id="navUp" type="button" aria-label="Previous section">
+    <button class="hud-arrow" id="navUp" type="button" aria-label="Poprzednia sekcja">
       <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 9L7 4L12 9" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
-    <button class="hud-arrow" id="navDown" type="button" aria-label="Next section">
+    <button class="hud-arrow" id="navDown" type="button" aria-label="Następna sekcja">
       <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 5L7 10L12 5" stroke="currentColor" stroke-width="1.5"/></svg>
     </button>
   </div>
