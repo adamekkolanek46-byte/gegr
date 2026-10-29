@@ -1,272 +1,171 @@
-
 <!DOCTYPE html>
-<html lang="pl">
+<!--
+  Nexus System Template
+  https://templatemo.com/tm-629-nexus-system
+-->
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080b16">
-  <title>Strona w budowie | GrupaGenZie</title>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      overflow: hidden;
-      font-family: Inter, "Segoe UI", Arial, sans-serif;
-      color: #f5f7ff;
-      background:
-        radial-gradient(ellipse at 50% 0%, #182652 0%, transparent 55%),
-        #080b16;
-    }
-
-    .glow {
-      position: fixed;
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      background: #526dff;
-      filter: blur(150px);
-      opacity: 0.18;
-      pointer-events: none;
-      animation: pulse 5s ease-in-out infinite alternate;
-    }
-
-    .container {
-      position: relative;
-      width: 100%;
-      max-width: 650px;
-      text-align: center;
-      animation: appear 1s ease both;
-    }
-
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 65px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-
-    .logo-icon {
-      display: grid;
-      place-items: center;
-      width: 38px;
-      height: 38px;
-      border: 1px solid #607aff;
-      border-radius: 12px;
-      color: white;
-      background: linear-gradient(135deg, #536dfe, #8b5cf6);
-      box-shadow: 0 0 25px #536dfe40;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 15px;
-      margin-bottom: 26px;
-      border: 1px solid #ffffff18;
-      border-radius: 50px;
-      color: #b9c5ff;
-      background: #ffffff08;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #6df7ae;
-      box-shadow: 0 0 12px #6df7ae;
-      animation: blink 1.5s infinite;
-    }
-
-    h1 {
-      margin-bottom: 22px;
-      font-size: clamp(42px, 8vw, 76px);
-      line-height: 1.04;
-      letter-spacing: -4px;
-      font-weight: 850;
-    }
-
-    h1 span {
-      color: #8495ff;
-      background: linear-gradient(90deg, #91a3ff, #c5a5ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .description {
-      max-width: 460px;
-      margin: 0 auto;
-      color: #9ca8c4;
-      font-size: 16px;
-      line-height: 1.8;
-    }
-
-    .progress-card {
-      max-width: 420px;
-      margin: 42px auto 0;
-      padding: 22px;
-      text-align: left;
-      border: 1px solid #ffffff12;
-      border-radius: 18px;
-      background: #ffffff06;
-      backdrop-filter: blur(15px);
-    }
-
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-      font-size: 13px;
-    }
-
-    .progress-info span:first-child {
-      color: #dce3ff;
-      font-weight: 600;
-    }
-
-    .percentage {
-      color: #a9b6ff;
-      font-weight: 800;
-    }
-
-    .progress-bar {
-      height: 6px;
-      overflow: hidden;
-      border-radius: 20px;
-      background: #ffffff12;
-    }
-
-    .progress-fill {
-      width: 65%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #6179ff, #b28aff);
-      box-shadow: 0 0 15px #6179ff80;
-      animation: load 1.8s ease-out both;
-    }
-
-    .note {
-      margin-top: 14px;
-      color: #77829d;
-      font-size: 12px;
-    }
-
-    .footer {
-      margin-top: 55px;
-      color: #59647f;
-      font-size: 12px;
-    }
-
-    .footer span {
-      color: #8796ff;
-    }
-
-    @keyframes appear {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes pulse {
-      from { transform: scale(0.9); opacity: 0.12; }
-      to { transform: scale(1.2); opacity: 0.24; }
-    }
-
-    @keyframes blink {
-      50% { opacity: 0.4; }
-    }
-
-    @keyframes load {
-      from { width: 0; }
-      to { width: 65%; }
-    }
-
-    @media (max-width: 480px) {
-      .logo { margin-bottom: 48px; }
-      h1 { letter-spacing: -2px; }
-      .description { font-size: 14px; }
-      .progress-card { padding: 18px; }
-      .footer { margin-top: 40px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus System - Industrial Tech HTML Template</title>
+<meta name="description" content="The Nexus is a Z-Depth scroll-stacking industrial tech template with a brushed titanium and acid volt design system.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="templatemo-629-nexus-style.css">
 </head>
-
 <body>
-  <div class="glow"></div>
 
-  <main class="container">
-    <div class="logo">
-      <div class="logo-icon">GZ</div>
-      <span>GrupaGenZie</span>
-    </div>
+<div class="scroll-spacer" aria-hidden="true"></div>
 
-    <div class="status">
-      <span class="dot"></span>
-      Pracujemy nad stroną
-    </div>
+<!-- card 1: the floating hero -->
+<section class="zcard card-hero" data-card="1">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="glass-shape glass-a" aria-hidden="true"></div>
+  <div class="glass-shape glass-b" aria-hidden="true"></div>
+  <div class="glass-shape glass-c" aria-hidden="true"></div>
+  <div class="hero-stage">
+    <p class="hero-eyebrow">Modular Compute Systems</p>
+    <h1 class="hero-title">THE NEXUS</h1>
+    <p class="hero-sub">One chassis. Infinite configurations. Precision-engineered infrastructure for teams that build at the edge of what hardware allows.</p>
+  </div>
+  <div class="hero-scroll-hint">Scroll to descend</div>
+</section>
 
-    <h1>Coś nowego<br><span>nadchodzi.</span></h1>
+<!-- card 2: the engineered image overlay -->
+<section class="zcard card-macro" data-card="2">
+  <img class="macro-img" src="images/nexus-macro.jpg" alt="Macro view of the Nexus core module">
+  <div class="macro-shade" aria-hidden="true"></div>
+  <div class="crosshair-v" aria-hidden="true"></div>
+  <div class="crosshair-h" aria-hidden="true"></div>
+  <div class="node-dot" aria-hidden="true"></div>
+  <div class="node-box">
+    <p class="node-box-tag">NODE / NX-07 TELEMETRY</p>
+    <div class="node-stat"><span>EFFICIENCY</span><span>98.4%</span></div>
+    <div class="node-stat"><span>THERMAL DELTA</span><span>-12.6 C</span></div>
+    <div class="node-stat"><span>SYNC LATENCY</span><span>0.8 ms</span></div>
+  </div>
+  <div class="macro-caption">
+    <span class="mono">02 / Engineered in the open</span>
+    <h2>Every micron is accounted for.</h2>
+  </div>
+</section>
 
-    <p class="description">
-      Właśnie tworzymy coś wyjątkowego.
-      Nasza strona jest obecnie w budowie,
-      ale już niedługo wszystko będzie gotowe.
-      Wpadnij do nas ponownie!
-    </p>
-
-    <section class="progress-card">
-      <div class="progress-info">
-        <span>Postęp prac</span>
-        <span class="percentage">65%</span>
+<!-- card 3: the kinetic accordion fold -->
+<section class="zcard card-fold" data-card="3">
+  <div class="fold-head">
+    <h2>Four systems. One spine.</h2>
+    <span class="mono">03 / Hover or tap a column</span>
+  </div>
+  <div class="accordion" id="accordion">
+    <button class="slice" type="button" aria-expanded="false">
+      <img class="slice-img" src="images/nexus-core.jpg" alt="Core processing array">
+      <div class="slice-shade" aria-hidden="true"></div>
+      <div class="slice-idle">
+        <span class="slice-num">A.01</span>
+        <span class="slice-idle-title">Core Array</span>
+        <span class="slice-num" aria-hidden="true">+</span>
       </div>
-
-      <div
-        class="progress-bar"
-        role="progressbar"
-        aria-label="Postęp prac nad stroną"
-        aria-valuenow="65"
-        aria-valuemin="0"
-        aria-valuemax="100"
-      >
-        <div class="progress-fill"></div>
+      <div class="slice-reveal">
+        <span class="mono">A.01 / Compute</span>
+        <h3>Core Array</h3>
+        <p>Sixty-four hot-swappable compute blades aligned on a single coherent fabric, tuned for sustained full-load operation.</p>
       </div>
+    </button>
+    <button class="slice" type="button" aria-expanded="false">
+      <img class="slice-img" src="images/nexus-flux.jpg" alt="Liquid cooling fluidics loop">
+      <div class="slice-shade" aria-hidden="true"></div>
+      <div class="slice-idle">
+        <span class="slice-num">A.02</span>
+        <span class="slice-idle-title">Fluidics</span>
+        <span class="slice-num" aria-hidden="true">+</span>
+      </div>
+      <div class="slice-reveal">
+        <span class="mono">A.02 / Thermal</span>
+        <h3>Fluidics Loop</h3>
+        <p>A sealed dielectric loop moves heat away from silicon at the source, holding the entire rack within a two degree band.</p>
+      </div>
+    </button>
+    <button class="slice" type="button" aria-expanded="false">
+      <img class="slice-img" src="images/nexus-grid.jpg" alt="Power distribution grid">
+      <div class="slice-shade" aria-hidden="true"></div>
+      <div class="slice-idle">
+        <span class="slice-num">A.03</span>
+        <span class="slice-idle-title">Power Grid</span>
+        <span class="slice-num" aria-hidden="true">+</span>
+      </div>
+      <div class="slice-reveal">
+        <span class="mono">A.03 / Energy</span>
+        <h3>Power Grid</h3>
+        <p>Redundant busbars and solid-state switching deliver clean power with zero transfer time when a feed drops.</p>
+      </div>
+    </button>
+    <button class="slice" type="button" aria-expanded="false">
+      <img class="slice-img" src="images/nexus-sync.jpg" alt="Optical interconnect sync layer">
+      <div class="slice-shade" aria-hidden="true"></div>
+      <div class="slice-idle">
+        <span class="slice-num">A.04</span>
+        <span class="slice-idle-title">Sync Layer</span>
+        <span class="slice-num" aria-hidden="true">+</span>
+      </div>
+      <div class="slice-reveal">
+        <span class="mono">A.04 / Network</span>
+        <h3>Sync Layer</h3>
+        <p>Optical interconnects keep every node phase-locked, so distributed workloads behave like a single machine.</p>
+      </div>
+    </button>
+  </div>
+</section>
 
-      <p class="note">Dopracowujemy ostatnie szczegóły ✨</p>
-    </section>
+<!-- card 4: the matrix tabs and signature -->
+<section class="zcard card-matrix" data-card="4">
+  <div class="matrix-left">
+    <p class="mono-tag">04 / Inside the platform</p>
+    <h2>Built as a matrix, not a stack.</h2>
+    <div class="matrix-tabs">
+      <button class="matrix-tab active" type="button" data-goto="core" aria-selected="true">
+        <span class="tab-line"><span class="tab-num">01.</span><span class="tab-name">CORE</span></span>
+        <p>The structural heart of the Nexus. A milled aluminum frame that locates every module to within five microns.</p>
+      </button>
+      <button class="matrix-tab" type="button" data-goto="fluidics" aria-selected="false">
+        <span class="tab-line"><span class="tab-num">02.</span><span class="tab-name">FLUIDICS</span></span>
+        <p>Quick-disconnect manifolds route coolant through the chassis without a single exposed line.</p>
+      </button>
+      <button class="matrix-tab" type="button" data-goto="sync" aria-selected="false">
+        <span class="tab-line"><span class="tab-num">03.</span><span class="tab-name">SYNC</span></span>
+        <p>A dedicated timing plane distributes a single clock to all nodes, end to end, rack to rack.</p>
+      </button>
+    </div>
+  </div>
+  <div class="matrix-right">
+    <img class="matrix-img active" data-panel="core" src="images/nexus-tab-core.jpg" alt="The Nexus core frame">
+    <img class="matrix-img" data-panel="fluidics" src="images/nexus-tab-fluidics.jpg" alt="The Nexus fluidics manifold">
+    <img class="matrix-img" data-panel="sync" src="images/nexus-tab-sync.jpg" alt="The Nexus sync timing plane">
+    <div class="matrix-img-shade" aria-hidden="true"></div>
+    <div class="matrix-caption" id="matrixCaption">FIG. 01 / CORE FRAME</div>
+  </div>
+</section>
 
-    <footer class="footer">
-      © <span id="year"></span> GrupaGenZie · Tworzymy coś fajnego.
-    </footer>
-  </main>
+<!-- permanent hud signature bar -->
+<footer class="hud">
+  <a class="hud-brand" href="https://www.templatemo.com/tm-629-nexus-system" target="_blank" rel="nofollow noopener">
+    <span class="dot" aria-hidden="true"></span>Nexus System
+  </a>
+  <span class="hud-credit">FREE CSS TEMPLATES / <a href="https://templatemo.com" target="_blank" rel="nofollow noopener">TEMPLATEMO</a></span>
+  <div class="hud-progress">
+    <div class="hud-track"><div class="hud-fill" id="hudFill"></div></div>
+    <span class="hud-pct" id="hudPct">000%</span>
+  </div>
+  <div class="hud-nav">
+    <button class="hud-arrow" id="navUp" type="button" aria-label="Previous section">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 9L7 4L12 9" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+    <button class="hud-arrow" id="navDown" type="button" aria-label="Next section">
+      <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 5L7 10L12 5" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+  </div>
+</footer>
 
-  <script>
-    document.getElementById("year").textContent =
-      new Date().getFullYear();
-  </script>
+<script src="templatemo-629-nexus-script.js"></script>
 </body>
 </html>
