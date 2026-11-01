@@ -76,7 +76,7 @@
     <span class="mono">03 / Najedź lub kliknij kolumnę</span>
   </div>
   <div class="accordion" id="accordion">
-    <button class="slice" type="button" aria-expanded="false">
+    <div class="slice" role="button" tabindex="0" aria-expanded="false">
       <img class="slice-img" src="images/nexus-core.jpg" alt="Spotkania">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
@@ -89,8 +89,8 @@
         <h3>Spotkania</h3>
         <p>Wspólne wyjścia, wieczory i spontaniczne plany. Zawsze ktoś wpadnie na pomysł, a reszta już jest w drodze.</p>
       </div>
-    </button>
-    <button class="slice" type="button" aria-expanded="false">
+    </div>
+    <div class="slice" role="button" tabindex="0" aria-expanded="false">
       <img class="slice-img" src="images/nexus-flux.jpg" alt="Galeria">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
@@ -103,8 +103,8 @@
         <h3>Galeria</h3>
         <p>Zdjęcia i filmiki z każdego spotkania w jednym miejscu, żeby żadne wspomnienie nie przepadło.</p>
       </div>
-    </button>
-    <button class="slice" type="button" aria-expanded="false">
+    </div>
+    <div class="slice" role="button" tabindex="0" aria-expanded="false">
       <img class="slice-img" src="images/nexus-grid.jpg" alt="Ekipa">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
@@ -117,8 +117,8 @@
         <h3>Ekipa</h3>
         <p>Każdy ma swoją rolę i swój styl. Razem tworzymy coś, czego nie da się podrobić.</p>
       </div>
-    </button>
-    <button class="slice" type="button" aria-expanded="false">
+    </div>
+    <div class="slice" role="button" tabindex="0" aria-expanded="false">
       <img class="slice-img" src="images/nexus-sync.jpg" alt="Kontakt">
       <div class="slice-shade" aria-hidden="true"></div>
       <div class="slice-idle">
@@ -131,32 +131,14 @@
         <h3>Zawsze online</h3>
         <p>Instagram, TikTok i Messenger. Wybierz, gdzie wolisz nas złapać, i odezwij się.</p>
       </div>
-    </button>
+    </div>
   </div>
 </section>
 
-<!-- card 4: gallery -->
-<section class="zcard card-gallery" data-card="4">
-  <div class="fold-head">
-    <h2>Galeria. Nasze wspomnienia.</h2>
-    <span class="mono">04 / Kliknij zdjęcie</span>
-  </div>
-  <div class="gallery-grid">
-    <button class="gal-item" type="button" data-n="01" aria-label="Powiększ zdjęcie 1"><img src="images/nexus-macro.jpg" alt="Zdjęcie 1" loading="lazy" decoding="async"></button>
-    <button class="gal-item" type="button" data-n="02" aria-label="Powiększ zdjęcie 2"><img src="images/nexus-core.jpg" alt="Zdjęcie 2" loading="lazy" decoding="async"></button>
-    <button class="gal-item" type="button" data-n="03" aria-label="Powiększ zdjęcie 3"><img src="images/nexus-flux.jpg" alt="Zdjęcie 3" loading="lazy" decoding="async"></button>
-    <button class="gal-item" type="button" data-n="04" aria-label="Powiększ zdjęcie 4"><img src="images/nexus-grid.jpg" alt="Zdjęcie 4" loading="lazy" decoding="async"></button>
-    <button class="gal-item" type="button" data-n="05" aria-label="Powiększ zdjęcie 5"><img src="images/nexus-sync.jpg" alt="Zdjęcie 5" loading="lazy" decoding="async"></button>
-    <button class="gal-item" type="button" data-n="06" aria-label="Powiększ zdjęcie 6"><img src="images/nexus-tab-core.jpg" alt="Zdjęcie 6" loading="lazy" decoding="async"></button>
-    <button class="gal-item" type="button" data-n="07" aria-label="Powiększ zdjęcie 7"><img src="images/nexus-tab-fluidics.jpg" alt="Zdjęcie 7" loading="lazy" decoding="async"></button>
-    <button class="gal-item" type="button" data-n="08" aria-label="Powiększ zdjęcie 8"><img src="images/nexus-tab-sync.jpg" alt="Zdjęcie 8" loading="lazy" decoding="async"></button>
-  </div>
-</section>
-
-<!-- card 5: tabs -->
-<section class="zcard card-matrix" data-card="5">
+<!-- card 4: tabs -->
+<section class="zcard card-matrix" data-card="4">
   <div class="matrix-left">
-    <p class="mono-tag">05 / O nas</p>
+    <p class="mono-tag">04 / O nas</p>
     <h2>Genzie to coś więcej niż grupa.</h2>
     <div class="matrix-tabs">
       <button class="matrix-tab active" type="button" data-goto="core" aria-selected="true">
@@ -173,6 +155,7 @@
       </button>
     </div>
     <div class="cta-row">
+      <a class="soc" href="gallery.html">Galeria</a>
       <a class="soc" href="https://www.instagram.com/TWOJ_NICK" target="_blank" rel="noopener">Instagram</a>
       <a class="soc" href="https://www.tiktok.com/@TWOJ_NICK" target="_blank" rel="noopener">TikTok</a>
       <a class="soc" href="https://m.me/TWOJ_NICK" target="_blank" rel="noopener">Messenger</a>
@@ -187,19 +170,13 @@
   </div>
 </section>
 
-<!-- lightbox -->
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Podgląd zdjęcia">
-  <span class="lb-count" id="lbCount">01 / 08</span>
-  <img class="lb-img" id="lbImg" src="" alt="">
-  <button class="lb-btn lb-close" id="lbClose" type="button" aria-label="Zamknij">&times;</button>
-  <button class="lb-btn lb-prev" id="lbPrev" type="button" aria-label="Poprzednie zdjęcie">&#8249;</button>
-  <button class="lb-btn lb-next" id="lbNext" type="button" aria-label="Następne zdjęcie">&#8250;</button>
-</div>
-
 <!-- permanent hud bar with social links -->
 <footer class="hud">
   <span class="hud-brand"><span class="dot" aria-hidden="true"></span>Genzie</span>
   <div class="hud-social">
+    <a class="soc" href="gallery.html" aria-label="Galeria">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg><span>Galeria</span>
+    </a>
     <!-- PODMIEŃ linki na swoje -->
     <a class="soc" href="https://www.instagram.com/TWOJ_NICK" target="_blank" rel="noopener" aria-label="Instagram">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg><span>Instagram</span>

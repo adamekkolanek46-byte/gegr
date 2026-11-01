@@ -35,7 +35,7 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 .mono { font-family: 'JetBrains Mono', monospace; }
 
 /* ---------- scroll spacer creates the 400vh track ---------- */
-.scroll-spacer { height: 500vh; } /* JS ustawia dokładną wysokość (liczba kart x wysokość ekranu) */
+.scroll-spacer { height: 400vh; } /* JS ustawia dokładną wysokość (liczba kart x wysokość ekranu) */
 
 /* ---------- z-depth card engine ---------- */
 .zcard {
@@ -327,6 +327,9 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   cursor: pointer;
   text-align: left;
   padding: 0;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .slice:last-child { border-right: none; }
@@ -699,113 +702,16 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
 }
 
 
-/* ---------- card 4: gallery ---------- */
-.card-gallery { background: var(--white); display: flex; flex-direction: column; }
-
-.gallery-grid {
-  flex: 1;
-  min-height: 0;
-  margin-top: 20px;
-  padding: 0 40px calc(var(--hud-h) + 20px);
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.gal-item {
-  position: relative;
-  overflow: hidden;
-  background: var(--steel);
-  padding: 0;
-  min-height: 0;
-}
-
-.gal-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.9s var(--ease-silk), filter 0.6s var(--ease-silk);
-}
-
-.gal-item::after {
-  content: attr(data-n);
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  padding: 5px 9px;
-  background: var(--volt);
-  color: var(--carbon);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-}
-
-.gal-item:hover img { transform: scale(1.06); }
-.gal-item:focus-visible { outline: 2px solid var(--carbon); outline-offset: 2px; }
-
-/* ---------- lightbox ---------- */
-.lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: rgba(13, 14, 21, 0.94);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  touch-action: none;
-}
-
-.lightbox.open { display: flex; }
-
-.lb-img {
-  max-width: 100vw;
-  max-height: 100vh;
-  max-height: 100dvh;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.lb-btn {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(244, 245, 246, 0.12);
-  border: 1px solid rgba(244, 245, 246, 0.3);
-  color: var(--titanium);
-  font-size: 22px;
-  line-height: 1;
-}
-
-.lb-btn:hover, .lb-btn:focus-visible { background: var(--volt); color: var(--carbon); outline: none; }
-.lb-close { top: calc(16px + env(safe-area-inset-top, 0px)); right: 16px; }
-.lb-prev { left: 16px; top: 50%; transform: translateY(-50%); }
-.lb-next { right: 16px; top: 50%; transform: translateY(-50%); }
-
-.lb-count {
-  position: absolute;
-  left: 16px;
-  top: calc(26px + env(safe-area-inset-top, 0px));
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: var(--titanium);
-}
-
 /* ---------- mobile polish ---------- */
 @media (max-width: 900px) {
-  .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); padding: 0 16px calc(var(--hud-h) + 12px); gap: 6px; margin-top: 14px; }
   .hero-eyebrow { letter-spacing: 0.25em; font-size: 11px; }
   .hero-sub { font-size: 15px; }
   .hud { gap: 12px; padding-left: 14px; padding-right: 14px; }
   .hud-progress { max-width: none; }
   .hud-nav { padding-left: 12px; }
+  .card-fold { padding-bottom: var(--hud-h); } /* ostatnia kolumna nie chowa sie pod paskiem */
+  .accordion { min-height: 0; }
+  .slice { transition-duration: 0.6s; }
   .hud-arrow { width: 44px; height: 44px; }
   .slice-reveal p { font-size: 13px; line-height: 1.5; }
   .node-box { max-width: calc(100vw - 32px); }
@@ -814,7 +720,6 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .matrix-left h2 { font-size: clamp(24px, 7vw, 34px); margin-bottom: 12px; }
   .matrix-tab { padding: 12px 14px; }
   .matrix-tab.active p { max-height: 100px; }
-  .lb-btn { width: 52px; height: 52px; }
 }
 
 /* low phones: keep the text and socials, drop the photo so nothing gets cut off */
@@ -824,7 +729,3 @@ button { font-family: inherit; border: none; background: none; cursor: pointer; 
   .matrix-left { justify-content: center; padding-bottom: calc(var(--hud-h) + 12px); }
 }
 
-@media (max-height: 520px) and (orientation: landscape) {
-  .gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); }
-  .fold-head { padding-top: 12px; }
-}
