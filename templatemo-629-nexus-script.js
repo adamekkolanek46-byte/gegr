@@ -16,6 +16,13 @@
 
   var vh = window.innerHeight;
   var ticking = false;
+  var spacer = document.querySelector(".scroll-spacer");
+
+  /* spacer = liczba kart x aktualna wysokość ekranu (na telefonach pasek adresu zmienia vh) */
+  function sizeSpacer() {
+    if (spacer) { spacer.style.height = (cards.length * vh) + "px"; }
+  }
+  sizeSpacer();
 
   function clamp01(v) { return Math.max(0, Math.min(1, v)); }
 
@@ -62,6 +69,7 @@
 
   window.addEventListener("resize", function () {
     vh = window.innerHeight;
+    sizeSpacer();
     requestRender();
   });
 
@@ -154,4 +162,43 @@
       caption.textContent = captions[key];
     });
   });
+
+  /* galeria + lightbox (klik, strzałki, swipe, Esc) */
+  var galItems = Array.prototype.slice.call(document.querySelectorAll(".gal-item"));
+  var lb = document.getElementById("lightbox");
+  var lbImg = document.getElementById("lbImg");
+  var lbCount = document.getElementById("lbCount");
+  var lbIndex = 0;
+
+  function lbShow(i) {
+    lbIndex = (i + galItems.length) % galItems.length;
+    var im = galItems[lbIndex].querySelector("img");
+    lbImg.src = im.getAttribute("src");
+    lbImg.alt = im.getAttribute("alt") || "";
+    lbCount.textContent = String(lbIndex + 1).padStart(2, "0") + " / " + String(galItems.length).padStart(2, "0");
+  }
+  function lbOpen(i) { lbShow(i); lb.classList.add("open"); lb.setAttribute("aria-hidden", "false"); }
+  function lbClose() { lb.classList.remove("open"); lb.setAttribute("aria-hidden", "true"); }
+
+  galItems.forEach(function (it, i) { it.addEventListener("click", function () { lbOpen(i); }); });
+  document.getElementById("lbClose").addEventListener("click", lbClose);
+  document.getElementById("lbPrev").addEventListener("click", function () { lbShow(lbIndex - 1); });
+  document.getElementById("lbNext").addEventListener("click", function () { lbShow(lbIndex + 1); });
+  lb.addEventListener("click", function (e) { if (e.target === lb) { lbClose(); } });
+
+  document.addEventListener("keydown", function (e) {
+    if (!lb.classList.contains("open")) { return; }
+    if (e.key === "Escape") { lbClose(); }
+    else if (e.key === "ArrowLeft") { lbShow(lbIndex - 1); }
+    else if (e.key === "ArrowRight") { lbShow(lbIndex + 1); }
+  });
+
+  var tx = 0, ty = 0;
+  lb.addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  lb.addEventListener("touchend", function (e) {
+    var dx = e.changedTouches[0].clientX - tx;
+    var dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { lbShow(lbIndex + (dx < 0 ? 1 : -1)); }
+    else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) { lbClose(); }
+  }, { passive: true });
 })();

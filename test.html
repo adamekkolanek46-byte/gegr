@@ -6,9 +6,9 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Genzie — razem na co dzień</title>
-<meta name="description" content="Genzie — informacje o ekipie, wspólnych spotkaniach i kontakt.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Genzie - grupa przyjaciół</title>
+<meta name="description" content="Genzie - ekipa, spotkania, wspomnienia i dobry vibe. Dołącz do nas na Instagramie, TikToku i Messengerze.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -30,38 +30,6 @@
   .cta-row .soc { height: 44px; padding: 0 16px; }
   @media (min-width: 1100px) { .hud-social .soc span { display: inline; } }
   @media (max-width: 900px) { .hud-brand { display: none; } .hud-social { margin-right: auto; } }
-  @media (max-height: 700px) { .cta-row { display: none; } }
-  /* Minimalistyczny, monochromatyczny wygląd strony. */
-  :root {
-    --white: #fff;
-    --carbon: #111;
-    --steel: #d5d5d5;
-    --volt: #e8e8e8;
-    --ease-silk: cubic-bezier(.2,.7,.2,1);
-    color-scheme: light;
-  }
-  html { scroll-behavior: smooth; }
-  body { background: #fff; color: #111; }
-  .hero-grid, .glass-shape, .crosshair-v, .crosshair-h, .node-dot { display: none !important; }
-  .macro-img, .slice-img, .matrix-img { filter: grayscale(1); }
-  .macro-shade, .slice-shade { background: rgba(0,0,0,.28); }
-  .hero-title { letter-spacing: .08em; }
-  .hero-eyebrow, .hero-sub, .hero-scroll-hint, .macro-caption h2, .fold-head h2, .matrix-left h2 { text-shadow: none; }
-  .node-box { background: rgba(255,255,255,.94); color: #111; border: 1px solid #d5d5d5; box-shadow: none; }
-  .node-box-tag, .node-stat, .mono, .mono-tag, .slice-num, .tab-num, .tab-name { color: inherit; }
-  .soc { border-color: #d5d5d5; background: #fff; color: #111; border-radius: 0; box-shadow: none; }
-  .soc:hover, .soc:focus-visible { background: #e8e8e8; border-color: #111; }
-  .slice, .matrix-tab, .hud-arrow { box-shadow: none; }
-  .matrix-img-shade { background: rgba(0,0,0,.12); }
-  .hud { background: rgba(255,255,255,.96); color: #111; border-top: 1px solid #ddd; box-shadow: none; }
-  .hud-arrow { color: #111; }
-  .hud-track { background: #e5e5e5; }
-  .hud-fill { background: #111; }
-  a { color: inherit; }
-  :focus-visible { outline: 2px solid #111; outline-offset: 3px; }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  }
 </style>
 </head>
 <body>
@@ -75,9 +43,9 @@
   <div class="glass-shape glass-b" aria-hidden="true"></div>
   <div class="glass-shape glass-c" aria-hidden="true"></div>
   <div class="hero-stage">
-    <p class="hero-eyebrow">O nas</p>
+    <p class="hero-eyebrow">Grupa przyjaciół</p>
     <h1 class="hero-title">GENZIE</h1>
-    <p class="hero-sub">Grupa znajomych, wspólne spotkania i codzienne sprawy.</p>
+    <p class="hero-sub">Jedna ekipa. Tysiące wspomnień. Miejsce dla ludzi, którzy lubią spotkania, żarty i dobry vibe.</p>
   </div>
   <div class="hero-scroll-hint">Przewiń w dół</div>
 </section>
@@ -90,22 +58,22 @@
   <div class="crosshair-h" aria-hidden="true"></div>
   <div class="node-dot"></div>
   <div class="node-box">
-    <p class="node-box-tag">GENZIE / NA CO DZIEŃ</p>
-    <div class="node-stat"><span>SPOTKANIA</span><span>REGULARNIE</span></div>
-    <div class="node-stat"><span>PLANY</span><span>NA BIEŻĄCO</span></div>
-    <div class="node-stat"><span>AKTUALNOŚCI</span><span>ONLINE</span></div>
+    <p class="node-box-tag">GENZIE / STATUS EKIPY</p>
+    <div class="node-stat"><span>VIBE</span><span>100%</span></div>
+    <div class="node-stat"><span>NUDA</span><span>0%</span></div>
+    <div class="node-stat"><span>INSIDE JOKES</span><span>BEZ LIMITU</span></div>
   </div>
   <div class="macro-caption">
     <span class="mono">02 / Razem</span>
-    <h2>Tak spędzamy czas.</h2>
+    <h2>Najlepsze chwile robimy sami.</h2>
   </div>
 </section>
 
 <!-- card 3: accordion -->
 <section class="zcard card-fold" data-card="3">
   <div class="fold-head">
-    <h2>Co robimy</h2>
-    <span class="mono">03 / Kliknij, aby zobaczyć więcej</span>
+    <h2>Cztery powody, żeby być z nami.</h2>
+    <span class="mono">03 / Najedź lub kliknij kolumnę</span>
   </div>
   <div class="accordion" id="accordion">
     <button class="slice" type="button" aria-expanded="false">
@@ -119,7 +87,7 @@
       <div class="slice-reveal">
         <span class="mono">A.01 / Wyjścia</span>
         <h3>Spotkania</h3>
-        <p>Spotykamy się, wychodzimy i wspólnie planujemy wolny czas.</p>
+        <p>Wspólne wyjścia, wieczory i spontaniczne plany. Zawsze ktoś wpadnie na pomysł, a reszta już jest w drodze.</p>
       </div>
     </button>
     <button class="slice" type="button" aria-expanded="false">
@@ -133,7 +101,7 @@
       <div class="slice-reveal">
         <span class="mono">A.02 / Zdjęcia</span>
         <h3>Galeria</h3>
-        <p>Wybrane zdjęcia i nagrania ze wspólnych spotkań.</p>
+        <p>Zdjęcia i filmiki z każdego spotkania w jednym miejscu, żeby żadne wspomnienie nie przepadło.</p>
       </div>
     </button>
     <button class="slice" type="button" aria-expanded="false">
@@ -147,7 +115,7 @@
       <div class="slice-reveal">
         <span class="mono">A.03 / Ludzie</span>
         <h3>Ekipa</h3>
-        <p>Poznaj osoby, które tworzą Genzie.</p>
+        <p>Każdy ma swoją rolę i swój styl. Razem tworzymy coś, czego nie da się podrobić.</p>
       </div>
     </button>
     <button class="slice" type="button" aria-expanded="false">
@@ -161,29 +129,47 @@
       <div class="slice-reveal">
         <span class="mono">A.04 / Social media</span>
         <h3>Zawsze online</h3>
-        <p>Znajdziesz nas w mediach społecznościowych.</p>
+        <p>Instagram, TikTok i Messenger. Wybierz, gdzie wolisz nas złapać, i odezwij się.</p>
       </div>
     </button>
   </div>
 </section>
 
-<!-- card 4: tabs -->
-<section class="zcard card-matrix" data-card="4">
+<!-- card 4: gallery -->
+<section class="zcard card-gallery" data-card="4">
+  <div class="fold-head">
+    <h2>Galeria. Nasze wspomnienia.</h2>
+    <span class="mono">04 / Kliknij zdjęcie</span>
+  </div>
+  <div class="gallery-grid">
+    <button class="gal-item" type="button" data-n="01" aria-label="Powiększ zdjęcie 1"><img src="images/nexus-macro.jpg" alt="Zdjęcie 1" loading="lazy" decoding="async"></button>
+    <button class="gal-item" type="button" data-n="02" aria-label="Powiększ zdjęcie 2"><img src="images/nexus-core.jpg" alt="Zdjęcie 2" loading="lazy" decoding="async"></button>
+    <button class="gal-item" type="button" data-n="03" aria-label="Powiększ zdjęcie 3"><img src="images/nexus-flux.jpg" alt="Zdjęcie 3" loading="lazy" decoding="async"></button>
+    <button class="gal-item" type="button" data-n="04" aria-label="Powiększ zdjęcie 4"><img src="images/nexus-grid.jpg" alt="Zdjęcie 4" loading="lazy" decoding="async"></button>
+    <button class="gal-item" type="button" data-n="05" aria-label="Powiększ zdjęcie 5"><img src="images/nexus-sync.jpg" alt="Zdjęcie 5" loading="lazy" decoding="async"></button>
+    <button class="gal-item" type="button" data-n="06" aria-label="Powiększ zdjęcie 6"><img src="images/nexus-tab-core.jpg" alt="Zdjęcie 6" loading="lazy" decoding="async"></button>
+    <button class="gal-item" type="button" data-n="07" aria-label="Powiększ zdjęcie 7"><img src="images/nexus-tab-fluidics.jpg" alt="Zdjęcie 7" loading="lazy" decoding="async"></button>
+    <button class="gal-item" type="button" data-n="08" aria-label="Powiększ zdjęcie 8"><img src="images/nexus-tab-sync.jpg" alt="Zdjęcie 8" loading="lazy" decoding="async"></button>
+  </div>
+</section>
+
+<!-- card 5: tabs -->
+<section class="zcard card-matrix" data-card="5">
   <div class="matrix-left">
-    <p class="mono-tag">04 / INFORMACJE</p>
-    <h2>Kilka słów o Genzie</h2>
+    <p class="mono-tag">05 / O nas</p>
+    <h2>Genzie to coś więcej niż grupa.</h2>
     <div class="matrix-tabs">
       <button class="matrix-tab active" type="button" data-goto="core" aria-selected="true">
         <span class="tab-line"><span class="tab-num">01.</span><span class="tab-name">EKIPA</span></span>
-        <p>Jesteśmy grupą znajomych, których łączą wspólne zainteresowania.</p>
+        <p>Znamy się na wylot. Śmiejemy się z tych samych rzeczy i zawsze mamy czyjeś plecy.</p>
       </button>
       <button class="matrix-tab" type="button" data-goto="fluidics" aria-selected="false">
         <span class="tab-line"><span class="tab-num">02.</span><span class="tab-name">WSPOMNIENIA</span></span>
-        <p>Tutaj publikujemy wybrane zdjęcia i materiały ze spotkań.</p>
+        <p>Każde spotkanie to nowa historia, którą później opowiadamy przez miesiące.</p>
       </button>
       <button class="matrix-tab" type="button" data-goto="sync" aria-selected="false">
         <span class="tab-line"><span class="tab-num">03.</span><span class="tab-name">DOŁĄCZ</span></span>
-        <p>Obserwuj nasze profile, aby śledzić aktualności.</p>
+        <p>Napisz do nas na Instagramie, TikToku albo Messengerze i bądź na bieżąco.</p>
       </button>
     </div>
     <div class="cta-row">
@@ -200,6 +186,15 @@
     <div class="matrix-caption" id="matrixCaption">FOTO 01 / EKIPA</div>
   </div>
 </section>
+
+<!-- lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Podgląd zdjęcia">
+  <span class="lb-count" id="lbCount">01 / 08</span>
+  <img class="lb-img" id="lbImg" src="" alt="">
+  <button class="lb-btn lb-close" id="lbClose" type="button" aria-label="Zamknij">&times;</button>
+  <button class="lb-btn lb-prev" id="lbPrev" type="button" aria-label="Poprzednie zdjęcie">&#8249;</button>
+  <button class="lb-btn lb-next" id="lbNext" type="button" aria-label="Następne zdjęcie">&#8250;</button>
+</div>
 
 <!-- permanent hud bar with social links -->
 <footer class="hud">
