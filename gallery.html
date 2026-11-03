@@ -13,21 +13,50 @@ dialog button{border:1px solid #ffffff66;background:#28242d;color:white;border-r
 .prev,.next{position:absolute;top:50%;transform:translateY(-50%)}.prev{left:12px}.next{right:12px}
 :focus-visible{outline:3px solid #a28bc7;outline-offset:5px}
 @media(max-width:800px){.grid{columns:2}}@media(max-width:480px){.grid{columns:1}main{padding-top:40px}dialog img{padding:70px 16px}}
-</style></head><body>
+.album{display:block;background:#eee5f4;border-radius:20px;padding:24px;margin:32px 0;font-size:24px;font-weight:bold}.album small{display:block;font-size:14px;font-weight:normal;margin-top:10px}.filters{display:flex;gap:10px;flex-wrap:wrap}.filters button{font:inherit;cursor:pointer;border:1px solid #d6ccd8;border-radius:24px;padding:12px 22px;background:transparent;color:inherit}.filters button[aria-pressed="true"]{background:#35333d;color:#fff}.photo img{aspect-ratio:4/5;object-fit:cover;background:#e9e3ed}.photo small{color:#716976}dialog iframe{border:0;width:100%;height:100%;padding:72px 60px}.tools a{color:white;font-size:13px}.photo .thumb{position:relative;padding:0}.play{position:absolute;left:16px;bottom:16px;background:#35333d;color:white;border-radius:50%;padding:12px} .grid{columns:initial;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.photo{min-width:0}.photo img{color:#716976}@media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){.grid{grid-template-columns:1fr}dialog iframe{padding:75px 12px}}
+#large{width:100%;height:100%;display:grid;place-items:center;padding:70px 60px}#large img,#large video{max-width:100%;max-height:calc(100dvh - 140px);width:auto;height:auto;padding:0;object-fit:contain}@media(max-width:480px){#large{padding:70px 12px}}</style></head><body>
 <header class="wrap"><a href="test.html">grupa genzie.</a><a href="test.html">← Wróć</a></header>
 <main class="wrap"><h1>Nasza <span>galeria.</span></h1><p>Wspólne chwile w jednym miejscu. Kliknij zdjęcie, żeby je powiększyć.</p>
-<p id="count"></p><div class="grid" id="grid"></div><div class="empty" id="empty"><strong>Nowe wspomnienia już wkrótce.</strong><p>Tu pojawią się nasze zdjęcia.</p></div></main>
-<dialog id="viewer" aria-label="Podgląd zdjęcia"><img id="large" alt=""><div class="tools"><span id="caption"></span><button id="close" aria-label="Zamknij">×</button></div><button class="prev" id="prev" aria-label="Poprzednie zdjęcie">‹</button><button class="next" id="next" aria-label="Następne zdjęcie">›</button></dialog>
-<script src="photos.js"></script><script>
-const photos=window.GENZIE_PHOTOS||[], grid=document.getElementById("grid"), viewer=document.getElementById("viewer"), large=document.getElementById("large");
-let current=0,opener;
-document.getElementById("empty").hidden=photos.length>0;
-document.getElementById("count").textContent=photos.length ? photos.length+" zdjęć" : "";
-function show(i){current=(i+photos.length)%photos.length;large.src=photos[current];large.alt="Zdjęcie "+(current+1);document.getElementById("caption").textContent=large.alt+" / "+photos.length;}
-photos.forEach((src,i)=>{const button=document.createElement("button");button.className="photo";button.type="button";const img=document.createElement("img");img.src=src;img.alt="Zdjęcie "+(i+1);img.loading="lazy";const label=document.createElement("span");label.textContent=img.alt;button.append(img,label);button.onclick=()=>{opener=button;show(i);viewer.showModal();document.body.style.overflow="hidden";};grid.append(button);});
+<a class="album" href="#halloween">📁 Halloween <small>30.10.2026 · 30 zdjęć · 10 filmów</small></a>
+<section id="halloween"><h2>Halloween</h2><p>30 października 2026 · od najnowszych</p>
+<div class="filters" role="group" aria-label="Rodzaj materiałów"><button type="button" data-filter="all" aria-pressed="true">Wszystko</button><button type="button" data-filter="photo" aria-pressed="false">Zdjęcia</button><button type="button" data-filter="video" aria-pressed="false">Filmy</button></div><p id="count"></p><div class="grid" id="grid"></div><div class="empty" id="empty"><strong>Nowe wspomnienia już wkrótce.</strong><p>Tu pojawią się nasze zdjęcia.</p></div></section></main>
+<dialog id="viewer" aria-label="Podgląd zdjęcia"><div id="large"></div><div class="tools"><span id="caption"></span><a id="mediaLink" target="_blank" rel="noopener noreferrer">Otwórz plik ↗</a><button id="close" aria-label="Zamknij">×</button></div><button class="prev" id="prev" aria-label="Poprzednie zdjęcie">‹</button><button class="next" id="next" aria-label="Następne zdjęcie">›</button></dialog>
+<script src="halloween/media.js"></script><script>
+const media=[...(window.GENZIE_MEDIA||[])].sort((a,b)=>b.takenAt.localeCompare(a.takenAt));
+const grid=document.getElementById("grid"),viewer=document.getElementById("viewer"),large=document.getElementById("large");
+let current=0,opener,visible=media;
+function show(i){
+ current=(i+visible.length)%visible.length;
+ const item=visible[current];
+ large.replaceChildren();
+ const content=document.createElement(item.type==="video"?"video":"img");
+ content.src=item.src;
+ if(item.type==="video"){content.controls=true;content.playsInline=true;content.preload="metadata";}else{content.alt=item.title;}
+ large.append(content);
+ document.getElementById("caption").textContent=item.title+" / "+visible.length;
+ document.getElementById("mediaLink").href=item.src;
+}
+function render(filter){
+ visible=media.filter(item=>filter==="all"||item.type===filter);
+ grid.replaceChildren();document.getElementById("empty").hidden=visible.length>0;
+ document.getElementById("count").textContent=visible.length+" materiałów · od najnowszych";
+ visible.forEach((item,i)=>{
+  const button=document.createElement("button");button.className="photo";button.type="button";
+  const thumb=document.createElement("span");thumb.className="thumb";
+  const img=document.createElement("img");img.src=item.thumbnail;img.alt=item.title;img.loading="lazy";img.referrerPolicy="no-referrer";thumb.append(img);
+  if(item.type==="video"){const play=document.createElement("b");play.className="play";play.textContent="▶";thumb.append(play);}
+  const label=document.createElement("span");label.textContent=item.title;
+  button.append(thumb,label);
+  button.onclick=()=>{opener=button;show(i);viewer.showModal();document.body.style.overflow="hidden";};grid.append(button);
+ });
+}
+document.querySelectorAll("[data-filter]").forEach(button=>button.onclick=()=>{
+ document.querySelectorAll("[data-filter]").forEach(b=>b.setAttribute("aria-pressed",String(b===button)));render(button.dataset.filter);
+});
 document.getElementById("close").onclick=()=>viewer.close();
-viewer.addEventListener("close",()=>{document.body.style.overflow="";opener?.focus();});
+viewer.addEventListener("close",()=>{large.replaceChildren();document.body.style.overflow="";opener?.focus();});
 document.getElementById("prev").onclick=()=>show(current-1);document.getElementById("next").onclick=()=>show(current+1);
 viewer.addEventListener("keydown",e=>{if(e.key==="ArrowLeft"){e.preventDefault();show(current-1);}if(e.key==="ArrowRight"){e.preventDefault();show(current+1);}});
-let startX=0;viewer.addEventListener("touchstart",e=>{startX=e.changedTouches[0].clientX;},{passive:true});viewer.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>60)show(current+(dx<0?1:-1));},{passive:true});
+let touchStart=0;viewer.addEventListener("touchstart",e=>{touchStart=e.changedTouches[0].clientX;},{passive:true});viewer.addEventListener("touchend",e=>{if(e.target.closest("video,button,a"))return;const dx=e.changedTouches[0].clientX-touchStart;if(Math.abs(dx)>60)show(current+(dx<0?1:-1));},{passive:true});
+render("all");
 </script></body></html>

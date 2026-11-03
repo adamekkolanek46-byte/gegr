@@ -139,14 +139,14 @@
   </div>
   </main>
   <footer class="wrap"><span>grupa genzie</span><a href="#info">Razem jest fajniej. ↑</a></footer>
-<script src="photos.js"></script>
+<script src="halloween/media.js"></script>
 <script>
 const preview = document.getElementById("photoPreview");
-const photos = window.GENZIE_PHOTOS || [];
+const photos = (window.GENZIE_MEDIA || []).filter(item=>item.type==="photo").sort((a,b)=>b.takenAt.localeCompare(a.takenAt));
 document.getElementById("previewEmpty").hidden = photos.length > 0;
 photos.slice(0,3).forEach((src,i) => {
  const link=document.createElement("a"); link.href="gallery.html";
- const img=document.createElement("img"); img.src=src; img.alt="Zdjęcie "+(i+1); img.loading="lazy";
+ const img=document.createElement("img"); img.src=src.thumbnail; img.alt=src.title; img.loading="lazy";
  link.append(img); preview.append(link);
 });
 </script>

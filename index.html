@@ -46,6 +46,22 @@ main{min-height:100svh;display:grid;place-items:center;padding:24px}
 </div>
 </main>
 <script>
+const dateLabel = document.querySelector(".date");
+const deadline = new Date("2026-11-04T18:00:00+01:00");
+function updateDeadline() {
+  const today = new Intl.DateTimeFormat("sv-SE", {timeZone:"Europe/Warsaw"}).format(new Date());
+  const label = today === "2026-11-03" ? "do jutra, do 18:00"
+    : today === "2026-11-04" ? "dzisiaj o 18:00" : "4 listopada o 18:00";
+  if (dateLabel.dataset.label !== label) {
+    dateLabel.dataset.label = label;
+    dateLabel.replaceChildren(...[...label].map((character, i) => {
+      const span = document.createElement("span"); span.className = "letter";
+      span.style.setProperty("--i", i); span.textContent = character; return span;
+    }));
+  }
+}
+updateDeadline();
+setInterval(updateDeadline, 30000);
 const messages = [
   document.getElementById("brand"),
   document.getElementById("maintenance")
