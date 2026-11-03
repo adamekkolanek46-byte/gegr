@@ -17,17 +17,24 @@ main{min-height:100svh;display:grid;place-items:center;padding:24px}
 .group{display:block;color:#615c70;font-size:clamp(18px,2.8vw,36px);letter-spacing:.22em;padding-left:.22em;margin-bottom:clamp(10px,2vw,24px)}
 .name{display:flex;justify-content:center;font-size:clamp(48px,18vw,260px);letter-spacing:-.065em;line-height:.95;padding:.08em .08em .15em 0}
 .name span{display:inline-block}
-.name span:nth-child(1){color:#ef6686;transform:rotate(-7deg)}
-.name span:nth-child(2){color:#ed9b42;transform:rotate(5deg) translateY(-.025em)}
-.name span:nth-child(3){color:#83ae77;transform:rotate(-4deg)}
-.name span:nth-child(4){color:#6baed6;transform:rotate(5deg) translateY(.025em)}
-.name span:nth-child(5){color:#a28bc7;transform:rotate(-5deg) translateY(-.04em)}
-.name span:nth-child(6){color:#e582aa;transform:rotate(6deg)}
+.name > span:nth-child(1){color:#ef6686;transform:rotate(-7deg)}
+.name > span:nth-child(2){color:#ed9b42;transform:rotate(5deg) translateY(-.025em)}
+.name > span:nth-child(3){color:#83ae77;transform:rotate(-4deg)}
+.name > span:nth-child(4){color:#6baed6;transform:rotate(5deg) translateY(.025em)}
+.name > span:nth-child(5){color:#a28bc7;transform:rotate(-5deg) translateY(-.04em)}
+.name > span:nth-child(6){color:#e582aa;transform:rotate(6deg)}
 .maintenance{font-size:clamp(28px,7.5vw,110px);letter-spacing:-.045em;line-height:1.15}
 .maintenance .pink{color:#ef6686}.maintenance .purple{color:#a28bc7}
 .date{display:block;color:#615c70;font-size:clamp(18px,3vw,40px);letter-spacing:-.02em;margin-top:24px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
 @media(max-width:360px){main{padding:16px}}
+
+.letter{display:inline-block;white-space:pre}
+@keyframes letter-in{from{opacity:0;translate:0 .45em;scale:.7;filter:blur(5px)}to{opacity:1;translate:0 0;scale:1;filter:blur(0)}}
+@keyframes letter-out{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -.3em;filter:blur(4px)}}
+.message.entering .letter{animation:letter-in 430ms cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * var(--step))}
+.message.leaving .letter{animation:letter-out 180ms ease-in both;animation-delay:calc(var(--i) * 3ms)}
+@media(prefers-reduced-motion:reduce){.message .letter{animation:none!important}}
 </style>
 </head>
 <body>
@@ -39,11 +46,41 @@ main{min-height:100svh;display:grid;place-items:center;padding:24px}
 </div>
 </main>
 <script>
-const brand = document.getElementById("brand");
-const maintenance = document.getElementById("maintenance");
+const messages = [
+  document.getElementById("brand"),
+  document.getElementById("maintenance")
+];
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+for (const message of messages) {
+  const leaves = [...message.querySelectorAll("span")].filter(span => !span.children.length);
+  let index = 0;
+  for (const leaf of leaves) {
+    const text = leaf.textContent;
+    leaf.textContent = "";
+    for (const character of text) {
+      const letter = document.createElement("span");
+      letter.className = "letter";
+      letter.style.setProperty("--i", index++);
+      letter.textContent = character;
+      leaf.append(letter);
+    }
+  }
+  message.style.setProperty("--step", Math.min(45, 500 / Math.max(index - 1, 1)) + "ms");
+}
+let active = 0;
+messages[active].classList.add("entering");
 setInterval(() => {
-  brand.hidden = !brand.hidden;
-  maintenance.hidden = !brand.hidden;
+  const previous = messages[active];
+  previous.classList.remove("entering");
+  previous.classList.add("leaving");
+  setTimeout(() => {
+    previous.hidden = true;
+    previous.classList.remove("leaving");
+    active = (active + 1) % messages.length;
+    const next = messages[active];
+    next.hidden = false;
+    next.classList.add("entering");
+  }, reducedMotion.matches ? 0 : 280);
 }, 2000);
 </script>
 </body>
