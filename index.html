@@ -1,103 +1,24 @@
 <!doctype html>
-<html lang="pl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#faf9f6">
-<meta name="robots" content="noindex">
-<title>grupa genzie — prace techniczne do 4 listopada, 18:00</title>
-<style>
-:root{color-scheme:light;background:#faf9f6}
-*{box-sizing:border-box}
-body{margin:0;font-family:"Arial Rounded MT Bold","Trebuchet MS",Arial,sans-serif}
-main{min-height:100svh;display:grid;place-items:center;padding:24px}
-.stage{display:grid;place-items:center;width:100%;text-align:center}
-.message{grid-area:1/1;margin:0;width:100%;font-weight:900}
-.message[hidden]{display:none}
-.group{display:block;color:#615c70;font-size:clamp(18px,2.8vw,36px);letter-spacing:.22em;padding-left:.22em;margin-bottom:clamp(10px,2vw,24px)}
-.name{display:flex;justify-content:center;font-size:clamp(48px,18vw,260px);letter-spacing:-.065em;line-height:.95;padding:.08em .08em .15em 0}
-.name span{display:inline-block}
-.name > span:nth-child(1){color:#ef6686;transform:rotate(-7deg)}
-.name > span:nth-child(2){color:#ed9b42;transform:rotate(5deg) translateY(-.025em)}
-.name > span:nth-child(3){color:#83ae77;transform:rotate(-4deg)}
-.name > span:nth-child(4){color:#6baed6;transform:rotate(5deg) translateY(.025em)}
-.name > span:nth-child(5){color:#a28bc7;transform:rotate(-5deg) translateY(-.04em)}
-.name > span:nth-child(6){color:#e582aa;transform:rotate(6deg)}
-.maintenance{font-size:clamp(28px,7.5vw,110px);letter-spacing:-.045em;line-height:1.15}
-.maintenance .pink{color:#ef6686}.maintenance .purple{color:#a28bc7}
-.date{display:block;color:#615c70;font-size:clamp(18px,3vw,40px);letter-spacing:-.02em;margin-top:24px}
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
-@media(max-width:360px){main{padding:16px}}
-
-.letter{display:inline-block;white-space:pre}
-@keyframes letter-in{from{opacity:0;translate:0 .45em;scale:.7;filter:blur(5px)}to{opacity:1;translate:0 0;scale:1;filter:blur(0)}}
-@keyframes letter-out{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -.3em;filter:blur(4px)}}
-.message.entering .letter{animation:letter-in 430ms cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * var(--step))}
-.message.leaving .letter{animation:letter-out 180ms ease-in both;animation-delay:calc(var(--i) * 3ms)}
-@media(prefers-reduced-motion:reduce){.message .letter{animation:none!important}}
-</style>
-</head>
-<body>
-<main>
-<h1 class="sr-only">grupa genzie — prace techniczne do 4 listopada, 18:00</h1>
-<div class="stage" aria-hidden="true">
-<p class="message" id="brand"><span class="group">grupa</span><span class="name"><span>g</span><span>e</span><span>n</span><span>z</span><span>i</span><span>e</span></span></p>
-<p class="message maintenance" id="maintenance" hidden><span class="pink">prace</span><br><span class="purple">techniczne</span><span class="date">do jutra, do 18:00</span></p>
-</div>
-</main>
-<script>
-const dateLabel = document.querySelector(".date");
-const deadline = new Date("2026-11-04T18:00:00+01:00");
-function updateDeadline() {
-  const today = new Intl.DateTimeFormat("sv-SE", {timeZone:"Europe/Warsaw"}).format(new Date());
-  const label = today === "2026-11-03" ? "do jutra, do 18:00"
-    : today === "2026-11-04" ? "dzisiaj o 18:00" : "4 listopada o 18:00";
-  if (dateLabel.dataset.label !== label) {
-    dateLabel.dataset.label = label;
-    dateLabel.replaceChildren(...[...label].map((character, i) => {
-      const span = document.createElement("span"); span.className = "letter";
-      span.style.setProperty("--i", i); span.textContent = character; return span;
-    }));
-  }
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#faf9f6"><title>grupa genzie</title><style>:root{color-scheme:light;background:#faf9f6}*{box-sizing:border-box}body{margin:0;font-family:"Arial Rounded MT Bold","Trebuchet MS",Arial,sans-serif;color:#615c70}main{min-height:100svh;display:grid;place-items:center;padding:24px}.stage{width:100%;text-align:center}.brand{margin:0;font-weight:900}.group{display:block;font-size:clamp(18px,2.8vw,36px);letter-spacing:.22em;padding-left:.22em;margin-bottom:clamp(10px,2vw,24px)}.words{display:grid;place-items:center}.name{grid-area:1/1;display:flex;justify-content:center;font-size:clamp(48px,18vw,260px);letter-spacing:-.065em;line-height:.95;padding:.08em .08em .15em 0}.name[hidden]{display:none}.name>span{display:inline-block}.name>span:nth-child(1){color:#ef6686;transform:rotate(-7deg)}.name>span:nth-child(2){color:#ed9b42;transform:rotate(5deg) translateY(-.025em)}.name>span:nth-child(3){color:#83ae77;transform:rotate(-4deg)}.name>span:nth-child(4){color:#6baed6;transform:rotate(5deg) translateY(.025em)}.name>span:nth-child(5){color:#a28bc7;transform:rotate(-5deg) translateY(-.04em)}.name>span:nth-child(6){color:#e582aa;transform:rotate(6deg)}.beta-link{display:inline-flex;align-items:center;gap:16px;margin-top:40px;padding:16px 25px;border:1px solid #d8cfdc;border-radius:999px;color:#615c70;font-size:14px;text-decoration:none;transition:background .2s,transform .2s}.beta-link:hover{background:#eee5f4;transform:translateY(-2px)}.beta-link:focus-visible{outline:3px solid #a28bc7;outline-offset:5px}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.letter{display:inline-block}@keyframes letter-in{from{opacity:0;translate:0 .45em;scale:.7;filter:blur(5px)}to{opacity:1;translate:0 0;scale:1;filter:blur(0)}}@keyframes letter-out{from{opacity:1;translate:0 0}to{opacity:0;translate:0 -.3em;filter:blur(4px)}}.entering .letter{animation:letter-in 430ms cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i)*45ms)}.leaving .letter{animation:letter-out 180ms ease-in both;animation-delay:calc(var(--i)*8ms)}@media(prefers-reduced-motion:reduce){.letter{animation:none!important}.beta-link{transition:none}}@media(max-width:360px){main{padding:16px}}</style></head>
+<body><main><div class="stage"><h1 class="sr-only">grupa genzie</h1><p class="brand" aria-hidden="true"><span class="group">grupa</span><span class="words"><span class="name" id="genzie"><span>g</span><span>e</span><span>n</span><span>z</span><span>i</span><span>e</span></span></span></p><a class="beta-link" href="html.html">Przejdź do wersji beta <span aria-hidden="true">↗</span></a></div></main><script>const words = [...document.querySelectorAll(".name")];
+for (const word of words) {
+ [...word.children].forEach((outer,i)=>{
+  const letter=document.createElement("span");letter.className="letter";
+  letter.style.setProperty("--i",i);letter.textContent=outer.textContent;outer.replaceChildren(letter);
+ });
 }
-updateDeadline();
-setInterval(updateDeadline, 30000);
-const messages = [
-  document.getElementById("brand"),
-  document.getElementById("maintenance")
-];
-const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-for (const message of messages) {
-  const leaves = [...message.querySelectorAll("span")].filter(span => !span.children.length);
-  let index = 0;
-  for (const leaf of leaves) {
-    const text = leaf.textContent;
-    leaf.textContent = "";
-    for (const character of text) {
-      const letter = document.createElement("span");
-      letter.className = "letter";
-      letter.style.setProperty("--i", index++);
-      letter.textContent = character;
-      leaf.append(letter);
-    }
-  }
-  message.style.setProperty("--step", Math.min(45, 500 / Math.max(index - 1, 1)) + "ms");
+const reducedMotion=window.matchMedia("(prefers-reduced-motion: reduce)");
+words[0].classList.add("entering");
+function swap(from,to,after){
+ from.classList.remove("entering");from.classList.add("leaving");
+ setTimeout(()=>{
+  from.hidden=true;from.classList.remove("leaving");
+  to.hidden=false;to.classList.add("entering");
+  if(after)after();
+ },reducedMotion.matches?0:230);
 }
-let active = 0;
-messages[active].classList.add("entering");
-setInterval(() => {
-  const previous = messages[active];
-  previous.classList.remove("entering");
-  previous.classList.add("leaving");
-  setTimeout(() => {
-    previous.hidden = true;
-    previous.classList.remove("leaving");
-    active = (active + 1) % messages.length;
-    const next = messages[active];
-    next.hidden = false;
-    next.classList.add("entering");
-  }, reducedMotion.matches ? 0 : 280);
-}, 2000);
-</script>
-</body>
-</html>
+if(words.length===2){
+ setInterval(()=>swap(words[0],words[1],()=>{
+  setTimeout(()=>swap(words[1],words[0]),2000);
+ }),10000);
+}</script></body></html>
