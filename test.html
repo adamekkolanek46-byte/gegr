@@ -133,14 +133,22 @@
     </section>
     <section class="section" id="galeria">
       <div class="section-head"><div><p class="eyebrow">Nasze chwile</p><h2>Galeria wspomnień.</h2></div><a class="gallery-link" href="gallery.html">Zobacz całą galerię ↗</a></div>
-      <div class="photos">
-        <a href="gallery.html" aria-label="Otwórz galerię — zdjęcie 1"><img src="genzie-01.jpg" alt="Wspomnienie grupy Genzie — zdjęcie 1" loading="lazy" decoding="async"></a>
-        <a href="gallery.html" aria-label="Otwórz galerię — zdjęcie 2"><img src="genzie-02.jpg" alt="Wspomnienie grupy Genzie — zdjęcie 2" loading="lazy" decoding="async"></a>
-        <a href="gallery.html" aria-label="Otwórz galerię — zdjęcie 3"><img src="genzie-03.jpg" alt="Wspomnienie grupy Genzie — zdjęcie 3" loading="lazy" decoding="async"></a>
-      </div>
+      <div class="photos" id="photoPreview"></div>
+      <p id="previewEmpty" class="copy">Nowe zdjęcia pojawią się wkrótce.</p>
     </section>
   </div>
   </main>
   <footer class="wrap"><span>grupa genzie</span><a href="#info">Razem jest fajniej. ↑</a></footer>
+<script src="photos.js"></script>
+<script>
+const preview = document.getElementById("photoPreview");
+const photos = window.GENZIE_PHOTOS || [];
+document.getElementById("previewEmpty").hidden = photos.length > 0;
+photos.slice(0,3).forEach((src,i) => {
+ const link=document.createElement("a"); link.href="gallery.html";
+ const img=document.createElement("img"); img.src=src; img.alt="Zdjęcie "+(i+1); img.loading="lazy";
+ link.append(img); preview.append(link);
+});
+</script>
 </body>
 </html>
