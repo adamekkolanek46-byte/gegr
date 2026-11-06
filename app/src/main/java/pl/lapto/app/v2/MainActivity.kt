@@ -15,6 +15,11 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,15 +62,15 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.*
 
-private val Navy = Color(0xFF061A35)
-private val ZtmBlue = Color(0xFF005AA9)
-private val WarsawRed = Color(0xFFE31937)
-private val WarsawYellow = Color(0xFFFFD500)
-private val Surface = Color(0xFF102A49)
-private val Muted = Color(0xFF9CB1C9)
+private val Navy = Color(0xFF000000)
+private val ZtmBlue = Color(0xFFE51C46)
+private val WarsawRed = Color(0xFFE51C46)
+private val WarsawYellow = Color(0xFFC9B972)
+private val Surface = Color(0xFF141416)
+private val Muted = Color(0xFF929298)
 
 enum class Rarity(val label: String, val color: Color) {
-    COMMON("Pospolity", Color(0xFF63B3ED)), RARE("Rzadki", Color(0xFF8B5CF6)),
+    COMMON("Pospolity", Color(0xFF929298)), RARE("Rzadki", Color(0xFF8B5CF6)),
     VERY_RARE("Bardzo rzadki", WarsawYellow), TECHNICAL("Techniczny", Color(0xFFFF7A00)),
     VINTAGE("Zabytkowy", Color(0xFF2DD4A8)), TEST("Testowy", WarsawRed)
 }
@@ -75,8 +80,8 @@ data class VehicleCatch(
     val rarity: Rarity, val model: String, val technical: String
 )
 
-data class LiveVehicle(val lat: Double, val lon: Double, val line: String, val brigade: String, val type: String)
-data class FleetModel(val id: String, val type: String, val name: String, val numbers: List<String>, val years: List<Int>, val operator: String, val depot: String, val length: Int, val power: String, val seats: Int, val capacity: Int, val floor: String)
+data class LiveVehicle(val lat: Double, val lon: Double, val line: String, val brigade: String, val type: String, val number: String, val time: String)
+data class FleetModel(val id: String, val type: String, val name: String, val numbers: List<String>, val years: List<Int>, val operator: String, val depot: String, val length: Int, val power: String, val seats: Int, val capacity: Int, val floor: String, val brand: String = "Inne")
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,13 +92,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable private fun LapToTheme(content: @Composable () -> Unit) = MaterialTheme(
-    colorScheme = darkColorScheme(primary = WarsawYellow, secondary = WarsawRed, background = Navy, surface = Surface),
+    colorScheme = darkColorScheme(primary = WarsawRed, onPrimary = Color.White, secondary = WarsawRed, background = Navy, surface = Surface),
     content = content
 )
 
 @Composable private fun LapToApp() {
     val context = LocalContext.current
-    var tab by remember { mutableIntStateOf(0) }
+    var tab by remember { mutableIntStateOf((context as? ComponentActivity)?.intent?.getIntExtra("tab",0) ?: 0) }
     var catches by remember { mutableStateOf(loadCatches(context)) }
     val catalog = remember { loadFleetCatalog(context) }
     var deleteTarget by remember { mutableStateOf<VehicleCatch?>(null) }
@@ -105,14 +110,14 @@ class MainActivity : ComponentActivity() {
             text = { Text("Naklejka i wpis w albumie zostaną trwale usunięte.") },
             confirmButton = { TextButton(onClick = {
                 if (item.sticker.isNotBlank()) File(item.sticker).delete()
-                catches = catches.filterNot { it.number == item.number }; saveCatches(context, catches); deleteTarget = null
+                catches = catches.filterNot { it.number == item.number && it.type == item.type }; saveCatches(context, catches); deleteTarget = null
             }) { Text("USUŃ", color = WarsawRed) } },
             dismissButton = { TextButton(onClick = { deleteTarget = null }) { Text("ANULUJ") } }
         )
     }
 
     Scaffold(containerColor = Navy, bottomBar = {
-        NavigationBar(containerColor = Color(0xFF071F3D)) {
+        NavigationBar(containerColor = Color(0xFF080808)) {
             listOf("Start" to Icons.Default.Home, "Galeria" to Icons.Default.PhotoLibrary, "Łap" to Icons.Default.PhotoCamera, "Mapa" to Icons.Default.Map, "Ja" to Icons.Default.Person).forEachIndexed { i, item ->
                 NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = { Icon(item.second, item.first) }, label = { Text(item.first) })
             }
@@ -122,8 +127,8 @@ class MainActivity : ComponentActivity() {
             when (tab) {
                 0 -> Home(catches) { tab = 2 }
                 1 -> Gallery(catches, catalog, onDelete = { deleteTarget = it })
-                2 -> CameraScreen(catalog) { item -> catches = listOf(item) + catches.filterNot { it.number == item.number }; saveCatches(context, catches); tab = 1 }
-                3 -> LiveMapScreen()
+                2 -> CameraScreen(catalog) { item -> catches = listOf(item) + catches.filterNot { it.number == item.number && it.type == item.type }; saveCatches(context, catches); tab = 1 }
+                3 -> LiveMapScreen(catalog)
                 else -> Profile(catches)
             }
         }
@@ -131,13 +136,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable private fun Home(catches: List<VehicleCatch>, onCamera: () -> Unit) {
-    Column(Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(22.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Spacer(Modifier.height(4.dp)); Text("ŁAP TO · WARSZAWA", color = WarsawYellow, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
         Text("Złap miasto\nw ruchu.", color = Color.White, fontSize = 40.sp, lineHeight = 43.sp, fontWeight = FontWeight.Black)
         Text("Fotografuj autobusy i tramwaje. Każdy pojazd zmieni się w naklejkę bez tła.", color = Muted, fontSize = 17.sp)
-        Button(onClick = onCamera, modifier = Modifier.fillMaxWidth().height(58.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = WarsawYellow, contentColor = Navy)) {
+        Button(onClick = onCamera, modifier = Modifier.fillMaxWidth().height(58.dp), shape = RoundedCornerShape(18.dp), colors = ButtonDefaults.buttonColors(containerColor = WarsawRed, contentColor = Color.White)) {
             Icon(Icons.Default.PhotoCamera, null); Spacer(Modifier.width(10.dp)); Text("ZŁAP POJAZD", fontWeight = FontWeight.Black)
         }
+        StatsPanel(catches)
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Stat("POJAZDY", catches.size.toString(), Modifier.weight(1f)); Stat("MODELE", catches.map { it.model }.distinct().size.toString(), Modifier.weight(1f))
         }
@@ -151,9 +157,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable private fun Gallery(catches: List<VehicleCatch>, catalog: List<FleetModel>, onDelete: (VehicleCatch) -> Unit) {
     var filter by remember { mutableStateOf("Wszystkie") }
+    var brand by remember { mutableStateOf("Wszystkie marki") }
+    var query by remember { mutableStateOf("") }
     var selectedModel by remember { mutableStateOf<String?>(null) }
     selectedModel?.let { id ->
-        catalog.firstOrNull { it.id == id }?.let { model -> ModelDetail(model, catches.filter { it.number in model.numbers }, onBack = { selectedModel = null }, onDelete = onDelete) }
+        catalog.firstOrNull { it.id == id }?.let { model -> ModelDetail(model, catches.filter { it.type==model.type && it.number in model.numbers }, onBack = { selectedModel = null }, onDelete = onDelete) }
         return
     }
     Column(Modifier.fillMaxSize()) {
@@ -163,10 +171,17 @@ class MainActivity : ComponentActivity() {
         androidx.compose.foundation.lazy.LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(listOf("Wszystkie", "Autobus", "Tramwaj", "Metro", "SKM", "Braki")) { name -> FilterChip(selected = filter == name, onClick = { filter = name }, label = { Text(name.uppercase()) }) }
         }
+        OutlinedTextField(value=query,onValueChange={query=it},placeholder={Text("Model lub numer taborowy")},singleLine=true,modifier=Modifier.fillMaxWidth().padding(horizontal=16.dp))
+        androidx.compose.foundation.lazy.LazyRow(contentPadding=PaddingValues(horizontal=16.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            items(listOf("Wszystkie marki")+catalog.filter { filter !in listOf("Autobus","Tramwaj","Metro","SKM") || it.type==filter }.map { it.brand }.distinct().sorted()) { b -> FilterChip(selected=brand==b,onClick={brand=b},label={Text(b)}) }
+        }
         Spacer(Modifier.height(10.dp))
-        val groups = catalog.filter { model -> filter == "Wszystkie" || filter == "Braki" && catches.count { it.number in model.numbers } < model.numbers.size || model.type == filter }.sortedBy { it.type + it.name }
+        val groups = catalog.filter { model -> filter == "Wszystkie" || filter == "Braki" && catches.count { it.type==model.type && it.number in model.numbers } < model.numbers.size || model.type == filter }.filter { (brand=="Wszystkie marki" || it.brand==brand) && (query.isBlank() || it.name.contains(query,true) || it.numbers.any { n -> n.contains(query,true) }) }.sortedBy { it.brand + it.name }
         if (groups.isEmpty()) Empty("Brak modeli w tej kategorii") else LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(groups, key = { it.id }) { model -> ModelCard(model, catches.filter { it.number in model.numbers }, onClick = { selectedModel = model.id }) }
+            for ((make, models) in groups.groupBy { it.brand }) {
+ item { Text(make.uppercase(),color=WarsawRed,fontWeight=FontWeight.Bold,letterSpacing=2.sp,modifier=Modifier.padding(vertical=10.dp)) }
+ items(models,key={it.id}) { model -> ModelCard(model,catches.filter { it.type==model.type && it.number in model.numbers },onClick={selectedModel=model.id}) }
+ }
         }
     }
 }
@@ -176,8 +191,8 @@ class MainActivity : ComponentActivity() {
     Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = Surface), shape = RoundedCornerShape(22.dp), modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) { Surface(color = Color(0xFF233D59), shape = RoundedCornerShape(6.dp)) { Text(model.type.uppercase(), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) }; Spacer(Modifier.width(10.dp)); Text(model.name.ifBlank { "Nieznany model" }, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f)); Text("${caught.size}/$total", color = Color.White, fontWeight = FontWeight.Black) }
-                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp), color = rarity.color, trackColor = Color(0xFF263B52))
+                Row(verticalAlignment = Alignment.CenterVertically) { Surface(color = Color(0xFF252528), shape = RoundedCornerShape(6.dp)) { Text(model.type.uppercase(), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) }; Spacer(Modifier.width(10.dp)); Text(model.name.ifBlank { "Nieznany model" }, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f)); Text("${caught.size}/$total", color = Color.White, fontWeight = FontWeight.Black) }
+                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp), color = rarity.color, trackColor = Color(0xFF28282C))
                 Row { Text(model.years.let { if(it.isEmpty()) "ROK —" else "${it.first()}–${it.last()}" }, color = Muted, fontSize = 11.sp, modifier = Modifier.weight(1f)); Text(rarity.label.uppercase(), color = rarity.color, fontSize = 11.sp, fontWeight = FontWeight.Black) }
             }
             Spacer(Modifier.width(12.dp)); val first = caught.firstOrNull(); val bitmap = remember(first?.sticker) { first?.sticker?.takeIf { it.isNotBlank() }?.let(BitmapFactory::decodeFile) }
@@ -199,14 +214,14 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable private fun TechTile(label: String, value: String, modifier: Modifier) = Column(modifier.background(Surface, RoundedCornerShape(16.dp)).padding(13.dp)) { Text(label, color = Muted, fontSize = 9.sp, letterSpacing = 1.sp); Text(value, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Black) }
-@Composable private fun MiniSticker(item: VehicleCatch, onDelete: (VehicleCatch) -> Unit) { val bitmap = remember(item.sticker) { item.sticker.takeIf { it.isNotBlank() }?.let(BitmapFactory::decodeFile) }; Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF0A213D)), shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth().height(170.dp).clickable { }) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { if (bitmap != null) Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit); Surface(color = Color.White, shape = RoundedCornerShape(6.dp), modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)) { Text(item.number, color = Color.Black, fontWeight = FontWeight.Black, modifier = Modifier.padding(7.dp,4.dp)) }; IconButton(onClick = { onDelete(item) }, modifier = Modifier.align(Alignment.TopEnd)) { Icon(Icons.Default.DeleteOutline, "Usuń", tint = Muted) } } } }
-@Composable private fun MissingSticker(number: String) = Box(Modifier.fillMaxWidth().height(150.dp).background(Color(0xFF0A213D), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) { Text(number, color = Color(0xFF40556D), fontSize = 18.sp, fontWeight = FontWeight.Bold) }
+@Composable private fun MiniSticker(item: VehicleCatch, onDelete: (VehicleCatch) -> Unit) { val bitmap = remember(item.sticker) { item.sticker.takeIf { it.isNotBlank() }?.let(BitmapFactory::decodeFile) }; Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF0D0D0F)), shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth().height(170.dp).clickable { }) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { if (bitmap != null) Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit); Surface(color = Color.White, shape = RoundedCornerShape(6.dp), modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)) { Text(item.number, color = Color.Black, fontWeight = FontWeight.Black, modifier = Modifier.padding(7.dp,4.dp)) }; IconButton(onClick = { onDelete(item) }, modifier = Modifier.align(Alignment.TopEnd)) { Icon(Icons.Default.DeleteOutline, "Usuń", tint = Muted) } } } }
+@Composable private fun MissingSticker(number: String) = Box(Modifier.fillMaxWidth().height(150.dp).background(Color(0xFF0D0D0F), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) { Text(number, color = Color(0xFF65656B), fontSize = 18.sp, fontWeight = FontWeight.Bold) }
 
 @Composable private fun VehicleCard(item: VehicleCatch, onLongPressDelete: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
     Card(colors = CardDefaults.cardColors(containerColor = Surface), shape = RoundedCornerShape(24.dp), modifier = Modifier.fillMaxWidth()) {
         Column {
-            Box(Modifier.fillMaxWidth().height(210.dp).background(Color(0xFF0A213D)), contentAlignment = Alignment.Center) {
+            Box(Modifier.fillMaxWidth().height(210.dp).background(Color(0xFF0D0D0F)), contentAlignment = Alignment.Center) {
                 val bitmap = remember(item.sticker) { item.sticker.takeIf { it.isNotBlank() }?.let { BitmapFactory.decodeFile(it) } }
                 if (bitmap != null) Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize().padding(14.dp), contentScale = ContentScale.Fit)
                 else Icon(if (item.type == "Tramwaj") Icons.Default.Tram else Icons.Default.DirectionsBus, null, tint = item.rarity.color, modifier = Modifier.size(90.dp))
@@ -271,29 +286,71 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable private fun LiveMapScreen() {
+@Composable private fun LiveMapScreen(catalog: List<FleetModel>) {
     val context = LocalContext.current
-    var apiKey by remember { mutableStateOf(context.getSharedPreferences("settings", 0).getString("warsaw_api_key", "").orEmpty()) }
+    var apiKey by remember { mutableStateOf(context.getSharedPreferences("settings",0).getString("warsaw_api_key","").orEmpty()) }
+    var draft by remember { mutableStateOf(apiKey) }
     var vehicles by remember { mutableStateOf(emptyList<LiveVehicle>()) }
-    var status by remember { mutableStateOf("Wpisz klucz API Warszawy") }
+    var status by remember { mutableStateOf("Połącz mapę kluczem API") }
     var map by remember { mutableStateOf<MapView?>(null) }
     var editKey by remember { mutableStateOf(apiKey.isBlank()) }
-    val scope = rememberCoroutineScope()
-    fun refresh() { if (apiKey.isBlank()) return; status = "Pobieram pojazdy…"; scope.launch {
-        runCatching { fetchAllVehicles(apiKey) }.onSuccess { vehicles = it; status = "${it.size} pojazdów · aktualizacja co 10 s"; map?.let { m -> renderClusters(context, m, it) } }.onFailure { status = "Błąd API: ${it.message ?: "spróbuj ponownie"}" }
-    } }
-    DisposableEffect(apiKey) { if (apiKey.isNotBlank()) { val job = scope.launch { while (isActive) { refresh(); delay(10_000) } }; onDispose { job.cancel() } } else onDispose { } }
-    Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth().background(Surface).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) { Text("Mapa pojazdów", color = Color.White, fontWeight = FontWeight.Bold); Text(status, color = Muted, fontSize = 12.sp) }
-            IconButton(onClick = { editKey = true }) { Icon(Icons.Default.Key, "Klucz API") }; IconButton(onClick = { refresh() }) { Icon(Icons.Default.Refresh, "Odśwież") }
+    var tick by remember { mutableIntStateOf(0) }
+    var selected by remember { mutableStateOf<LiveVehicle?>(null) }
+    var filter by remember { mutableStateOf("Wszystkie") }
+    var query by remember { mutableStateOf("") }
+    val lifecycle = LocalLifecycleOwner.current
+    val onSelect: (LiveVehicle) -> Unit = { selected=it }
+    val visible = vehicles.filter { (filter=="Wszystkie" || it.type==filter) && (query.isBlank() || it.line.contains(query,true) || it.number.contains(query,true)) }
+    val currentVisible by rememberUpdatedState(visible)
+    LaunchedEffect(apiKey,tick) {
+        if(apiKey.isBlank()) return@LaunchedEffect
+        lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while(isActive) {
+                try {
+                    vehicles=fetchAllVehicles(apiKey)
+                    status="${vehicles.size} aktualnych pozycji · "+SimpleDateFormat("HH:mm:ss",Locale("pl")).format(Date())
+                    selected=selected?.let { old -> vehicles.firstOrNull { it.type==old.type && it.number==old.number } }
+                    selected?.let { Widgets.track(context,it,catalog) }
+                } catch(e: CancellationException) { throw e }
+                catch(e: Exception) { status="Nie udało się odświeżyć. Sprawdź klucz lub połączenie."; vehicles=emptyList(); selected=null }
+                delay(15000)
+            }
         }
-        AndroidView(factory = { ctx -> MapView(ctx).apply { setTileSource(TileSourceFactory.MAPNIK); setMultiTouchControls(true); controller.setZoom(12.0); controller.setCenter(GeoPoint(52.2297, 21.0122)); addMapListener(object : org.osmdroid.events.MapListener {
-            override fun onScroll(event: org.osmdroid.events.ScrollEvent?): Boolean { renderClusters(ctx, this@apply, vehicles); return false }
-            override fun onZoom(event: org.osmdroid.events.ZoomEvent?): Boolean { renderClusters(ctx, this@apply, vehicles); return false }
-        }); map = this } }, modifier = Modifier.weight(1f).fillMaxWidth())
     }
-    if (editKey) AlertDialog(onDismissRequest = { editKey = false }, title = { Text("Klucz API Warszawy") }, text = { OutlinedTextField(value = apiKey, onValueChange = { apiKey = it.trim() }, label = { Text("apikey") }, supportingText = { Text("Darmowy klucz z api.um.warszawa.pl") }) }, confirmButton = { TextButton(onClick = { context.getSharedPreferences("settings", 0).edit().putString("warsaw_api_key", apiKey).apply(); editKey = false; refresh() }) { Text("ZAPISZ") } }, dismissButton = { TextButton(onClick = { editKey = false }) { Text("ANULUJ") } })
+    DisposableEffect(map) { onDispose { map?.onPause(); map?.onDetach() } }
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().padding(16.dp),verticalAlignment=Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) { Text("NA ŻYWO",color=WarsawRed,fontWeight=FontWeight.Black,letterSpacing=3.sp); Text(status,color=Muted,fontSize=11.sp) }
+            IconButton(onClick={draft=apiKey;editKey=true}) { Icon(Icons.Default.Key,"Klucz API") }
+            IconButton(onClick={tick++}) { Icon(Icons.Default.Refresh,"Odśwież") }
+        }
+        OutlinedTextField(value=query,onValueChange={query=it},singleLine=true,placeholder={Text("Linia lub numer pojazdu")},modifier=Modifier.fillMaxWidth().padding(horizontal=16.dp))
+        Row(Modifier.padding(horizontal=16.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+            listOf("Wszystkie","Autobus","Tramwaj").forEach { f -> FilterChip(selected=filter==f,onClick={filter=f},label={Text(f)}) }
+        }
+        Box(Modifier.weight(1f)) {
+            AndroidView(factory={ctx -> MapView(ctx).apply {
+                setTileSource(TileSourceFactory.MAPNIK); setMultiTouchControls(true); controller.setZoom(12.0); controller.setCenter(GeoPoint(52.2297,21.0122)); onResume()
+                addMapListener(object: org.osmdroid.events.MapListener {
+                    override fun onScroll(e:org.osmdroid.events.ScrollEvent?)=false
+                    override fun onZoom(e:org.osmdroid.events.ZoomEvent?):Boolean { renderClusters(ctx,this@apply,currentVisible,onSelect);return false }
+                }); map=this
+            }},update={renderClusters(context,it,visible,onSelect)},modifier=Modifier.fillMaxSize())
+            Text("© OpenStreetMap contributors · Dane: m.st. Warszawa",color=Color.White,fontSize=10.sp,modifier=Modifier.align(Alignment.BottomStart).background(Color.Black.copy(alpha=.8f)).padding(4.dp))
+        }
+        selected?.let { v ->
+            val model=catalog.firstOrNull { it.type==v.type && v.number in it.numbers }?.name ?: v.type
+            Column(Modifier.fillMaxWidth().padding(16.dp).background(Surface,RoundedCornerShape(24.dp)).padding(18.dp)) {
+                Row { Text("#${v.number}  •  LINIA ${v.line}",color=WarsawRed,fontWeight=FontWeight.Black,modifier=Modifier.weight(1f)); IconButton(onClick={selected=null}){Icon(Icons.Default.Close,"Zamknij")} }
+                Text(model,color=Color.White,fontSize=22.sp,fontWeight=FontWeight.Bold)
+                Text("Ostatni sygnał: ${v.time}",color=Muted,fontSize=12.sp)
+                TextButton(onClick={Widgets.track(context,v,catalog);Widgets.pin(context,TrackingWidget::class.java)}) { Text("DODAJ WIDŻET POJAZDU") }
+            }
+        }
+    }
+    if(editKey) AlertDialog(onDismissRequest={editKey=false},title={Text("Połącz z Warszawą")},text={
+        OutlinedTextField(value=draft,onValueChange={draft=it.trim()},label={Text("Token API")},visualTransformation=androidx.compose.ui.text.input.PasswordVisualTransformation(),supportingText={Text("Token z dane.um.warszawa.pl. Zapisywany lokalnie.")})
+    },confirmButton={TextButton(onClick={apiKey=draft;context.getSharedPreferences("settings",0).edit().putString("warsaw_api_key",apiKey).apply();editKey=false}){Text("ZAPISZ")}},dismissButton={TextButton(onClick={editKey=false}){Text("ANULUJ")}})
 }
 
 @Composable private fun Profile(catches: List<VehicleCatch>) = LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -316,18 +373,22 @@ private suspend fun fetchAllVehicles(key: String): List<LiveVehicle> = withConte
         val raw = connection.inputStream.bufferedReader().use { it.readText() }; connection.disconnect()
         val result = if (raw.trimStart().startsWith("[")) JSONArray(raw) else JSONObject(raw).optJSONArray("result") ?: JSONArray()
         (0 until result.length()).mapNotNull { i -> result.optJSONObject(i)?.let { o ->
-            val lat = o.optDouble("Lat"); val lon = o.optDouble("Lon"); if (lat !in 52.0..52.5 || lon !in 20.5..21.5) null else LiveVehicle(lat, lon, o.optString("Lines", "?"), o.optString("Brigade", "?"), label)
+            val lat = o.optDouble("Lat"); val lon = o.optDouble("Lon")
+            val time = o.optString("Time")
+            val stamp = runCatching { java.time.LocalDateTime.parse(time,java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")).atZone(java.time.ZoneId.of("Europe/Warsaw")).toInstant().toEpochMilli() }.getOrNull()
+            if (!lat.isFinite() || !lon.isFinite() || lat !in -90.0..90.0 || lon !in -180.0..180.0 || stamp==null || System.currentTimeMillis()-stamp !in -60000L..180000L) null
+            else LiveVehicle(lat,lon,o.optString("Lines","?"),o.optString("Brigade","?"),label,o.optString("VehicleNumber","?"),time)
         } }
     }
 }
 
-private fun renderClusters(context: Context, map: MapView, vehicles: List<LiveVehicle>) {
+private fun renderClusters(context: Context, map: MapView, vehicles: List<LiveVehicle>, onSelect: (LiveVehicle) -> Unit) {
     map.overlays.removeAll { it is Marker }
     if (vehicles.isEmpty()) { map.invalidate(); return }
-    val precision = when { map.zoomLevelDouble >= 16 -> .001; map.zoomLevelDouble >= 14 -> .004; map.zoomLevelDouble >= 12 -> .012; else -> .035 }
+    val precision = .012 * 2.0.pow(12-map.zoomLevelDouble)
     vehicles.groupBy { Pair((it.lat / precision).roundToInt(), (it.lon / precision).roundToInt()) }.values.forEach { group ->
         val lat = group.map { it.lat }.average(); val lon = group.map { it.lon }.average(); val count = group.size
-        Marker(map).apply { position = GeoPoint(lat, lon); setAnchor(.5f, .5f); title = if (count == 1) "Linia ${group[0].line} · ${group[0].type}" else "$count pojazdów"; snippet = if (count == 1) "Brygada ${group[0].brigade}" else "Powiększ mapę, aby rozdzielić"; icon = BitmapDrawable(context.resources, clusterBitmap(if (count > 99) "99+" else count.toString(), count == 1)); map.overlays.add(this) }
+        Marker(map).apply { position = GeoPoint(lat, lon); setAnchor(.5f, .5f); title = if (count == 1) "Linia ${group[0].line} · ${group[0].type}" else "$count pojazdów"; snippet = if (count == 1) "Brygada ${group[0].brigade}" else "Powiększ mapę, aby rozdzielić"; icon = BitmapDrawable(context.resources, clusterBitmap(if (count > 99) "99+" else if(count==1) group[0].line else count.toString(), count == 1)); setOnMarkerClickListener { _, _ -> if(count==1) onSelect(group[0]) else { map.controller.setCenter(position); map.controller.setZoom(map.zoomLevelDouble+2) }; true }; map.overlays.add(this) }
     }; map.invalidate()
 }
 
@@ -347,7 +408,7 @@ private fun createSticker(source: Bitmap): Bitmap {
 
 private data class Info(val first: String, val second: Rarity, val third: String, val fourth: String)
 private fun vehicleInfo(n: String, chosenType: String = "Auto", catalog: List<FleetModel> = emptyList()): Info {
-    catalog.firstOrNull { n in it.numbers }?.let { m -> return Info(m.type, rarityFor(m.numbers.size), m.name.ifBlank { "Nieznany model" }, listOf(m.power, m.floor).filter { it.isNotBlank() }.joinToString(" · ")) }
+    catalog.firstOrNull { n in it.numbers && (chosenType=="Auto" || it.type==chosenType) }?.let { m -> return Info(m.type, rarityFor(m.numbers.size), m.name.ifBlank { "Nieznany model" }, listOf(m.power, m.floor).filter { it.isNotBlank() }.joinToString(" · ")) }
     val v = n.toIntOrNull() ?: 0; val type = if (chosenType != "Auto") chosenType else if (v in 2000..4999) "Tramwaj" else "Autobus"
     val rarity = when { v in 90000..99999 -> Rarity.TEST; v in 100..999 -> Rarity.VINTAGE; v in 50000..89999 -> Rarity.TECHNICAL; v % 41 == 0 -> Rarity.VERY_RARE; v % 7 == 0 -> Rarity.RARE; else -> Rarity.COMMON }
     val model = when { type == "Metro" && v in 1..99 -> "Škoda Varsovia"; type == "Metro" -> "Pociąg metra"; type == "SKM" && v in 1..99 -> "Newag Impuls"; type == "SKM" -> "Elektryczny zespół trakcyjny"; type == "Tramwaj" && v in 4200..4299 -> "Hyundai Rotem 140N"; type == "Tramwaj" && v in 3000..3599 -> "Pesa Swing"; type == "Autobus" && v in 8300..8799 -> "Solaris Urbino 18"; type == "Autobus" && v in 9800..9899 -> "Mercedes-Benz Conecto G"; rarity == Rarity.TECHNICAL -> "Pojazd techniczny"; else -> "Model do potwierdzenia" }
@@ -363,12 +424,12 @@ private fun findFleetNumber(text: String, catalog: List<FleetModel>): String? {
     return candidates.firstOrNull { it in known } ?: candidates.firstOrNull { it.count(Char::isDigit) >= 4 }
 }
 private fun now() = SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale("pl")).format(Date())
-private fun saveCatches(context: Context, list: List<VehicleCatch>) { val a = JSONArray(); list.forEach { a.put(JSONObject().put("n",it.number).put("t",it.type).put("d",it.date).put("s",it.sticker).put("r",it.rarity.name).put("m",it.model).put("x",it.technical)) }; context.getSharedPreferences("album_v2",0).edit().putString("items",a.toString()).apply() }
+private fun saveCatches(context: Context, list: List<VehicleCatch>) { val a = JSONArray(); list.forEach { a.put(JSONObject().put("n",it.number).put("t",it.type).put("d",it.date).put("s",it.sticker).put("r",it.rarity.name).put("m",it.model).put("x",it.technical)) }; context.getSharedPreferences("album_v2",0).edit().putString("items",a.toString()).apply(); Widgets.refresh(context) }
 private fun loadCatches(context: Context): List<VehicleCatch> = runCatching { val a = JSONArray(context.getSharedPreferences("album_v2",0).getString("items","[]")); (0 until a.length()).map { i -> a.getJSONObject(i).let { VehicleCatch(it.getString("n"),it.getString("t"),it.getString("d"),it.optString("s"),Rarity.valueOf(it.optString("r","COMMON")),it.optString("m","Model do potwierdzenia"),it.optString("x")) } } }.getOrDefault(emptyList())
 private fun loadFleetCatalog(context: Context): List<FleetModel> = runCatching {
     val a = JSONArray(context.assets.open("fleet_catalog.json").bufferedReader().use { it.readText() })
     (0 until a.length()).map { i -> a.getJSONObject(i).let { o ->
         val ns=o.getJSONArray("numbers"); val ys=o.getJSONArray("years")
-        FleetModel(o.getString("id"),o.getString("type"),o.optString("name"), (0 until ns.length()).map { ns.getString(it) }, (0 until ys.length()).map { ys.getInt(it) },o.optString("operator"),o.optString("depot"),o.optInt("length"),o.optString("power"),o.optInt("seats"),o.optInt("capacity"),o.optString("floor"))
+        FleetModel(o.getString("id"),o.getString("type"),o.optString("name"), (0 until ns.length()).map { ns.getString(it) }, (0 until ys.length()).map { ys.getInt(it) },o.optString("operator"),o.optString("depot"),o.optInt("length"),o.optString("power"),o.optInt("seats"),o.optInt("capacity"),o.optString("floor"),o.optString("brand","Inne"))
     } }
 }.getOrDefault(emptyList())
