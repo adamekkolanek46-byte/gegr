@@ -76,6 +76,7 @@ data class VehicleCatch(
 )
 
 data class LiveVehicle(val lat: Double, val lon: Double, val line: String, val brigade: String, val type: String)
+data class FleetModel(val id: String, val type: String, val name: String, val numbers: List<String>, val years: List<Int>, val operator: String, val depot: String, val length: Int, val power: String, val seats: Int, val capacity: Int, val floor: String)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +95,7 @@ class MainActivity : ComponentActivity() {
     val context = LocalContext.current
     var tab by remember { mutableIntStateOf(0) }
     var catches by remember { mutableStateOf(loadCatches(context)) }
+    val catalog = remember { loadFleetCatalog(context) }
     var deleteTarget by remember { mutableStateOf<VehicleCatch?>(null) }
 
     deleteTarget?.let { item ->
@@ -119,8 +121,8 @@ class MainActivity : ComponentActivity() {
         Box(Modifier.padding(pad).fillMaxSize()) {
             when (tab) {
                 0 -> Home(catches) { tab = 2 }
-                1 -> Gallery(catches, onDelete = { deleteTarget = it })
-                2 -> CameraScreen { item -> catches = listOf(item) + catches.filterNot { it.number == item.number }; saveCatches(context, catches); tab = 1 }
+                1 -> Gallery(catches, catalog, onDelete = { deleteTarget = it })
+                2 -> CameraScreen(catalog) { item -> catches = listOf(item) + catches.filterNot { it.number == item.number }; saveCatches(context, catches); tab = 1 }
                 3 -> LiveMapScreen()
                 else -> Profile(catches)
             }
@@ -147,58 +149,58 @@ class MainActivity : ComponentActivity() {
     Text(title, color = Muted, fontSize = 11.sp, fontWeight = FontWeight.Bold); Text(value, color = Color.White, fontSize = 34.sp, fontWeight = FontWeight.Black)
 }
 
-@Composable private fun Gallery(catches: List<VehicleCatch>, onDelete: (VehicleCatch) -> Unit) {
+@Composable private fun Gallery(catches: List<VehicleCatch>, catalog: List<FleetModel>, onDelete: (VehicleCatch) -> Unit) {
     var filter by remember { mutableStateOf("Wszystkie") }
     var selectedModel by remember { mutableStateOf<String?>(null) }
-    selectedModel?.let { model ->
-        ModelDetail(model, catches.filter { it.model == model }, onBack = { selectedModel = null }, onDelete = onDelete)
+    selectedModel?.let { id ->
+        catalog.firstOrNull { it.id == id }?.let { model -> ModelDetail(model, catches.filter { it.number in model.numbers }, onBack = { selectedModel = null }, onDelete = onDelete) }
         return
     }
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.padding(20.dp)) {
-            Row { Column(Modifier.weight(1f)) { Text("TWÓJ ALBUM", color = Muted, letterSpacing = 3.sp, fontSize = 12.sp); Text("Warszawski tabor", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black) }; Text("${catches.size} POJAZDÓW", color = Muted, fontWeight = FontWeight.Bold) }
+            Row { Column(Modifier.weight(1f)) { Text("TWÓJ ALBUM", color = Muted, letterSpacing = 3.sp, fontSize = 12.sp); Text("Warszawski tabor", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black) }; Text("${catches.size} / ${catalog.sumOf { it.numbers.size }}", color = Muted, fontWeight = FontWeight.Bold) }
         }
         androidx.compose.foundation.lazy.LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(listOf("Wszystkie", "Autobus", "Tramwaj", "Metro", "SKM", "Braki")) { name -> FilterChip(selected = filter == name, onClick = { filter = name }, label = { Text(name.uppercase()) }) }
         }
         Spacer(Modifier.height(10.dp))
-        val groups = catches.groupBy { it.model }.values.map { it.sortedBy { c -> c.number } }.filter { group ->
-            filter == "Wszystkie" || filter == "Braki" && group.size < modelCapacity(group.first().model) || group.first().type == filter
-        }.sortedBy { it.first().type + it.first().model }
+        val groups = catalog.filter { model -> filter == "Wszystkie" || filter == "Braki" && catches.count { it.number in model.numbers } < model.numbers.size || model.type == filter }.sortedBy { it.type + it.name }
         if (groups.isEmpty()) Empty("Brak modeli w tej kategorii") else LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(groups, key = { it.first().model }) { group -> ModelCard(group, onClick = { selectedModel = group.first().model }) }
+            items(groups, key = { it.id }) { model -> ModelCard(model, catches.filter { it.number in model.numbers }, onClick = { selectedModel = model.id }) }
         }
     }
 }
 
-@Composable private fun ModelCard(group: List<VehicleCatch>, onClick: () -> Unit) {
-    val first = group.first(); val total = modelCapacity(first.model); val progress = (group.size.toFloat()/total).coerceIn(0f,1f)
+@Composable private fun ModelCard(model: FleetModel, caught: List<VehicleCatch>, onClick: () -> Unit) {
+    val total = model.numbers.size; val progress = (caught.size.toFloat()/total.coerceAtLeast(1)).coerceIn(0f,1f); val rarity = rarityFor(total)
     Card(onClick = onClick, colors = CardDefaults.cardColors(containerColor = Surface), shape = RoundedCornerShape(22.dp), modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) { Surface(color = Color(0xFF233D59), shape = RoundedCornerShape(6.dp)) { Text(first.type.uppercase(), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) }; Spacer(Modifier.width(10.dp)); Text(first.model, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f)); Text("${group.size}/$total", color = Color.White, fontWeight = FontWeight.Black) }
-                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp), color = first.rarity.color, trackColor = Color(0xFF263B52))
-                Row { Text(first.technical.uppercase(), color = Muted, fontSize = 11.sp, modifier = Modifier.weight(1f)); Text(first.rarity.label.uppercase(), color = first.rarity.color, fontSize = 11.sp, fontWeight = FontWeight.Black) }
+                Row(verticalAlignment = Alignment.CenterVertically) { Surface(color = Color(0xFF233D59), shape = RoundedCornerShape(6.dp)) { Text(model.type.uppercase(), color = Muted, fontSize = 10.sp, fontWeight = FontWeight.Black, modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) }; Spacer(Modifier.width(10.dp)); Text(model.name.ifBlank { "Nieznany model" }, color = Color.White, fontSize = 19.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f)); Text("${caught.size}/$total", color = Color.White, fontWeight = FontWeight.Black) }
+                LinearProgressIndicator(progress = { progress }, modifier = Modifier.fillMaxWidth().height(6.dp), color = rarity.color, trackColor = Color(0xFF263B52))
+                Row { Text(model.years.let { if(it.isEmpty()) "ROK —" else "${it.first()}–${it.last()}" }, color = Muted, fontSize = 11.sp, modifier = Modifier.weight(1f)); Text(rarity.label.uppercase(), color = rarity.color, fontSize = 11.sp, fontWeight = FontWeight.Black) }
             }
-            Spacer(Modifier.width(12.dp)); val bitmap = remember(first.sticker) { first.sticker.takeIf { it.isNotBlank() }?.let(BitmapFactory::decodeFile) }
-            Box(Modifier.size(88.dp), contentAlignment = Alignment.Center) { if (bitmap != null) Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit) else Icon(Icons.Default.DirectionsTransit, null, tint = first.rarity.color, modifier = Modifier.size(55.dp)); Surface(color = Color.White, shape = RoundedCornerShape(5.dp), modifier = Modifier.align(Alignment.BottomStart)) { Text(first.number, color = Color.Black, fontWeight = FontWeight.Black, modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)) } }
+            Spacer(Modifier.width(12.dp)); val first = caught.firstOrNull(); val bitmap = remember(first?.sticker) { first?.sticker?.takeIf { it.isNotBlank() }?.let(BitmapFactory::decodeFile) }
+            Box(Modifier.size(88.dp), contentAlignment = Alignment.Center) { if (bitmap != null) Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit) else Icon(Icons.Default.DirectionsTransit, null, tint = rarity.color, modifier = Modifier.size(55.dp)); Surface(color = Color.White, shape = RoundedCornerShape(5.dp), modifier = Modifier.align(Alignment.BottomStart)) { Text(first?.number ?: "?", color = Color.Black, fontWeight = FontWeight.Black, modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)) } }
         }
     }
 }
 
-@Composable private fun ModelDetail(model: String, items: List<VehicleCatch>, onBack: () -> Unit, onDelete: (VehicleCatch) -> Unit) {
-    val first = items.first(); val total = modelCapacity(model)
+@Composable private fun ModelDetail(model: FleetModel, items: List<VehicleCatch>, onBack: () -> Unit, onDelete: (VehicleCatch) -> Unit) {
+    val total = model.numbers.size; val rarity = rarityFor(total)
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Wróć") }; Text("WSZYSTKIE MODELE", color = Muted, letterSpacing = 2.sp, fontSize = 12.sp) } }
-        item { Text(model, color = Color.White, fontSize = 34.sp, lineHeight = 38.sp, fontWeight = FontWeight.Black); Text("${first.type.uppercase()} · ${first.technical.uppercase()}", color = Muted, letterSpacing = 1.sp); Spacer(Modifier.height(12.dp)); LinearProgressIndicator(progress = { (items.size.toFloat()/total).coerceIn(0f,1f) }, modifier = Modifier.fillMaxWidth().height(7.dp), color = first.rarity.color); Text("${items.size}/$total", color = Color.White, fontWeight = FontWeight.Black, modifier = Modifier.fillMaxWidth()) }
-        item { Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { TechTile("RODZAJ", first.type, Modifier.weight(1f)); TechTile("RZADKOŚĆ", first.rarity.label, Modifier.weight(1f)); TechTile("ZŁAPANE", items.size.toString(), Modifier.weight(1f)) } }
+        item { Text(model.name.ifBlank { "Nieznany model" }, color = Color.White, fontSize = 34.sp, lineHeight = 38.sp, fontWeight = FontWeight.Black); Text("${model.type.uppercase()} · ${model.operator.uppercase()}", color = Muted, letterSpacing = 1.sp); Spacer(Modifier.height(12.dp)); LinearProgressIndicator(progress = { (items.size.toFloat()/total.coerceAtLeast(1)).coerceIn(0f,1f) }, modifier = Modifier.fillMaxWidth().height(7.dp), color = rarity.color); Text("${items.size}/$total", color = Color.White, fontWeight = FontWeight.Black, modifier = Modifier.fillMaxWidth()) }
+        item { Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { TechTile("DŁUGOŚĆ", if(model.length>0) "${model.length/1000.0} m" else "—", Modifier.weight(1f)); TechTile("NAPĘD", model.power, Modifier.weight(1f)); TechTile("MIEJSCA", model.capacity.takeIf { it>0 }?.toString() ?: "—", Modifier.weight(1f)) } }
+        item { Text("${model.depot} · ${model.years.let { if(it.isEmpty()) "rok —" else "${it.first()}–${it.last()}" }}", color = Muted) }
         item { Text("TWOJE NAKLEJKI", color = Muted, letterSpacing = 2.sp, fontWeight = FontWeight.Bold) }
-        items(items.chunked(2)) { row -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) { row.forEach { item -> Box(Modifier.weight(1f)) { MiniSticker(item, onDelete) } }; if (row.size == 1) Spacer(Modifier.weight(1f)) } }
+        items(model.numbers.chunked(3)) { row -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) { row.forEach { number -> val caught = items.firstOrNull { it.number == number }; Box(Modifier.weight(1f)) { if(caught != null) MiniSticker(caught, onDelete) else MissingSticker(number) } }; repeat(3-row.size) { Spacer(Modifier.weight(1f)) } } }
     }
 }
 
 @Composable private fun TechTile(label: String, value: String, modifier: Modifier) = Column(modifier.background(Surface, RoundedCornerShape(16.dp)).padding(13.dp)) { Text(label, color = Muted, fontSize = 9.sp, letterSpacing = 1.sp); Text(value, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Black) }
 @Composable private fun MiniSticker(item: VehicleCatch, onDelete: (VehicleCatch) -> Unit) { val bitmap = remember(item.sticker) { item.sticker.takeIf { it.isNotBlank() }?.let(BitmapFactory::decodeFile) }; Card(colors = CardDefaults.cardColors(containerColor = Color(0xFF0A213D)), shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth().height(170.dp).clickable { }) { Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { if (bitmap != null) Image(bitmap.asImageBitmap(), null, Modifier.fillMaxSize().padding(8.dp), contentScale = ContentScale.Fit); Surface(color = Color.White, shape = RoundedCornerShape(6.dp), modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)) { Text(item.number, color = Color.Black, fontWeight = FontWeight.Black, modifier = Modifier.padding(7.dp,4.dp)) }; IconButton(onClick = { onDelete(item) }, modifier = Modifier.align(Alignment.TopEnd)) { Icon(Icons.Default.DeleteOutline, "Usuń", tint = Muted) } } } }
+@Composable private fun MissingSticker(number: String) = Box(Modifier.fillMaxWidth().height(150.dp).background(Color(0xFF0A213D), RoundedCornerShape(16.dp)), contentAlignment = Alignment.Center) { Text(number, color = Color(0xFF40556D), fontSize = 18.sp, fontWeight = FontWeight.Bold) }
 
 @Composable private fun VehicleCard(item: VehicleCatch, onLongPressDelete: () -> Unit) {
     var menu by remember { mutableStateOf(false) }
@@ -222,7 +224,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable private fun CameraScreen(onCaught: (VehicleCatch) -> Unit) {
+@Composable private fun CameraScreen(catalog: List<FleetModel>, onCaught: (VehicleCatch) -> Unit) {
     val context = LocalContext.current
     var granted by remember { mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) }
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted = it }
@@ -248,7 +250,7 @@ class MainActivity : ComponentActivity() {
                     override fun onImageSaved(result: ImageCapture.OutputFileResults) {
                         val input = InputImage.fromFilePath(context, android.net.Uri.fromFile(photo))
                         TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS).process(input).addOnSuccessListener { text ->
-                            val number = findFleetNumber(text.text)
+                            val number = findFleetNumber(text.text, catalog)
                             if (number == null) { status = "Nie znaleziono numeru — podejdź bliżej"; photo.delete(); return@addOnSuccessListener }
                             status = "Wycinam pojazd z tła…"
                             val opts = SubjectSegmenterOptions.Builder().enableForegroundBitmap().build()
@@ -257,7 +259,7 @@ class MainActivity : ComponentActivity() {
                                 if (foreground == null) { status = "Nie wykryto pojazdu na zdjęciu"; photo.delete(); return@addOnSuccessListener }
                                 val stickerFile = File(context.filesDir, "sticker-$number-${System.currentTimeMillis()}.png")
                                 stickerFile.outputStream().use { createSticker(foreground).compress(Bitmap.CompressFormat.PNG, 100, it) }
-                                val info = vehicleInfo(number, selectedType)
+                                val info = vehicleInfo(number, selectedType, catalog)
                                 onCaught(VehicleCatch(number, info.first, now(), stickerFile.absolutePath, info.second, info.third, info.fourth)); photo.delete()
                             }.addOnFailureListener { e -> status = if (e.message?.contains("download", true) == true) "Pobieram model wycinania — spróbuj ponownie za chwilę" else "Nie udało się wyciąć tła" }
                         }.addOnFailureListener { status = "Nie udało się odczytać zdjęcia" }
@@ -344,7 +346,8 @@ private fun createSticker(source: Bitmap): Bitmap {
 }
 
 private data class Info(val first: String, val second: Rarity, val third: String, val fourth: String)
-private fun vehicleInfo(n: String, chosenType: String = "Auto"): Info {
+private fun vehicleInfo(n: String, chosenType: String = "Auto", catalog: List<FleetModel> = emptyList()): Info {
+    catalog.firstOrNull { n in it.numbers }?.let { m -> return Info(m.type, rarityFor(m.numbers.size), m.name.ifBlank { "Nieznany model" }, listOf(m.power, m.floor).filter { it.isNotBlank() }.joinToString(" · ")) }
     val v = n.toIntOrNull() ?: 0; val type = if (chosenType != "Auto") chosenType else if (v in 2000..4999) "Tramwaj" else "Autobus"
     val rarity = when { v in 90000..99999 -> Rarity.TEST; v in 100..999 -> Rarity.VINTAGE; v in 50000..89999 -> Rarity.TECHNICAL; v % 41 == 0 -> Rarity.VERY_RARE; v % 7 == 0 -> Rarity.RARE; else -> Rarity.COMMON }
     val model = when { type == "Metro" && v in 1..99 -> "Škoda Varsovia"; type == "Metro" -> "Pociąg metra"; type == "SKM" && v in 1..99 -> "Newag Impuls"; type == "SKM" -> "Elektryczny zespół trakcyjny"; type == "Tramwaj" && v in 4200..4299 -> "Hyundai Rotem 140N"; type == "Tramwaj" && v in 3000..3599 -> "Pesa Swing"; type == "Autobus" && v in 8300..8799 -> "Solaris Urbino 18"; type == "Autobus" && v in 9800..9899 -> "Mercedes-Benz Conecto G"; rarity == Rarity.TECHNICAL -> "Pojazd techniczny"; else -> "Model do potwierdzenia" }
@@ -352,8 +355,20 @@ private fun vehicleInfo(n: String, chosenType: String = "Auto"): Info {
 }
 
 private fun modelCapacity(model: String) = when(model) { "Hyundai Rotem 140N" -> 85; "Pesa Swing" -> 186; "Solaris Urbino 18" -> 403; "Mercedes-Benz Conecto G" -> 99; "Škoda Varsovia" -> 37; "Newag Impuls" -> 35; else -> 25 }
+private fun rarityFor(total: Int) = when { total <= 12 -> Rarity.VERY_RARE; total <= 48 -> Rarity.RARE; else -> Rarity.COMMON }
 
-private fun findFleetNumber(text: String) = Regex("(?<![A-Z0-9])\\d{3,5}(?![A-Z0-9])", RegexOption.IGNORE_CASE).findAll(text).map { it.value }.firstOrNull { it.length >= 4 }
+private fun findFleetNumber(text: String, catalog: List<FleetModel>): String? {
+    val candidates = Regex("(?<![A-Z0-9])\\d{2,5}[A-Z]?(?![A-Z0-9])", RegexOption.IGNORE_CASE).findAll(text.uppercase()).map { it.value }.toList()
+    val known = catalog.asSequence().flatMap { it.numbers.asSequence() }.toHashSet()
+    return candidates.firstOrNull { it in known } ?: candidates.firstOrNull { it.count(Char::isDigit) >= 4 }
+}
 private fun now() = SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale("pl")).format(Date())
 private fun saveCatches(context: Context, list: List<VehicleCatch>) { val a = JSONArray(); list.forEach { a.put(JSONObject().put("n",it.number).put("t",it.type).put("d",it.date).put("s",it.sticker).put("r",it.rarity.name).put("m",it.model).put("x",it.technical)) }; context.getSharedPreferences("album_v2",0).edit().putString("items",a.toString()).apply() }
 private fun loadCatches(context: Context): List<VehicleCatch> = runCatching { val a = JSONArray(context.getSharedPreferences("album_v2",0).getString("items","[]")); (0 until a.length()).map { i -> a.getJSONObject(i).let { VehicleCatch(it.getString("n"),it.getString("t"),it.getString("d"),it.optString("s"),Rarity.valueOf(it.optString("r","COMMON")),it.optString("m","Model do potwierdzenia"),it.optString("x")) } } }.getOrDefault(emptyList())
+private fun loadFleetCatalog(context: Context): List<FleetModel> = runCatching {
+    val a = JSONArray(context.assets.open("fleet_catalog.json").bufferedReader().use { it.readText() })
+    (0 until a.length()).map { i -> a.getJSONObject(i).let { o ->
+        val ns=o.getJSONArray("numbers"); val ys=o.getJSONArray("years")
+        FleetModel(o.getString("id"),o.getString("type"),o.optString("name"), (0 until ns.length()).map { ns.getString(it) }, (0 until ys.length()).map { ys.getInt(it) },o.optString("operator"),o.optString("depot"),o.optInt("length"),o.optString("power"),o.optInt("seats"),o.optInt("capacity"),o.optString("floor"))
+    }
+}.getOrDefault(emptyList())
