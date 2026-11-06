@@ -370,5 +370,5 @@ private fun loadFleetCatalog(context: Context): List<FleetModel> = runCatching {
     (0 until a.length()).map { i -> a.getJSONObject(i).let { o ->
         val ns=o.getJSONArray("numbers"); val ys=o.getJSONArray("years")
         FleetModel(o.getString("id"),o.getString("type"),o.optString("name"), (0 until ns.length()).map { ns.getString(it) }, (0 until ys.length()).map { ys.getInt(it) },o.optString("operator"),o.optString("depot"),o.optInt("length"),o.optString("power"),o.optInt("seats"),o.optInt("capacity"),o.optString("floor"))
-    }
+    } }
 }.getOrDefault(emptyList())
