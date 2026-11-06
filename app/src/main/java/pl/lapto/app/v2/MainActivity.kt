@@ -253,8 +253,9 @@ class MainActivity : ComponentActivity() {
                             val opts = SubjectSegmenterOptions.Builder().enableForegroundBitmap().build()
                             SubjectSegmentation.getClient(opts).process(input).addOnSuccessListener { segmented ->
                                 val foreground = segmented.foregroundBitmap
+                                if (foreground == null) { status = "Nie wykryto pojazdu na zdjęciu"; photo.delete(); return@addOnSuccessListener }
                                 val stickerFile = File(context.filesDir, "sticker-$number-${System.currentTimeMillis()}.png")
-                                createSticker(foreground).compress(Bitmap.CompressFormat.PNG, 100, stickerFile.outputStream())
+                                stickerFile.outputStream().use { createSticker(foreground).compress(Bitmap.CompressFormat.PNG, 100, it) }
                                 val info = vehicleInfo(number, selectedType)
                                 onCaught(VehicleCatch(number, info.first, now(), stickerFile.absolutePath, info.second, info.third, info.fourth)); photo.delete()
                             }.addOnFailureListener { e -> status = if (e.message?.contains("download", true) == true) "Pobieram model wycinania — spróbuj ponownie za chwilę" else "Nie udało się wyciąć tła" }
