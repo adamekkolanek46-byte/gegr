@@ -317,7 +317,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    DisposableEffect(map) { onDispose { map?.onPause(); map?.onDetach() } }
+    DisposableEffect(map) { val ownedMap = map; onDispose { ownedMap?.onPause(); ownedMap?.onDetach() } }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(16.dp),verticalAlignment=Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) { Text("NA ŻYWO",color=WarsawRed,fontWeight=FontWeight.Black,letterSpacing=3.sp); Text(status,color=Muted,fontSize=11.sp) }
