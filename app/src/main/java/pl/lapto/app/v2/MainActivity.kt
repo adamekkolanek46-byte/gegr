@@ -51,6 +51,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import java.io.File
+import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.*
@@ -305,8 +306,13 @@ class MainActivity : ComponentActivity() {
 
 private suspend fun fetchAllVehicles(key: String): List<LiveVehicle> = withContext(Dispatchers.IO) {
     listOf("1" to "Autobus", "2" to "Tramwaj").flatMap { (type, label) ->
-        val url = "https://api.um.warszawa.pl/api/action/busestrams_get/?resource_id=f2e5503e-927d-4ad3-9500-4ab9e55deb59&apikey=${java.net.URLEncoder.encode(key, "UTF-8")}&type=$type"
-        val root = JSONObject(URL(url).readText()); val result = root.optJSONArray("result") ?: JSONArray()
+        val connection = URL("https://dane.um.warszawa.pl/api/action/get_ztm_lokalizacja_pojazdow").openConnection() as HttpURLConnection
+        connection.requestMethod = "POST"; connection.connectTimeout = 15_000; connection.readTimeout = 20_000; connection.doOutput = true
+        connection.setRequestProperty("Authorization", key); connection.setRequestProperty("Content-Type", "application/json"); connection.setRequestProperty("Accept", "application/json")
+        connection.outputStream.bufferedWriter().use { it.write("{\"type\":$type}") }
+        if (connection.responseCode !in 200..299) throw IllegalStateException("HTTP ${connection.responseCode}")
+        val raw = connection.inputStream.bufferedReader().use { it.readText() }; connection.disconnect()
+        val result = if (raw.trimStart().startsWith("[")) JSONArray(raw) else JSONObject(raw).optJSONArray("result") ?: JSONArray()
         (0 until result.length()).mapNotNull { i -> result.optJSONObject(i)?.let { o ->
             val lat = o.optDouble("Lat"); val lon = o.optDouble("Lon"); if (lat !in 52.0..52.5 || lon !in 20.5..21.5) null else LiveVehicle(lat, lon, o.optString("Lines", "?"), o.optString("Brigade", "?"), label)
         } }
