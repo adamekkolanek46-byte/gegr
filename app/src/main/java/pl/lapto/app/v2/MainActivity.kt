@@ -345,6 +345,7 @@ class MainActivity : ComponentActivity() {
         }
     }
     DisposableEffect(map,lifecycle) {
+        var fittedToCity=false
         fun updateWindow() {
             if(map.width<=0 || map.height<=0)return
             val bounds=map.boundingBox
@@ -357,7 +358,13 @@ class MainActivity : ComponentActivity() {
                 return false
             }
         }
-        val layout=android.view.View.OnLayoutChangeListener { _,_,_,_,_,_,_,_,_ -> updateWindow() }
+        val layout=android.view.View.OnLayoutChangeListener { _,_,_,_,_,_,_,_,_ ->
+            if(!fittedToCity && map.width>0 && map.height>0) {
+                fittedToCity=true
+                map.zoomToBoundingBox(org.osmdroid.util.BoundingBox(52.368154,21.271151,52.097850,20.851688),false,(36*context.resources.displayMetrics.density).toInt())
+            }
+            updateWindow()
+        }
         val observer=androidx.lifecycle.LifecycleEventObserver { _,event ->
             when(event) {
                 Lifecycle.Event.ON_RESUME -> map.onResume()
