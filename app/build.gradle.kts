@@ -8,11 +8,11 @@ android {
     namespace = "pl.lapto.app"
     compileSdk = 35
     defaultConfig {
-        applicationId = "pl.lapto.app.oled"
+        applicationId = "pl.lapto.mobile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.4.0"
+        versionCode = 5
+        versionName = "0.5.0"
     }
     buildFeatures { compose = true }
     compileOptions {
@@ -23,6 +23,8 @@ android {
 }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20240303")
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.activity:activity-compose:1.10.0")
     implementation("androidx.compose.material3:material3")

@@ -1,0 +1,7 @@
+/app/src/main/assets/private_config.json
+*.keystore
+*.p12
+*.pk8
+local.properties
+.gradle/
+**/build/

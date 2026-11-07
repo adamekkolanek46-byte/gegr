@@ -81,7 +81,6 @@ data class VehicleCatch(
 )
 
 data class LiveVehicle(val lat: Double, val lon: Double, val line: String, val brigade: String, val type: String, val number: String, val time: String)
-data class FleetModel(val id: String, val type: String, val name: String, val numbers: List<String>, val years: List<Int>, val operator: String, val depot: String, val length: Int, val power: String, val seats: Int, val capacity: Int, val floor: String, val brand: String = "Inne")
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,7 +91,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable private fun LapToTheme(content: @Composable () -> Unit) = MaterialTheme(
-    colorScheme = darkColorScheme(primary = WarsawRed, onPrimary = Color.White, secondary = WarsawRed, background = Navy, surface = Surface),
+    colorScheme = darkColorScheme(primary = WarsawRed, onPrimary = Color.White, secondary = WarsawRed, secondaryContainer = Color(0xFF3B111A), onSecondaryContainer = Color(0xFFFFC3CF), background = Navy, surface = Surface),
     content = content
 )
 
@@ -118,7 +117,7 @@ class MainActivity : ComponentActivity() {
 
     Scaffold(containerColor = Navy, bottomBar = {
         NavigationBar(containerColor = Color(0xFF080808)) {
-            listOf("Start" to Icons.Default.Home, "Galeria" to Icons.Default.PhotoLibrary, "Łap" to Icons.Default.PhotoCamera, "Mapa" to Icons.Default.Map, "Ja" to Icons.Default.Person).forEachIndexed { i, item ->
+            listOf("Start" to Icons.Default.Home, "Galeria" to Icons.Default.PhotoLibrary, "Łap" to Icons.Default.PhotoCamera, "Mapa" to Icons.Default.Map, "Ustawienia" to Icons.Default.Settings).forEachIndexed { i, item ->
                 NavigationBarItem(selected = tab == i, onClick = { tab = i }, icon = { Icon(item.second, item.first) }, label = { Text(item.first) })
             }
         }
@@ -129,7 +128,7 @@ class MainActivity : ComponentActivity() {
                 1 -> Gallery(catches, catalog, onDelete = { deleteTarget = it })
                 2 -> CameraScreen(catalog) { item -> catches = listOf(item) + catches.filterNot { it.number == item.number && it.type == item.type }; saveCatches(context, catches); tab = 1 }
                 3 -> LiveMapScreen(catalog)
-                else -> Profile(catches)
+                else -> SettingsScreen(catches) { catches = loadCatches(context); Widgets.refresh(context) }
             }
         }
     }
@@ -169,7 +168,7 @@ class MainActivity : ComponentActivity() {
             Row { Column(Modifier.weight(1f)) { Text("TWÓJ ALBUM", color = Muted, letterSpacing = 3.sp, fontSize = 12.sp); Text("Warszawski tabor", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Black) }; Text("${catches.size} / ${catalog.sumOf { it.numbers.size }}", color = Muted, fontWeight = FontWeight.Bold) }
         }
         androidx.compose.foundation.lazy.LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(listOf("Wszystkie", "Autobus", "Tramwaj", "Metro", "SKM", "Braki")) { name -> FilterChip(selected = filter == name, onClick = { filter = name }, label = { Text(name.uppercase()) }) }
+            items(listOf("Wszystkie", "Autobus", "Tramwaj", "Metro", "SKM", "Braki")) { name -> FilterChip(selected = filter == name, onClick = { filter = name; brand = "Wszystkie marki" }, label = { Text(name.uppercase()) }) }
         }
         OutlinedTextField(value=query,onValueChange={query=it},placeholder={Text("Model lub numer taborowy")},singleLine=true,modifier=Modifier.fillMaxWidth().padding(horizontal=16.dp))
         androidx.compose.foundation.lazy.LazyRow(contentPadding=PaddingValues(horizontal=16.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -207,7 +206,7 @@ class MainActivity : ComponentActivity() {
         item { Row(verticalAlignment = Alignment.CenterVertically) { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Wróć") }; Text("WSZYSTKIE MODELE", color = Muted, letterSpacing = 2.sp, fontSize = 12.sp) } }
         item { Text(model.name.ifBlank { "Nieznany model" }, color = Color.White, fontSize = 34.sp, lineHeight = 38.sp, fontWeight = FontWeight.Black); Text("${model.type.uppercase()} · ${model.operator.uppercase()}", color = Muted, letterSpacing = 1.sp); Spacer(Modifier.height(12.dp)); LinearProgressIndicator(progress = { (items.size.toFloat()/total.coerceAtLeast(1)).coerceIn(0f,1f) }, modifier = Modifier.fillMaxWidth().height(7.dp), color = rarity.color); Text("${items.size}/$total", color = Color.White, fontWeight = FontWeight.Black, modifier = Modifier.fillMaxWidth()) }
         item { Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) { TechTile("DŁUGOŚĆ", if(model.length>0) "${model.length/1000.0} m" else "—", Modifier.weight(1f)); TechTile("NAPĘD", model.power, Modifier.weight(1f)); TechTile("MIEJSCA", model.capacity.takeIf { it>0 }?.toString() ?: "—", Modifier.weight(1f)) } }
-        item { Text("${model.depot} · ${model.years.let { if(it.isEmpty()) "rok —" else "${it.first()}–${it.last()}" }}", color = Muted) }
+        item { Text("ROCZNIKI: ${model.years.joinToString(", ").ifBlank { "brak danych" }}", color = Muted); Text(model.depot, color = Muted) }
         item { Text("TWOJE NAKLEJKI", color = Muted, letterSpacing = 2.sp, fontWeight = FontWeight.Bold) }
         items(model.numbers.chunked(3)) { row -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) { row.forEach { number -> val caught = items.firstOrNull { it.number == number }; Box(Modifier.weight(1f)) { if(caught != null) MiniSticker(caught, onDelete) else MissingSticker(number) } }; repeat(3-row.size) { Spacer(Modifier.weight(1f)) } } }
     }
@@ -288,7 +287,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable private fun LiveMapScreen(catalog: List<FleetModel>) {
     val context = LocalContext.current
-    var apiKey by remember { mutableStateOf(context.getSharedPreferences("settings",0).getString("warsaw_api_key","").orEmpty()) }
+    var apiKey by remember { mutableStateOf(defaultApiKey(context)) }
     var draft by remember { mutableStateOf(apiKey) }
     var vehicles by remember { mutableStateOf(emptyList<LiveVehicle>()) }
     var status by remember { mutableStateOf("Połącz mapę kluczem API") }
@@ -428,8 +427,11 @@ private fun saveCatches(context: Context, list: List<VehicleCatch>) { val a = JS
 private fun loadCatches(context: Context): List<VehicleCatch> = runCatching { val a = JSONArray(context.getSharedPreferences("album_v2",0).getString("items","[]")); (0 until a.length()).map { i -> a.getJSONObject(i).let { VehicleCatch(it.getString("n"),it.getString("t"),it.getString("d"),it.optString("s"),Rarity.valueOf(it.optString("r","COMMON")),it.optString("m","Model do potwierdzenia"),it.optString("x")) } } }.getOrDefault(emptyList())
 private fun loadFleetCatalog(context: Context): List<FleetModel> = runCatching {
     val a = JSONArray(context.assets.open("fleet_catalog.json").bufferedReader().use { it.readText() })
-    (0 until a.length()).map { i -> a.getJSONObject(i).let { o ->
+    groupFleet((0 until a.length()).map { i -> a.getJSONObject(i).let { o ->
         val ns=o.getJSONArray("numbers"); val ys=o.getJSONArray("years")
         FleetModel(o.getString("id"),o.getString("type"),o.optString("name"), (0 until ns.length()).map { ns.getString(it) }, (0 until ys.length()).map { ys.getInt(it) },o.optString("operator"),o.optString("depot"),o.optInt("length"),o.optString("power"),o.optInt("seats"),o.optInt("capacity"),o.optString("floor"),o.optString("brand","Inne"))
-    } }
+    } })
 }.getOrDefault(emptyList())
+
+internal fun defaultApiKey(context: Context): String = context.getSharedPreferences("settings",0).getString("warsaw_api_key",null)?.takeIf { it.isNotBlank() }
+    ?: runCatching { JSONObject(context.assets.open("private_config.json").bufferedReader().use { it.readText() }).getString("warsaw_api_key") }.getOrDefault("")

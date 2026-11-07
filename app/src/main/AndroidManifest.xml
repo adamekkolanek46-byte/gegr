@@ -6,9 +6,10 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="Łap To OLED"
+        android:label="Łap To 0.5"
         android:theme="@style/Theme.LapTo">
         <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="subject_segment" />
+        <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.files" android:exported="false" android:grantUriPermissions="true"><meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/share_paths"/></provider>
         <activity
             android:name=".v2.MainActivity"
             android:exported="true"
