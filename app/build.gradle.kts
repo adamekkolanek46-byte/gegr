@@ -8,7 +8,7 @@ android {
     namespace = "pl.lapto.app"
     compileSdk = 35
     defaultConfig {
-        applicationId = "pl.lapto.app"
+        applicationId = "pl.lapto.app.oled"
         minSdk = 26
         targetSdk = 35
         versionCode = 4
