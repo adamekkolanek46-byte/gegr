@@ -1,0 +1,4 @@
+Source: Dzielnice_Warszawy_i_Gminy, baza__WTP_widok, ArcGIS FeatureServer layer 4
+https://services.arcgis.com/VU1dOESuQS3Z8oTW/ArcGIS/rest/services/baza__WTP_widok/FeatureServer/4
+Downloaded 2026-11-07; filter czyWarszawa='TAK'; coordinates EPSG:4326.
+18 district polygons, simplified with tolerance 0.000025 degrees for mobile point-in-polygon lookup.

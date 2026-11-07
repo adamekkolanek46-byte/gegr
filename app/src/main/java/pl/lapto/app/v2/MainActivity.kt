@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -48,13 +47,15 @@ import com.google.mlkit.vision.segmentation.subject.SubjectSegmenterOptions
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
 import org.json.JSONArray
 import org.json.JSONObject
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -299,7 +300,7 @@ class MainActivity : ComponentActivity() {
             setDestroyMode(false)
             setTileSource(TileSourceFactory.MAPNIK)
             setMultiTouchControls(true)
-            controller.setZoom(12.0)
+            controller.setZoom(11.5)
             controller.setCenter(GeoPoint(52.2297,21.0122))
         }
     }
@@ -310,9 +311,24 @@ class MainActivity : ComponentActivity() {
     var query by remember { mutableStateOf("") }
     val lifecycle = LocalLifecycleOwner.current
     val onSelect: (LiveVehicle) -> Unit = { selected=it }
-    val visible = vehicles.filter { (filter=="Wszystkie" || it.type==filter) && (query.isBlank() || it.line.contains(query,true) || it.number.contains(query,true)) }
-    val currentVisible by rememberUpdatedState(visible)
+    val visible = remember(vehicles,filter,query) { vehicles.filter { (filter=="Wszystkie" || it.type==filter) && (query.isBlank() || it.line.contains(query,true) || it.number.contains(query,true)) } }
     val currentSelect by rememberUpdatedState(onSelect)
+    val vehicleFlow=remember { MutableStateFlow(emptyList<LiveVehicle>()) }
+    val windowFlow=remember { MutableStateFlow(MapWindow(11.5,52.45,21.35,52.05,20.75)) }
+    val bubbles=remember(map) { VehicleBubbleOverlay(context.resources.displayMetrics.density) { currentSelect(it) } }
+    SideEffect { vehicleFlow.value=visible }
+    LaunchedEffect(map) {
+        val engine=withContext(Dispatchers.IO) {
+            ClusterEngine(District.parse(context.assets.open("warsaw_districts.json").bufferedReader().use { it.readText() }))
+        }
+        combine(vehicleFlow,windowFlow) { data,window -> data to window }.collectLatest { (data,window) ->
+            // Wait for the gesture to settle and discard obsolete work.
+            delay(120)
+            val result=withContext(Dispatchers.Default) { engine.clusters(data,window) }
+            bubbles.submit(result)
+            map.invalidate()
+        }
+    }
     LaunchedEffect(apiKey,tick) {
         if(apiKey.isBlank()) return@LaunchedEffect
         lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -329,13 +345,19 @@ class MainActivity : ComponentActivity() {
         }
     }
     DisposableEffect(map,lifecycle) {
+        fun updateWindow() {
+            if(map.width<=0 || map.height<=0)return
+            val bounds=map.boundingBox
+            windowFlow.value=MapWindow(map.zoomLevelDouble,bounds.latNorth,bounds.lonEast,bounds.latSouth,bounds.lonWest)
+        }
         val listener=object:org.osmdroid.events.MapListener {
-            override fun onScroll(e:org.osmdroid.events.ScrollEvent?)=false
+            override fun onScroll(e:org.osmdroid.events.ScrollEvent?):Boolean { updateWindow();return false }
             override fun onZoom(e:org.osmdroid.events.ZoomEvent?):Boolean {
-                renderClusters(context,map,currentVisible,currentSelect)
+                updateWindow()
                 return false
             }
         }
+        val layout=android.view.View.OnLayoutChangeListener { _,_,_,_,_,_,_,_,_ -> updateWindow() }
         val observer=androidx.lifecycle.LifecycleEventObserver { _,event ->
             when(event) {
                 Lifecycle.Event.ON_RESUME -> map.onResume()
@@ -344,10 +366,13 @@ class MainActivity : ComponentActivity() {
             }
         }
         map.addMapListener(listener)
+        map.addOnLayoutChangeListener(layout)
+        map.overlays.add(bubbles)
         lifecycle.lifecycle.addObserver(observer)
         onDispose {
             lifecycle.lifecycle.removeObserver(observer)
             map.removeMapListener(listener)
+            map.removeOnLayoutChangeListener(layout)
             map.onPause()
             map.onDetach()
         }
@@ -362,8 +387,9 @@ class MainActivity : ComponentActivity() {
         Row(Modifier.padding(horizontal=16.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             listOf("Wszystkie","Autobus","Tramwaj").forEach { f -> FilterChip(selected=filter==f,onClick={filter=f},label={Text(f)}) }
         }
+        Text("Dotknij dzielnicy lub przybliż mapę, aby zobaczyć pojazdy",color=Muted,fontSize=11.sp,modifier=Modifier.padding(horizontal=16.dp,vertical=4.dp))
         Box(Modifier.weight(1f)) {
-            AndroidView(factory={map},update={renderClusters(context,it,visible,onSelect)},modifier=Modifier.fillMaxSize())
+            AndroidView(factory={map},modifier=Modifier.fillMaxSize())
             Text("© OpenStreetMap contributors · Dane: m.st. Warszawa",color=Color.White,fontSize=10.sp,modifier=Modifier.align(Alignment.BottomStart).background(Color.Black.copy(alpha=.8f)).padding(4.dp))
         }
         selected?.let { v ->
@@ -408,22 +434,6 @@ private suspend fun fetchAllVehicles(key: String): List<LiveVehicle> = withConte
             else LiveVehicle(lat,lon,o.optString("Lines","?"),o.optString("Brigade","?"),label,o.optString("VehicleNumber","?"),time)
         } }
     }
-}
-
-internal fun renderClusters(context: Context, map: MapView, vehicles: List<LiveVehicle>, onSelect: (LiveVehicle) -> Unit) {
-    map.overlays.removeAll { it is Marker }
-    if (vehicles.isEmpty()) { map.invalidate(); return }
-    val precision = .012 * 2.0.pow(12-map.zoomLevelDouble)
-    vehicles.groupBy { Pair((it.lat / precision).roundToInt(), (it.lon / precision).roundToInt()) }.values.forEach { group ->
-        val lat = group.map { it.lat }.average(); val lon = group.map { it.lon }.average(); val count = group.size
-        Marker(map).apply { position = GeoPoint(lat, lon); setAnchor(.5f, .5f); title = if (count == 1) "Linia ${group[0].line} · ${group[0].type}" else "$count pojazdów"; snippet = if (count == 1) "Brygada ${group[0].brigade}" else "Powiększ mapę, aby rozdzielić"; icon = BitmapDrawable(context.resources, clusterBitmap(if (count > 99) "99+" else if(count==1) group[0].line else count.toString(), count == 1)); setOnMarkerClickListener { _, _ -> if(count==1) onSelect(group[0]) else { map.controller.setCenter(position); map.controller.setZoom(map.zoomLevelDouble+2) }; true }; map.overlays.add(this) }
-    }; map.invalidate()
-}
-
-private fun clusterBitmap(text: String, single: Boolean): Bitmap {
-    val size = if (single) 72 else 86; val b = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888); val c = Canvas(b)
-    c.drawCircle(size/2f, size/2f, size*.43f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = if (single) android.graphics.Color.rgb(0,90,169) else android.graphics.Color.rgb(227,25,55) })
-    c.drawText(text, size/2f, size*.62f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.WHITE; textSize = if (text.length > 2) 25f else 30f; textAlign = Paint.Align.CENTER; typeface = Typeface.DEFAULT_BOLD }); return b
 }
 
 private fun createSticker(source: Bitmap): Bitmap {

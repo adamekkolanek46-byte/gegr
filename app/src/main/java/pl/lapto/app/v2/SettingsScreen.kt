@@ -73,7 +73,7 @@ import java.util.UUID
         Text("Mapa",fontSize=22.sp,fontWeight=FontWeight.Bold)
         Text(if(defaultApiKey(context).isNotBlank())"API ustawione — mapa połączy się automatycznie." else "Brak klucza API. Ustaw go przyciskiem klucza na mapie.",color=Color(0xFFAAAAAF))
         Text("Twoja kolekcja: ${catches.size} pojazdów",color=Color(0xFFAAAAAF))
-        Text("Łap To · 0.5.1",color=Color.Gray,fontSize=12.sp)
+        Text("Łap To · 0.5.2",color=Color.Gray,fontSize=12.sp)
     }
     preview?.let { data ->
         AlertDialog(onDismissRequest={if(!busy){data.root.deleteRecursively();preview=null}},title={Text("Wczytać ${data.items.length()} pojazdów?")},text={Text("Połączę tę kopię z Twoim albumem. Pojazdy, które już masz, zachowają swoje zdjęcia.")},
