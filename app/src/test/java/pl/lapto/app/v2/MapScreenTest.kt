@@ -32,8 +32,14 @@ class MapScreenTest {
                 val map=requireNotNull(mapIn(compose.activity.window.decorView))
                 assertNotNull("The displayed map must not have been destroyed",map.tileRequestCompleteHandler)
                 map.setUseDataConnection(false)
+                val vehicles=(1..120).map { n -> LiveVehicle(52.2297,21.0122,"19","1","Tramwaj",n.toString(),"2026-11-07 09:00:00") }
+                renderClusters(compose.activity,map,vehicles){}
+                renderClusters(compose.activity,map,vehicles){}
+                assertEquals(1,map.overlays.count { it is org.osmdroid.views.overlay.Marker })
                 map.controller.setZoom(14.0)
                 assertNotNull(map.tileRequestCompleteHandler)
+                renderClusters(compose.activity,map,emptyList()){}
+                assertEquals(0,map.overlays.count { it is org.osmdroid.views.overlay.Marker })
             }
             compose.onNodeWithText("Start",useUnmergedTree=true).performClick()
         }

@@ -86,6 +86,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Configuration.getInstance().userAgentValue = packageName
+        Configuration.getInstance().osmdroidBasePath = File(filesDir,"maps").apply { mkdirs() }
+        Configuration.getInstance().osmdroidTileCache = File(cacheDir,"map-tiles").apply { mkdirs() }
         setContent { LapToTheme { LapToApp() } }
     }
 }
@@ -291,7 +293,16 @@ class MainActivity : ComponentActivity() {
     var draft by remember { mutableStateOf(apiKey) }
     var vehicles by remember { mutableStateOf(emptyList<LiveVehicle>()) }
     var status by remember { mutableStateOf("Połącz mapę kluczem API") }
-    var map by remember { mutableStateOf<MapView?>(null) }
+    val map = remember(context) {
+        MapView(context).apply {
+            // Compose owns this instance. Window detach must not destroy it a second time.
+            setDestroyMode(false)
+            setTileSource(TileSourceFactory.MAPNIK)
+            setMultiTouchControls(true)
+            controller.setZoom(12.0)
+            controller.setCenter(GeoPoint(52.2297,21.0122))
+        }
+    }
     var editKey by remember { mutableStateOf(apiKey.isBlank()) }
     var tick by remember { mutableIntStateOf(0) }
     var selected by remember { mutableStateOf<LiveVehicle?>(null) }
@@ -301,6 +312,7 @@ class MainActivity : ComponentActivity() {
     val onSelect: (LiveVehicle) -> Unit = { selected=it }
     val visible = vehicles.filter { (filter=="Wszystkie" || it.type==filter) && (query.isBlank() || it.line.contains(query,true) || it.number.contains(query,true)) }
     val currentVisible by rememberUpdatedState(visible)
+    val currentSelect by rememberUpdatedState(onSelect)
     LaunchedEffect(apiKey,tick) {
         if(apiKey.isBlank()) return@LaunchedEffect
         lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -316,7 +328,30 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    DisposableEffect(map) { val ownedMap = map; onDispose { ownedMap?.onPause(); ownedMap?.onDetach() } }
+    DisposableEffect(map,lifecycle) {
+        val listener=object:org.osmdroid.events.MapListener {
+            override fun onScroll(e:org.osmdroid.events.ScrollEvent?)=false
+            override fun onZoom(e:org.osmdroid.events.ZoomEvent?):Boolean {
+                renderClusters(context,map,currentVisible,currentSelect)
+                return false
+            }
+        }
+        val observer=androidx.lifecycle.LifecycleEventObserver { _,event ->
+            when(event) {
+                Lifecycle.Event.ON_RESUME -> map.onResume()
+                Lifecycle.Event.ON_PAUSE -> map.onPause()
+                else -> Unit
+            }
+        }
+        map.addMapListener(listener)
+        lifecycle.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycle.lifecycle.removeObserver(observer)
+            map.removeMapListener(listener)
+            map.onPause()
+            map.onDetach()
+        }
+    }
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth().padding(16.dp),verticalAlignment=Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) { Text("NA ŻYWO",color=WarsawRed,fontWeight=FontWeight.Black,letterSpacing=3.sp); Text(status,color=Muted,fontSize=11.sp) }
@@ -328,13 +363,7 @@ class MainActivity : ComponentActivity() {
             listOf("Wszystkie","Autobus","Tramwaj").forEach { f -> FilterChip(selected=filter==f,onClick={filter=f},label={Text(f)}) }
         }
         Box(Modifier.weight(1f)) {
-            AndroidView(factory={ctx -> MapView(ctx).apply {
-                setTileSource(TileSourceFactory.MAPNIK); setMultiTouchControls(true); controller.setZoom(12.0); controller.setCenter(GeoPoint(52.2297,21.0122)); onResume()
-                addMapListener(object: org.osmdroid.events.MapListener {
-                    override fun onScroll(e:org.osmdroid.events.ScrollEvent?)=false
-                    override fun onZoom(e:org.osmdroid.events.ZoomEvent?):Boolean { renderClusters(ctx,this@apply,currentVisible,onSelect);return false }
-                }); map=this
-            }},update={renderClusters(context,it,visible,onSelect)},modifier=Modifier.fillMaxSize())
+            AndroidView(factory={map},update={renderClusters(context,it,visible,onSelect)},modifier=Modifier.fillMaxSize())
             Text("© OpenStreetMap contributors · Dane: m.st. Warszawa",color=Color.White,fontSize=10.sp,modifier=Modifier.align(Alignment.BottomStart).background(Color.Black.copy(alpha=.8f)).padding(4.dp))
         }
         selected?.let { v ->
@@ -381,7 +410,7 @@ private suspend fun fetchAllVehicles(key: String): List<LiveVehicle> = withConte
     }
 }
 
-private fun renderClusters(context: Context, map: MapView, vehicles: List<LiveVehicle>, onSelect: (LiveVehicle) -> Unit) {
+internal fun renderClusters(context: Context, map: MapView, vehicles: List<LiveVehicle>, onSelect: (LiveVehicle) -> Unit) {
     map.overlays.removeAll { it is Marker }
     if (vehicles.isEmpty()) { map.invalidate(); return }
     val precision = .012 * 2.0.pow(12-map.zoomLevelDouble)
