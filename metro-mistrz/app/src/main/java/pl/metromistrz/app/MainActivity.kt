@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -30,6 +31,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -159,8 +161,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-                AnimatedVisibility(report.blockers.isNotEmpty()) {
-                    Surface(color = Color(0xFFFFF3F3), shape = RoundedCornerShape(16.dp), modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp, vertical = 12.dp).fillMaxWidth().border(1.dp, Bad.copy(.25f), RoundedCornerShape(16.dp))) {
+                androidx.compose.animation.AnimatedVisibility(visible = report.blockers.isNotEmpty(), modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp, vertical = 12.dp).fillMaxWidth()) {
+                    Surface(color = Color(0xFFFFF3F3), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth().border(1.dp, Bad.copy(.25f), RoundedCornerShape(16.dp))) {
                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Warning, null, tint = Bad); Spacer(Modifier.width(9.dp))
                             Text(report.blockers.first(), color = Bad, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
