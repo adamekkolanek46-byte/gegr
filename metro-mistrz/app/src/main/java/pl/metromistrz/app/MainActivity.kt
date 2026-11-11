@@ -1,286 +1,240 @@
 package pl.metromistrz.app
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.gestures.detectTapGestures
+import android.os.Handler
+import android.os.Looper
+import android.graphics.*
+import android.graphics.drawable.GradientDrawable
+import android.location.Geocoder
+import android.view.Gravity
+import android.widget.*
+import org.json.JSONArray
+import org.json.JSONObject
+import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.views.overlay.Overlay
 import kotlin.math.*
+import kotlin.random.Random
+import java.io.File
+import java.util.Locale
 
-private val Ink = Color(0xFF101824)
-private val Navy = Color(0xFF18263B)
-private val Slate = Color(0xFF617186)
-private val Map = Color(0xFFE5EDF1)
-private val Water = Color(0xFF8BCBE2)
-private val Green = Color(0xFFB5D5B1)
-private val Track = Color(0xFF25374B)
-private val MetroRed = Color(0xFFE84C52)
-private val MetroBlue = Color(0xFF296EE8)
-private val MetroYellow = Color(0xFFF2B93B)
-private val Good = Color(0xFF1FA16C)
-private val Bad = Color(0xFFD83C45)
+data class Station(val p: GeoPoint, var name: String, val cost: Double, var waiting: Int = 0)
+data class Stock(val name: String, val price: Double, val capacity: Int, val speed: Double, val upkeep: Double)
 
-data class Point(val x: Float, val y: Float)
-data class City(val name: String, val subtitle: String, val demand: Int, val scaleKm: Float)
-
-private val cities = listOf(
-    City("Warszawa", "gęsta zabudowa · duży popyt", 94, .083f),
-    City("Kraków", "stare miasto · duży ruch", 83, .091f),
-    City("Wrocław", "rzeka i mosty · średni popyt", 76, .096f),
-    City("Gdańsk", "układ liniowy · umiarkowany popyt", 67, .105f),
-    City("Własne miasto", "zaprojektuj od zera", 60, .10f)
-)
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent { MetroMistrzTheme { MetroGame() } }
+class MainActivity : Activity() {
+    private lateinit var map: MapView
+    private lateinit var moneyText: TextView
+    private lateinit var info: TextView
+    private lateinit var hint: TextView
+    private lateinit var play: Button
+    private val stations = mutableListOf<Station>()
+    private val stocks = listOf(Stock("81 · używany / stary", 8.0, 500, 65.0, 110.0), Stock("Metropolis · odnowiony", 20.0, 700, 75.0, 85.0), Stock("Inspiro · nowoczesny", 38.0, 900, 80.0, 65.0))
+    private var cash = 180.0
+    private var owned = -1
+    private var onboard = 0
+    private var transported = 0
+    private var running = false
+    private var build = false
+    private var speed = 1
+    private var target = 0
+    private var direction = 1
+    private var elapsed = 0.0
+    private var travel = 1.0
+    private var dwell = 0.0
+    private var clock = 21600.0
+    private var demandClock = 0.0
+    private var train: GeoPoint? = null
+    private var lastEvent = "Kup skład, zbuduj minimum dwie stacje."
+    private val handler = Handler(Looper.getMainLooper())
+    private val ink = Color.rgb(15,22,34)
+    private val red = Color.rgb(240,77,83)
+    private val tick = object : Runnable {
+        override fun run() { if (running) simulate(.25 * speed); handler.postDelayed(this, 250) }
     }
-}
-
-@Composable private fun MetroMistrzTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = lightColorScheme(primary = MetroRed, background = Map, surface = Color.White), content = content)
-}
-
-@Composable private fun MetroGame() {
-    var city by remember { mutableStateOf(cities.first()) }
-    var stations by remember { mutableStateOf(listOf<Point>()) }
-    var lineName by remember { mutableStateOf("M1") }
-    var lineColor by remember { mutableStateOf(MetroRed) }
-    var building by remember { mutableStateOf(true) }
-    var simulation by remember { mutableStateOf(false) }
-    var message by remember { mutableStateOf("Dotknij mapy, aby postawić pierwszą stację.") }
-    var showRules by remember { mutableStateOf(false) }
-
-    val report = routeReport(stations, city.scaleKm)
-    val canSimulate = stations.size >= 2 && report.blockers.isEmpty()
-
-    fun changeCity(newCity: City) {
-        city = newCity; stations = emptyList(); simulation = false
-        message = "Nowy obszar: ${newCity.name}. Zacznij od pierwszej stacji."
-    }
-
-    fun addStation(point: Point) {
-        if (!building) return
-        val proposal = stations + point
-        val test = routeReport(proposal, city.scaleKm)
-        if (test.lastError != null) {
-            message = test.lastError
-        } else {
-            stations = proposal
-            message = if (proposal.size == 1) "Stacja 01 gotowa. Rysuj dalej." else "Stacja ${proposal.size.toString().padStart(2, '0')} dodana · ${test.totalKm.format()} km linii"
+    private fun dp(n: Int) = (n * resources.displayMetrics.density).toInt()
+    private fun label(s: String, size: Float = 13f, color: Int = Color.WHITE) = TextView(this).apply { text=s; textSize=size; setTextColor(color); setPadding(dp(12),dp(6),dp(12),dp(6)) }
+    private fun button(s: String, action: () -> Unit) = Button(this).apply { text=s; textSize=11f; isAllCaps=false; setOnClickListener { action() } }
+    private fun row() = LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL; gravity=Gravity.CENTER_VERTICAL }
+    private fun note(s: String) { hint.text=s }
+    override fun onCreate(state: Bundle?) {
+        super.onCreate(state)
+        val config=Configuration.getInstance()
+        config.userAgentValue="MetroMistrzWorld/2.0 (Android)"
+        config.osmdroidBasePath=File(filesDir,"maps")
+        config.osmdroidTileCache=File(cacheDir,"tiles")
+        restore()
+        val root=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL; setBackgroundColor(ink) }
+        root.fitsSystemWindows=true
+        setContentView(root)
+        root.addView(label("M  /  METRO MISTRZ ŚWIAT",20f))
+        moneyText=label("");root.addView(moneyText)
+        val searchRow=row()
+        val search=EditText(this).apply { hint="Miasto lub lat, lon"; setTextColor(Color.WHITE); setHintTextColor(Color.LTGRAY); textSize=14f; setSingleLine() }
+        searchRow.addView(search,LinearLayout.LayoutParams(0,dp(46),1f))
+        searchRow.addView(button("Szukaj") { locate(search.text.toString()) })
+        searchRow.addView(button("⚙") { menu() });root.addView(searchRow)
+        val frame=FrameLayout(this)
+        map=MapView(this).apply {
+            setTileSource(TileSourceFactory.MAPNIK);setMultiTouchControls(true)
+            minZoomLevel=3.0;maxZoomLevel=19.0
+            controller.setZoom(14.0);controller.setCenter(stations.firstOrNull()?.p ?: GeoPoint(52.2297,21.0122))
         }
-    }
-
-    Scaffold(containerColor = Map, topBar = {
-        Column(Modifier.background(Ink).statusBarsPadding()) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-                Surface(color = lineColor, shape = RoundedCornerShape(12.dp)) {
-                    Text(lineName, Modifier.padding(horizontal = 11.dp, vertical = 7.dp), color = Color.White, fontWeight = FontWeight.Black, fontSize = 13.sp)
-                }
-                Spacer(Modifier.width(10.dp))
-                Column(Modifier.weight(1f)) {
-                    Text("METRO MISTRZ", color = Color.White, fontWeight = FontWeight.Black, letterSpacing = 1.sp, fontSize = 15.sp)
-                    Text("Polska · projektowanie realistycznej sieci", color = Color(0xFFAEC0D4), fontSize = 10.sp)
-                }
-                IconButton(onClick = { showRules = true }) { Icon(Icons.Default.Info, "Zasady", tint = Color.White) }
+        frame.addView(map)
+        val attribution=label("© OpenStreetMap contributors",10f,ink).apply { setBackgroundColor(Color.WHITE);setOnClickListener { startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW,android.net.Uri.parse("https://www.openstreetmap.org/copyright"))) } }
+        frame.addView(attribution,FrameLayout.LayoutParams(-2,-2,Gravity.BOTTOM or Gravity.LEFT))
+        root.addView(frame,LinearLayout.LayoutParams(-1,0,1f))
+        map.overlays.add(MapEventsOverlay(object:MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p:GeoPoint):Boolean {
+                val s=stations.minByOrNull { it.p.distanceToAsDouble(p) }
+                if(s!=null && s.p.distanceToAsDouble(p)<120 && map.zoomLevelDouble>=14) stationDialog(s)
+                return false
             }
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(start = 14.dp, bottom = 12.dp), horizontalArrangement = Arrangement.spacedBy(7.dp)) {
-                cities.forEach { item -> CityChip(item, item == city) { changeCity(item) } }
-            }
-        }
-    }, bottomBar = {
-        Column(Modifier.background(Color.White).navigationBarsPadding().padding(14.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                StatPill(Icons.Default.Train, "${stations.size} st.", Navy, Modifier.weight(1f))
-                StatPill(Icons.Default.Straighten, "${report.totalKm.format()} km", Navy, Modifier.weight(1f))
-                StatPill(if (report.blockers.isEmpty()) Icons.Default.CheckCircle else Icons.Default.Warning, if (report.blockers.isEmpty()) "realistyczna" else "popraw trasę", if (report.blockers.isEmpty()) Good else Bad, Modifier.weight(1.32f))
-            }
-            Spacer(Modifier.height(10.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                OutlinedButton(onClick = {
-                    if (stations.isNotEmpty()) { stations = stations.dropLast(1); simulation = false; message = "Cofnięto ostatnią stację." }
-                }, enabled = stations.isNotEmpty(), modifier = Modifier.weight(1f), shape = RoundedCornerShape(16.dp)) {
-                    Icon(Icons.Default.Undo, null); Spacer(Modifier.width(4.dp)); Text("COFNIJ", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                }
-                Button(onClick = { simulation = !simulation; building = !simulation }, enabled = canSimulate, modifier = Modifier.weight(1.45f), shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.buttonColors(containerColor = if (simulation) Ink else lineColor)) {
-                    Icon(if (simulation) Icons.Default.Pause else Icons.Default.PlayArrow, null); Spacer(Modifier.width(4.dp)); Text(if (simulation) "ZATRZYMAJ" else "URUCHOM METRO", fontSize = 11.sp, fontWeight = FontWeight.Black)
-                }
-            }
-        }
-    }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            Row(Modifier.fillMaxWidth().background(Color(0xFFF7FAFB)).padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(9.dp).background(if (simulation) Good else lineColor, CircleShape))
-                Spacer(Modifier.width(8.dp))
-                Text(if (simulation) "Pociągi kursują · frekwencja ${routeDemand(stations, city.demand)}%" else city.subtitle, color = Slate, fontSize = 11.sp, modifier = Modifier.weight(1f))
-                Text(if (building) "TRYB BUDOWY" else "SYMULACJA", color = Ink, fontSize = 9.sp, fontWeight = FontWeight.Black, letterSpacing = .6.sp)
-            }
-            Box(Modifier.fillMaxSize()) {
-                MetroMap(stations, lineColor, simulation, onTap = ::addStation)
-                Surface(color = Color.White.copy(.94f), shadowElevation = 7.dp, shape = RoundedCornerShape(18.dp), modifier = Modifier.align(Alignment.TopCenter).padding(14.dp).fillMaxWidth()) {
-                    Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
-                        Text(message, color = Ink, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                        if (stations.size > 1) {
-                            Spacer(Modifier.height(3.dp))
-                            Text("Odstęp ostatnich stacji: ${report.lastDistance.format()} km · zakręt: ${report.lastTurn.format(0)}°", color = Slate, fontSize = 10.sp)
-                        }
+            override fun longPressHelper(p:GeoPoint):Boolean { if(build && !running) propose(p);else note("Włącz „Buduj”, potem przytrzymaj miejsce na mapie.");return true }
+        }))
+        map.overlays.add(object:Overlay(){
+            override fun draw(canvas:Canvas,m:MapView,shadow:Boolean) {
+                if(shadow)return
+                val paint=Paint(Paint.ANTI_ALIAS_FLAG)
+                val pts=stations.map { m.projection.toPixels(it.p,null) }
+                if(pts.size>1) {
+                    val path=Path();path.moveTo(pts[0].x.toFloat(),pts[0].y.toFloat())
+                    for(i in 1 until pts.size-1){
+                        val a=pts[i-1];val b=pts[i];val c=pts[i+1]
+                        path.lineTo(b.x+(a.x-b.x)*.22f,b.y+(a.y-b.y)*.22f)
+                        path.quadTo(b.x.toFloat(),b.y.toFloat(),b.x+(c.x-b.x)*.22f,b.y+(c.y-b.y)*.22f)
                     }
+                    path.lineTo(pts.last().x.toFloat(),pts.last().y.toFloat())
+                    paint.style=Paint.Style.STROKE;paint.strokeCap=Paint.Cap.ROUND;paint.color=Color.WHITE;paint.strokeWidth=dp(9).toFloat();canvas.drawPath(path,paint)
+                    paint.color=red;paint.strokeWidth=dp(5).toFloat();canvas.drawPath(path,paint)
                 }
-                androidx.compose.animation.AnimatedVisibility(visible = report.blockers.isNotEmpty(), modifier = Modifier.align(Alignment.BottomCenter).padding(horizontal = 14.dp, vertical = 12.dp).fillMaxWidth()) {
-                    Surface(color = Color(0xFFFFF3F3), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth().border(1.dp, Bad.copy(.25f), RoundedCornerShape(16.dp))) {
-                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Warning, null, tint = Bad); Spacer(Modifier.width(9.dp))
-                            Text(report.blockers.first(), color = Bad, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
-                        }
-                    }
+                paint.style=Paint.Style.FILL
+                pts.forEachIndexed { i,p ->
+                    paint.color=red;canvas.drawCircle(p.x.toFloat(),p.y.toFloat(),dp(8).toFloat(),paint)
+                    paint.color=Color.WHITE;canvas.drawCircle(p.x.toFloat(),p.y.toFloat(),dp(4).toFloat(),paint)
+                    if(m.zoomLevelDouble>=13){ paint.textSize=dp(11).toFloat();paint.typeface=Typeface.DEFAULT_BOLD;paint.setShadowLayer(3f,0f,0f,Color.BLACK);canvas.drawText(stations[i].name+" · "+stations[i].waiting,p.x+dp(12).toFloat(),p.y-dp(8).toFloat(),paint);paint.clearShadowLayer() }
                 }
+                train?.let { val p=m.projection.toPixels(it,null);paint.color=ink;canvas.drawCircle(p.x.toFloat(),p.y.toFloat(),dp(11).toFloat(),paint);paint.color=Color.WHITE;paint.textSize=dp(12).toFloat();canvas.drawText("M",p.x-dp(5).toFloat(),p.y+dp(4).toFloat(),paint) }
             }
-        }
+        })
+        hint=label("Przesuwaj mapę palcem, przybliżaj dwoma. Mapa wymaga internetu.",11f,Color.LTGRAY);root.addView(hint)
+        info=label("",12f);root.addView(info)
+        val actions=row()
+        val buildButton=button("Buduj"){}
+        buildButton.setOnClickListener { if(running)note("Zatrzymaj ruch przed budową.") else {build=!build;buildButton.text=if(build)"Buduj ✓" else "Buduj";note(if(build)"Przytrzymaj mapę: wycena stacji i tunelu." else "Przesuwanie mapy. Dotknij stacji, aby zobaczyć pasażerów.")} }
+        actions.addView(buildButton,LinearLayout.LayoutParams(0,dp(48),1f))
+        actions.addView(button("Tabor"){fleet()},LinearLayout.LayoutParams(0,dp(48),1f))
+        play=button("▶ Start"){toggle()};actions.addView(play,LinearLayout.LayoutParams(0,dp(48),1f))
+        val fast=button("1×"){}
+        fast.setOnClickListener {speed=when(speed){1->5;5->20;else->1};fast.text="${speed}×"}
+        actions.addView(fast,LinearLayout.LayoutParams(0,dp(48),.7f));root.addView(actions)
+        update();handler.post(tick)
     }
-    if (showRules) RulesSheet { showRules = false }
-}
-
-@Composable private fun CityChip(city: City, selected: Boolean, onClick: () -> Unit) {
-    Surface(onClick = onClick, color = if (selected) Color.White else Color(0xFF26354A), shape = RoundedCornerShape(50.dp)) {
-        Text(city.name, Modifier.padding(horizontal = 13.dp, vertical = 7.dp), color = if (selected) Ink else Color(0xFFE1EAF2), fontSize = 11.sp, fontWeight = FontWeight.Bold)
+    private fun locate(q:String) {
+        val coord=q.split(",").map { it.trim().toDoubleOrNull() }
+        if(coord.size==2 && coord.all { it!=null } && coord[0]!! in -85.0..85.0 && coord[1]!! in -180.0..180.0){map.controller.setCenter(GeoPoint(coord[0]!!,coord[1]!!));map.controller.setZoom(14.0);return}
+        if(q.isBlank())return
+        note("Szukam: $q…")
+        Thread {
+            try {
+                @Suppress("DEPRECATION") val result=Geocoder(this,Locale.getDefault()).getFromLocationName(q,1)
+                runOnUiThread { if(isDestroyed)return@runOnUiThread;val a=result?.firstOrNull();if(a!=null){map.controller.setCenter(GeoPoint(a.latitude,a.longitude));map.controller.setZoom(14.0);note("Obszar: $q")}else note("Brak wyniku. Przesuń mapę albo wpisz lat, lon.") }
+            }catch(e:Exception){runOnUiThread {note("Wyszukiwanie niedostępne. Możesz przesuwać mapę lub wpisać współrzędne.")}}
+        }.start()
     }
-}
-
-@Composable private fun StatPill(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String, color: Color, modifier: Modifier) {
-    Row(modifier.height(36.dp).clip(RoundedCornerShape(13.dp)).background(color.copy(alpha = .08f)).padding(horizontal = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(15.dp)); Spacer(Modifier.width(5.dp)); Text(text, color = color, fontWeight = FontWeight.Bold, fontSize = 10.sp, maxLines = 1)
+    private fun propose(p:GeoPoint){
+        if(map.zoomLevelDouble<13){note("Przybliż mapę do ulic przed budową.");return}
+        if(stations.any { it.p.distanceToAsDouble(p)<650 }){note("Za blisko innej stacji: minimum 650 m.");return}
+        val km=stations.lastOrNull()?.p?.distanceToAsDouble(p)?.div(1000) ?: 0.0
+        if(km>3.2){note("Za długi odcinek: maksymalnie 3,2 km między stacjami.");return}
+        if(stations.size>=2){
+            val a=stations[stations.size-2].p;val b=stations.last().p
+            val turn=abs(((b.bearingTo(p)-a.bearingTo(b)+540)%360)-180)
+            if(turn>60){note("Za ostry skręt: zmiana kierunku maks. 60°.");return}
+        }
+        val cost=28+km*42
+        if(cash<cost){note("Brak środków: potrzeba ${fmt(cost)} mln zł.");return}
+        val name=EditText(this).apply {setText("Stacja ${stations.size+1}");setSingleLine()}
+        AlertDialog.Builder(this).setTitle("Budowa · ${fmt(cost)} mln zł").setMessage("Stacja 28 mln + tunel 42 mln/km.\nOdcinek: ${fmt(km)} km.\nPo budowie: ${fmt(cash-cost)} mln zł.\nKoszty są zbalansowane dla gry.").setView(name).setNegativeButton("Anuluj",null).setPositiveButton("Buduj"){_,_->
+            if(cash>=cost){cash-=cost;stations.add(Station(p,name.text.toString().take(32).ifBlank{"Stacja ${stations.size+1}"},cost,Random.nextInt(8,30)));resetTrain();save();update();note("Stacja gotowa. Przytrzymaj mapę, żeby przedłużyć linię.")}
+        }.show()
     }
-}
-
-@Composable private fun MetroMap(stations: List<Point>, lineColor: Color, simulation: Boolean, onTap: (Point) -> Unit) {
-    val animation = rememberInfiniteTransition(label = "train")
-    val progress by animation.animateFloat(0f, 1f, infiniteRepeatable(tween(8500, easing = LinearEasing)), label = "trainProgress")
-    Canvas(Modifier.fillMaxSize().pointerInput(Unit) { detectTapGestures { tap ->
-        val point = Point((tap.x / size.width * 100f).coerceIn(4f, 96f), (tap.y / size.height * 100f).coerceIn(7f, 95f))
-        onTap(point)
-    } }) {
-        drawRect(Map)
-        // city blocks
-        for (x in 5..95 step 10) for (y in 8..94 step 9) {
-            val shift = ((x * 7 + y * 3) % 5).toFloat()
-            drawRoundRect(Color(0xFFD3DEE2), Offset(x / 100f * size.width + shift, y / 100f * size.height), Size(size.width * .055f, size.height * .032f), CornerRadius(5f, 5f))
-        }
-        // parks
-        drawOval(Green, Offset(size.width * .09f, size.height * .64f), Size(size.width * .26f, size.height * .20f))
-        drawOval(Green, Offset(size.width * .68f, size.height * .12f), Size(size.width * .22f, size.height * .16f))
-        // river
-        val river = Path().apply { moveTo(size.width * .63f, 0f); cubicTo(size.width*.45f,size.height*.22f,size.width*.75f,size.height*.44f,size.width*.52f,size.height*.69f); cubicTo(size.width*.43f,size.height*.82f,size.width*.56f,size.height*.94f,size.width*.51f,size.height) }
-        drawPath(river, Water, style = Stroke(width = size.width * .045f, cap = StrokeCap.Round))
-        // roads
-        val road = Color(0xFFB9C7CE)
-        listOf(.17f,.37f,.78f).forEach { y -> drawLine(road, Offset(0f,size.height*y), Offset(size.width,size.height*(y+.08f)), 5f) }
-        listOf(.23f,.48f,.84f).forEach { x -> drawLine(road, Offset(size.width*x,0f), Offset(size.width*(x-.12f),size.height), 4f) }
-
-        fun screen(p: Point) = Offset(p.x / 100f * size.width, p.y / 100f * size.height)
-        if (stations.size > 1) {
-            val path = Path().apply { moveTo(screen(stations.first()).x, screen(stations.first()).y); stations.drop(1).forEach { lineTo(screen(it).x, screen(it).y) } }
-            drawPath(path, Color.White, style = Stroke(width = 15f, cap = StrokeCap.Round))
-            drawPath(path, lineColor, style = Stroke(width = 9f, cap = StrokeCap.Round))
-        }
-        stations.forEachIndexed { i, p ->
-            val at = screen(p)
-            drawCircle(Color.White, 13f, at)
-            drawCircle(lineColor, 9f, at)
-            drawCircle(Color.White, 4f, at)
-            drawContext.canvas.nativeCanvas.apply {
-                val paint = android.graphics.Paint().apply { color = android.graphics.Color.rgb(16,24,36); textSize = 24f; typeface = android.graphics.Typeface.DEFAULT_BOLD; setShadowLayer(3f,1f,1f,android.graphics.Color.WHITE) }
-                drawText("${(i + 1).toString().padStart(2,'0')}", at.x + 15f, at.y - 13f, paint)
-            }
-        }
-        if (simulation && stations.size > 1) {
-            val train = pointAlong(stations, progress)
-            val at = screen(train)
-            drawCircle(Ink, 15f, at); drawCircle(Color.White, 10f, at); drawCircle(lineColor, 6f, at)
-        }
-        drawContext.canvas.nativeCanvas.apply {
-            val paint = android.graphics.Paint().apply { color = android.graphics.Color.rgb(74,98,115); textSize = 22f; typeface = android.graphics.Typeface.DEFAULT_BOLD }
-            drawText("DOTKNIJ MAPY · BUDUJ POD ZIEMIĄ", 22f, size.height - 24f, paint)
-        }
+    private fun stationDialog(s:Station){
+        val input=EditText(this).apply {setText(s.name)}
+        AlertDialog.Builder(this).setTitle(s.name).setMessage("Oczekujących: ${s.waiting}\nPopyt jest symulacją gry, nie rzeczywistymi danymi.").setView(input).setPositiveButton("Zmień nazwę"){_,_->s.name=input.text.toString().take(32).ifBlank{s.name};save();map.invalidate()}.setNegativeButton("Zamknij",null).show()
     }
-}
-
-private data class RouteReport(val totalKm: Float, val lastDistance: Float, val lastTurn: Float, val blockers: List<String>, val lastError: String?)
-
-private fun routeReport(points: List<Point>, scale: Float): RouteReport {
-    if (points.size < 2) return RouteReport(0f, 0f, 180f, emptyList(), null)
-    val dists = points.zipWithNext { a, b -> distance(a, b) * scale }
-    val turns = points.windowed(3).map { angle(it[0], it[1], it[2]) }
-    val blocker = when {
-        dists.last() < .65f -> "Za blisko: zachowaj co najmniej 650 m między stacjami."
-        dists.last() > 3.2f -> "Za daleko: pojedynczy odcinek może mieć maks. 3,2 km."
-        turns.isNotEmpty() && turns.last() < 115f -> "Za ostry zakręt: metro potrzebuje łagodniejszego łuku (min. 115°)."
-        else -> null
+    private fun fleet(){
+        val items=stocks.mapIndexed { i,s -> "${if(i==owned)"✓ " else ""}${s.name}\n${s.price.toInt()} mln zł · ${s.capacity} osób · ${s.speed.toInt()} km/h\nUtrzymanie ${s.upkeep.toInt()} zł/min" }.toTypedArray()
+        AlertDialog.Builder(this).setTitle("Tabor · jeden skład na linię").setItems(items){_,i->
+            if(running){note("Zatrzymaj ruch, aby wymienić skład.");return@setItems}
+            if(i==owned)return@setItems
+            val refund=if(owned>=0)stocks[owned].price*.5 else 0.0
+            val cost=stocks[i].price-refund
+            AlertDialog.Builder(this).setTitle(stocks[i].name).setMessage("Koszt po odsprzedaży obecnego składu: ${fmt(cost)} mln zł.").setNegativeButton("Anuluj",null).setPositiveButton("Kup"){_,_->
+                if(cash>=cost){cash-=cost;owned=i;resetTrain();save();update()}else note("Nie stać Cię na ten skład.")
+            }.show()
+        }.setNegativeButton("Zamknij",null).show()
     }
-    val all = mutableListOf<String>()
-    dists.forEach { if (it < .65f) all += "stacje są zbyt blisko"; if (it > 3.2f) all += "odcinek jest zbyt długi" }
-    turns.forEach { if (it < 115f) all += "jeden z zakrętów jest za ostry" }
-    return RouteReport(dists.sum(), dists.last(), turns.lastOrNull() ?: 180f, all.distinct(), blocker)
-}
-
-private fun distance(a: Point, b: Point) = hypot(a.x - b.x, a.y - b.y)
-private fun angle(a: Point, b: Point, c: Point): Float {
-    val uX = a.x - b.x; val uY = a.y - b.y; val vX = c.x - b.x; val vY = c.y - b.y
-    val denom = hypot(uX, uY) * hypot(vX, vY)
-    return if (denom == 0f) 0f else Math.toDegrees(acos(((uX*vX + uY*vY) / denom).coerceIn(-1f,1f).toDouble())).toFloat()
-}
-private fun pointAlong(points: List<Point>, progress: Float): Point {
-    val parts = points.zipWithNext { a,b -> distance(a,b) }; val total = parts.sum().coerceAtLeast(.01f); var left = progress * total
-    parts.forEachIndexed { index, len -> if (left <= len) { val t=left/len; val a=points[index]; val b=points[index+1]; return Point(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t) }; left -= len }
-    return points.last()
-}
-private fun routeDemand(points: List<Point>, base: Int) = (base - max(0, points.size - 9) * 2).coerceAtLeast(42)
-private fun Float.format(decimals: Int = 1) = "%1.${decimals}f".format(java.util.Locale.US, this)
-
-@Composable private fun RulesSheet(onDismiss: () -> Unit) {
-    AlertDialog(onDismissRequest = onDismiss, confirmButton = { TextButton(onClick = onDismiss) { Text("GOTOWE", color = MetroRed, fontWeight = FontWeight.Black) } }, title = { Text("Zasady realistycznej trasy", color = Ink, fontWeight = FontWeight.Black) }, text = {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Rule(Icons.Default.SocialDistance, "Min. 650 m", "Stacje postawione bliżej nie zostaną dodane.")
-            Rule(Icons.Default.Straighten, "Maks. 3,2 km", "Dłuższy odcinek nie ma sensu dla miejskiego metra.")
-            Rule(Icons.Default.TurnRight, "Zakręt min. 115°", "Linia nie może nagle zawracać ani być zbyt kręta.")
-            Rule(Icons.Default.PlayArrow, "Uruchomienie", "Gdy projekt jest poprawny, możesz włączyć kursowanie.")
+    private fun toggle(){
+        if(!running && (owned<0 || stations.size<2)){note("Potrzebujesz dwóch stacji i kupionego składu.");return}
+        running=!running;build=false;play.text=if(running)"Ⅱ Pauza" else "▶ Start";save();update()
+    }
+    private fun resetTrain(){target=0;direction=1;elapsed=0.0;travel=1.0;dwell=0.0;onboard=0;train=stations.firstOrNull()?.p}
+    private fun simulate(dt:Double){
+        clock+=dt;demandClock+=dt
+        val stock=stocks[owned]
+        cash-=stock.upkeep*dt/60/1000000
+        if(cash<=0){cash=0.0;running=false;play.text="▶ Start";note("Brak pieniędzy na ruch. Odbierz dotację w menu.");save();update();return}
+        if(demandClock>=60){demandClock%=60;stations.forEach {it.waiting=(it.waiting+Random.nextInt(3,14)).coerceAtMost(2000)}}
+        if(dwell>0){dwell-=dt;if(dwell<=0){if(target==stations.lastIndex)direction=-1;if(target==0)direction=1;target+=direction;elapsed=0.0;travel=stations[target-direction].p.distanceToAsDouble(stations[target].p)/(stock.speed/3.6)*1.35};update();return}
+        elapsed+=dt
+        if(elapsed>=travel){
+            train=stations[target].p
+            val leave=if(target==0 || target==stations.lastIndex)onboard else Random.nextInt(0,onboard+1)/2
+            onboard-=leave;transported+=leave
+            val enter=min(stations[target].waiting,stock.capacity-onboard);stations[target].waiting-=enter;onboard+=enter;cash+=enter*4.5/1000000
+            lastEvent="${stations[target].name}  ↑ $enter wsiadło  ↓ $leave wysiadło"
+            dwell=25.0;save()
+        }else if(target-direction in stations.indices){
+            val a=stations[target-direction].p;val b=stations[target].p;val t=(elapsed/travel).coerceIn(0.0,1.0)
+            train=GeoPoint(a.latitude+(b.latitude-a.latitude)*t,a.longitude+(b.longitude-a.longitude)*t)
         }
-    })
-}
-@Composable private fun Rule(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, desc: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) { Icon(icon, null, tint = MetroRed); Spacer(Modifier.width(12.dp)); Column { Text(title, fontWeight = FontWeight.Bold, color = Ink); Text(desc, color = Slate, fontSize = 11.sp) } }
+        update()
+    }
+    private fun update(){
+        val km=stations.zipWithNext {a,b->a.p.distanceToAsDouble(b.p)/1000}.sum()
+        val h=(clock/3600).toInt()%24;val m=(clock/60).toInt()%60
+        moneyText.text="BUDŻET  ${fmt(cash)} mln zł     %02d:%02d".format(h,m)
+        val stock=stocks.getOrNull(owned)
+        info.text="M1 · ${stations.size} stacji · ${fmt(km)} km\n${stock?.name ?: "Brak składu"} · $onboard/${stock?.capacity ?: 0} osób\n$lastEvent\nDowiezieni: $transported · bilet 4,50 zł${if(dwell>0)" · postój ${dwell.toInt()} s" else ""}"
+        map.invalidate()
+    }
+    private fun menu(){
+        AlertDialog.Builder(this).setTitle("Zarządzanie").setItems(arrayOf("Wróć do swojej linii","Odbierz dotację za 1000 dowiezionych","Usuń ostatnią stację · zwrot 50%","Zasady i zapis","Nowa gra")){_,i->when(i){
+            0->stations.firstOrNull()?.let {map.controller.setCenter(it.p);map.controller.setZoom(14.0)}
+            1->{val prefs=getPreferences(0);val grants=prefs.getInt("grants",0);if(transported/1000>grants){cash+=35;prefs.edit().putInt("grants",grants+1).apply();save();update();note("Dotacja +35 mln zł.")}else note("Kolejna dotacja po ${(grants+1)*1000} dowiezionych pasażerach.")}
+            2->if(!running && stations.isNotEmpty())AlertDialog.Builder(this).setMessage("Usunąć ${stations.last().name}? Zwrot połowy kosztu.").setNegativeButton("Anuluj",null).setPositiveButton("Usuń"){_,_->cash+=stations.removeAt(stations.lastIndex).cost*.5;resetTrain();save();update()}.show() else note("Zatrzymaj ruch przed rozbiórką.")
+            3->AlertDialog.Builder(this).setTitle("Jak grać").setMessage("Start: 180 mln zł. Kup używany skład, zbuduj krótką linię i zarabiaj na biletach. Dotacja 35 mln co 1000 dowiezionych.\n\nMapa świata: przesuwanie i zoom dwoma palcami. Buduj → przytrzymaj mapę → zatwierdź cenę. Stacje min. 650 m, odcinki do 3,2 km, skręt do 60°.\n\nZapis automatyczny. Symulacja pauzuje po zamknięciu. Pasażerowie, osiągi i ekonomia są uproszczonym modelem gry. Mapa ulic jest prawdziwa i wymaga internetu.").setPositiveButton("OK",null).show()
+            4->AlertDialog.Builder(this).setMessage("Usunąć aktualną grę i zacząć z 180 mln zł?").setNegativeButton("Anuluj",null).setPositiveButton("Nowa gra"){_,_->running=false;stations.clear();cash=180.0;owned=-1;transported=0;clock=21600.0;getPreferences(0).edit().remove("grants").apply();resetTrain();play.text="▶ Start";save();update()}.show()
+        }}.setNegativeButton("Zamknij",null).show()
+    }
+    private fun save(){
+        val arr=JSONArray();stations.forEach {s->arr.put(JSONObject().put("lat",s.p.latitude).put("lon",s.p.longitude).put("name",s.name).put("cost",s.cost).put("waiting",s.waiting))}
+        getPreferences(0).edit().putString("stations",arr.toString()).putFloat("cash",cash.toFloat()).putInt("owned",owned).putInt("transported",transported).putFloat("clock",clock.toFloat()).putInt("onboard",onboard).putInt("target",target).putInt("direction",direction).putFloat("elapsed",elapsed.toFloat()).putFloat("travel",travel.toFloat()).putFloat("dwell",dwell.toFloat()).apply()
+    }
+    private fun restore(){
+        val p=getPreferences(0);cash=p.getFloat("cash",180f).toDouble();owned=p.getInt("owned",-1);transported=p.getInt("transported",0);clock=p.getFloat("clock",21600f).toDouble()
+        try{val a=JSONArray(p.getString("stations","[]"));for(i in 0 until a.length()){val s=a.getJSONObject(i);stations.add(Station(GeoPoint(s.getDouble("lat"),s.getDouble("lon")),s.getString("name"),s.getDouble("cost"),s.optInt("waiting")))}}catch(e:Exception){stations.clear()}
+        onboard=p.getInt("onboard",0);target=p.getInt("target",0);direction=p.getInt("direction",1);elapsed=p.getFloat("elapsed",0f).toDouble();travel=p.getFloat("travel",1f).toDouble();dwell=p.getFloat("dwell",0f).toDouble()
+        train=stations.getOrNull(target)?.p
+    }
+    override fun onResume(){super.onResume();map.onResume()}
+    override fun onPause(){running=false;play.text="▶ Start";save();map.onPause();super.onPause()}
+    override fun onDestroy(){handler.removeCallbacks(tick);map.onDetach();super.onDestroy()}
+    private fun fmt(n:Double)=String.format(Locale.US,"%.2f",n)
 }
