@@ -104,10 +104,11 @@ class MainActivity : Activity() {
                 val pts=stations.map { m.projection.toPixels(it.p,null) }
                 if(pts.size>1) {
                     val path=Path();path.moveTo(pts[0].x.toFloat(),pts[0].y.toFloat())
-                    for(i in 1 until pts.size-1){
-                        val a=pts[i-1];val b=pts[i];val c=pts[i+1]
-                        path.lineTo(b.x+(a.x-b.x)*.22f,b.y+(a.y-b.y)*.22f)
-                        path.quadTo(b.x.toFloat(),b.y.toFloat(),b.x+(c.x-b.x)*.22f,b.y+(c.y-b.y)*.22f)
+                    for(i in 0 until pts.size-1){
+                        for(step in 1..20){
+                            val at=m.projection.toPixels(routePoint(i,step/20.0),null)
+                            path.lineTo(at.x.toFloat(),at.y.toFloat())
+                        }
                     }
                     path.lineTo(pts.last().x.toFloat(),pts.last().y.toFloat())
                     paint.style=Paint.Style.STROKE;paint.strokeCap=Paint.Cap.ROUND;paint.color=Color.WHITE;paint.strokeWidth=dp(9).toFloat();canvas.drawPath(path,paint)
@@ -184,7 +185,20 @@ class MainActivity : Activity() {
         if(!running && (owned<0 || stations.size<2)){note("Potrzebujesz dwóch stacji i kupionego składu.");return}
         running=!running;build=false;play.text=if(running)"Ⅱ Pauza" else "▶ Start";save();update()
     }
-    private fun resetTrain(){target=0;direction=1;elapsed=0.0;travel=1.0;dwell=0.0;onboard=0;train=stations.firstOrNull()?.p}
+    private fun resetTrain(){stations.firstOrNull()?.let {it.waiting+=onboard};target=0;direction=1;elapsed=0.0;travel=1.0;dwell=0.0;onboard=0;train=stations.firstOrNull()?.p}
+    private fun routePoint(segment:Int,t:Double):GeoPoint {
+        val a=stations[(segment-1).coerceAtLeast(0)].p
+        val b=stations[segment].p
+        val c=stations[segment+1].p
+        val d=stations[(segment+2).coerceAtMost(stations.lastIndex)].p
+        fun curve(a:Double,b:Double,c:Double,d:Double):Double {
+            val u=1-t
+            val first=b+(c-a)/6
+            val second=c-(d-b)/6
+            return u*u*u*b+3*u*u*t*first+3*u*t*t*second+t*t*t*c
+        }
+        return GeoPoint(curve(a.latitude,b.latitude,c.latitude,d.latitude),curve(a.longitude,b.longitude,c.longitude,d.longitude))
+    }
     private fun simulate(dt:Double){
         clock+=dt;demandClock+=dt
         val stock=stocks[owned]
@@ -201,8 +215,8 @@ class MainActivity : Activity() {
             lastEvent="${stations[target].name}  ↑ $enter wsiadło  ↓ $leave wysiadło"
             dwell=25.0;save()
         }else if(target-direction in stations.indices){
-            val a=stations[target-direction].p;val b=stations[target].p;val t=(elapsed/travel).coerceIn(0.0,1.0)
-            train=GeoPoint(a.latitude+(b.latitude-a.latitude)*t,a.longitude+(b.longitude-a.longitude)*t)
+            val t=(elapsed/travel).coerceIn(0.0,1.0)
+            train=routePoint(min(target,target-direction),if(direction>0)t else 1-t)
         }
         update()
     }
