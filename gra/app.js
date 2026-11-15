@@ -9,6 +9,8 @@ const logout = byId('logout');
 const authSwitch = byId('auth-switch');
 const creator = byId('creator');
 const beautyDialog = byId('beauty-dialog');
+const shopHub = byId('shop-hub');
+const creativeHub = byId('creative-hub');
 const tramDialog = byId('tram-game');
 const worldDialog = byId('world-dialog');
 
@@ -541,16 +543,16 @@ document.querySelectorAll('.spot').forEach((button) => button.addEventListener('
 document.querySelectorAll('[data-board]').forEach((button) => button.addEventListener('click', () => {
   const action = button.dataset.board;
   if (action === 'games') openTramGame();
-  if (action === 'shop') openCreator(false, 'shop');
+  if (action === 'shop') shopHub.showModal();
   if (action === 'chat') showToast('Chat dzielnicy zostanie otwarty w kolejnym etapie.');
   if (action === 'palace') claimReward('palace', 10, 8, 'Widok z Pałacu Kultury! +10 monet');
-  if (action === 'events') claimReward('event', 12, 5, 'Bilet na wydarzenie zdobyty! +12 monet');
+  if (action === 'events') creativeHub.showModal();
   if (action === 'clinic') openBeautyClinic();
 }));
 document.querySelectorAll('[data-social]').forEach((button) => button.addEventListener('click', () => {
   const action = button.dataset.social;
   if (action === 'profile') openCreator();
-  else if (action === 'shop') openCreator(false, 'shop');
+  else if (action === 'shop') shopHub.showModal();
   else if (action === 'games') openTramGame();
   else if (action === 'world') worldDialog.showModal();
   else if (action === 'home') showToast('Jesteś na stronie startowej Warszawy.');
@@ -563,6 +565,39 @@ document.querySelector('.mood-box').addEventListener('click', () => showToast('S
 worldDialog.querySelector('.close-button').addEventListener('click', () => worldDialog.close());
 worldDialog.querySelector('.warsaw').addEventListener('click', () => { worldDialog.close(); showToast('Warszawa jest aktywnym miastem.'); });
 byId('profile-button').addEventListener('click', () => openCreator());
+shopHub.querySelector('.close-button').addEventListener('click', () => shopHub.close());
+creativeHub.querySelector('.close-button').addEventListener('click', () => creativeHub.close());
+document.querySelectorAll('[data-hub-action]').forEach((button) => button.addEventListener('click', () => {
+  const action = button.dataset.hubAction;
+  if (action === 'beauty') {
+    shopHub.close();
+    openBeautyClinic();
+    return;
+  }
+  if (action === 'fashion-female' || action === 'fashion-male') {
+    shopHub.close();
+    openCreator(false, 'shop');
+    draft.gender = action === 'fashion-male' ? 'male' : 'female';
+    document.querySelectorAll('[data-gender]').forEach((item) => item.classList.toggle('selected', item.dataset.gender === draft.gender));
+    creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+    return;
+  }
+  showToast(`${button.querySelector('b').textContent}: dział pojawi się w następnym etapie.`);
+}));
+document.querySelectorAll('[data-creative]').forEach((button) => button.addEventListener('click', () => {
+  const action = button.dataset.creative;
+  if (action === 'Design Studio' || action === 'Looks') {
+    creativeHub.close();
+    openCreator();
+    return;
+  }
+  if (action === 'Filmy') {
+    creativeHub.close();
+    openTramGame();
+    return;
+  }
+  showToast(`${action}: moduł jest już na mapie i zostanie rozwinięty w kolejnym etapie.`);
+}));
 document.querySelectorAll('[data-gender]').forEach((button) => button.addEventListener('click', () => {
   draft.gender = button.dataset.gender;
   document.querySelectorAll('[data-gender]').forEach((item) => item.classList.toggle('selected', item === button));
