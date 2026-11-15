@@ -8,21 +8,31 @@ const submit = byId('submit');
 const logout = byId('logout');
 const authSwitch = byId('auth-switch');
 const creator = byId('creator');
+const beautyDialog = byId('beauty-dialog');
 const tramDialog = byId('tram-game');
+const worldDialog = byId('world-dialog');
 
 const defaultPlayer = {
   version: 1,
   created: false,
   name: 'Nowa osoba',
-  skin: '#d89c71',
-  hair: '#3b2929',
-  hairStyle: '1',
-  outfit: '#ef795f',
+  gender: 'female',
+  skin: '#c98b62',
+  beauty: { eyes: '#5a3828', makeup: 'none' },
+  outfit3d: { top: 'base', legs: 'base', feet: 'base', head: 'casual' },
+  inventory: { top: ['base'], legs: ['base'], feet: ['base'], head: ['casual'] },
   coins: 80,
   xp: 0,
   visited: [],
   rewards: {},
   daily: '',
+};
+
+const shopPrices = {
+  top: { casual: 90, punk: 160, formal: 230 },
+  legs: { casual: 100, punk: 175, formal: 220 },
+  feet: { casual: 75, punk: 145, formal: 190 },
+  head: { punk: 120, formal: 180, suit: 210 },
 };
 
 const locations = {
@@ -77,6 +87,10 @@ let soundEnabled = false;
 let tramTimer;
 let tramScore = 0;
 let tramTime = 15;
+let mainViewer;
+let creatorViewer;
+let avatarModulePromise;
+let creatorMode = 'wardrobe';
 
 function route() {
   const hash = location.hash;
@@ -96,11 +110,16 @@ function storageKey() {
 }
 
 function normalizePlayer(value) {
+  const savedInventory = value?.inventory || {};
+  const savedOutfit = { ...defaultPlayer.outfit3d, ...(value?.outfit3d || {}) };
   return {
     ...defaultPlayer,
     ...(value && typeof value === 'object' ? value : {}),
     visited: Array.isArray(value?.visited) ? value.visited : [],
     rewards: value?.rewards && typeof value.rewards === 'object' ? value.rewards : {},
+    outfit3d: savedOutfit,
+    inventory: Object.fromEntries(Object.entries(defaultPlayer.inventory).map(([key, items]) => [key, Array.from(new Set([...items, savedOutfit[key], ...(Array.isArray(savedInventory[key]) ? savedInventory[key] : [])]))])),
+    beauty: { ...defaultPlayer.beauty, ...(value?.beauty || {}) },
   };
 }
 
@@ -135,16 +154,40 @@ function queueSave() {
   }, 500);
 }
 
-function setAvatarStyle(element, source = player) {
-  if (!element || !source) return;
-  element.style.setProperty('--skin', source.skin);
-  element.style.setProperty('--hair', source.hair);
-  element.style.setProperty('--outfit', source.outfit);
-  element.dataset.hair = source.hairStyle;
+function avatarModule() {
+  avatarModulePromise ||= import('./avatar3d.js');
+  return avatarModulePromise;
+}
+
+async function ensureMainViewer() {
+  if (mainViewer || !player) return;
+  try {
+    const { createAvatarViewer } = await avatarModule();
+    mainViewer = await createAvatarViewer(byId('avatar-canvas'), { ...player.outfit3d, skin: player.skin, gender: player.gender, ...player.beauty });
+    byId('avatar-loading').hidden = true;
+  } catch {
+    byId('avatar-loading').textContent = 'Nie udało się wczytać postaci 3D.';
+  }
+}
+
+async function ensureCreatorViewer() {
+  if (creatorViewer) {
+    creatorViewer.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+    return;
+  }
+  const { createAvatarViewer } = await avatarModule();
+  creatorViewer = await createAvatarViewer(byId('creator-canvas'), { ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+}
+
+function updateAvatarViewers(source = player) {
+  if (!source) return;
+  mainViewer?.update({ ...source.outfit3d, skin: source.skin, gender: source.gender, ...source.beauty });
+  creatorViewer?.update({ ...source.outfit3d, skin: source.skin, gender: source.gender, ...source.beauty });
 }
 
 function render() {
   const screen = route();
+  document.body.classList.toggle('playing', screen === 'game');
   const authenticated = Boolean(session || guest);
   if (screen === 'game' && ready && !authenticated) {
     location.hash = '#logowanie';
@@ -184,8 +227,8 @@ function renderGame() {
   byId('player-level').textContent = `Poziom ${Math.floor(player.xp / 50) + 1}`;
   byId('coins').textContent = player.coins;
   byId('xp').textContent = player.xp;
-  setAvatarStyle(byId('mini-avatar'));
-  setAvatarStyle(byId('scene-avatar'));
+  ensureMainViewer();
+  updateAvatarViewers();
   const claimed = player.daily === localDate();
   byId('daily-button').disabled = claimed;
   byId('daily-button').querySelector('strong').textContent = claimed ? 'Odebrano ✓' : 'Odbierz 25 ◉';
@@ -195,7 +238,7 @@ function renderGame() {
 function renderLocation(id, countVisit = true) {
   const locationData = locations[id] || locations.plac;
   currentLocation = id;
-  document.querySelectorAll('.place').forEach((button) => button.classList.toggle('active', button.dataset.location === id));
+  document.querySelectorAll('.spot').forEach((button) => button.classList.toggle('active', button.dataset.location === id));
   byId('location-scene').dataset.scene = id;
   byId('location-kicker').textContent = locationData.kicker;
   byId('location-title').textContent = locationData.title;
@@ -236,44 +279,125 @@ function claimReward(key, coins, xp, message) {
 
 function createOptionButtons() {
   const groups = [
-    { id: 'skin-options', key: 'skin', values: ['#f4c9a5', '#d89c71', '#9c634c', '#603f35'], type: 'swatch' },
-    { id: 'hair-options', key: 'hairStyle', values: ['1', '2', '3'], type: 'choice' },
-    { id: 'outfit-options', key: 'outfit', values: ['#ef795f', '#f4b84d', '#57a7b7', '#4a725c', '#d07aa5'], type: 'swatch' },
+    { id: 'top-options', key: 'top', values: [['base', 'Sportowy top'], ['casual', 'T-shirt'], ['punk', 'Kurtka punk'], ['formal', 'Elegancka']] },
+    { id: 'legs-options', key: 'legs', values: [['base', 'Szorty'], ['casual', 'Casual'], ['punk', 'Punk'], ['formal', 'Klasyczne']] },
+    { id: 'feet-options', key: 'feet', values: [['base', 'Boso'], ['casual', 'Sneakersy'], ['punk', 'Trapery'], ['formal', 'Półbuty']] },
+    { id: 'head-options', key: 'head', values: [['casual', 'Naturalne'], ['punk', 'Punk'], ['formal', 'Upięte'], ['suit', 'Krótkie']] },
   ];
   groups.forEach((group) => {
     const container = byId(group.id);
-    group.values.forEach((value, index) => {
+    group.values.forEach(([value, label]) => {
       const button = document.createElement('button');
       button.type = 'button';
-      button.className = group.type;
+      button.className = 'wardrobe-option';
       button.dataset.value = value;
-      button.setAttribute('aria-label', group.type === 'choice' ? `Fryzura ${index + 1}` : `Kolor ${index + 1}`);
-      if (group.type === 'swatch') button.style.background = value;
-      else button.textContent = `Styl ${index + 1}`;
+      button.dataset.group = group.key;
+      button.dataset.label = label;
       button.addEventListener('click', () => {
-        draft[group.key] = value;
-        container.querySelectorAll('button').forEach((item) => item.classList.toggle('selected', item === button));
-        setAvatarStyle(byId('avatar-preview'), draft);
-        playTone(440 + index * 60);
+        const owned = draft.inventory[group.key].includes(value);
+        const price = shopPrices[group.key]?.[value] || 0;
+        if (!owned && creatorMode !== 'shop') {
+          showToast('Ten przedmiot kupisz w Sklepie za StarCoins.');
+          return;
+        }
+        if (!owned && draft.coins < price) {
+          showToast(`Potrzebujesz ${price} StarCoins.`);
+          return;
+        }
+        if (!owned) {
+          draft.coins -= price;
+          draft.inventory[group.key].push(value);
+          player.coins = draft.coins;
+          player.inventory[group.key] = [...draft.inventory[group.key]];
+          queueSave();
+          byId('coins').textContent = player.coins;
+          showToast(`${label} kupiono za ${price} StarCoins!`);
+        }
+        draft.outfit3d[group.key] = value;
+        refreshCreatorOptions();
+        creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+        playTone(480);
       });
       container.append(button);
     });
   });
 }
 
-function openCreator(required = false) {
-  if (!player) return;
-  draft = { ...player };
-  byId('nickname').value = player.created ? player.name : player.name === 'Nowa osoba' ? '' : player.name;
-  ['skin-options', 'hair-options', 'outfit-options'].forEach((id) => {
-    const key = id === 'skin-options' ? 'skin' : id === 'hair-options' ? 'hairStyle' : 'outfit';
-    byId(id).querySelectorAll('button').forEach((button) => button.classList.toggle('selected', button.dataset.value === draft[key]));
+function createSkinButtons() {
+  const tones = ['#f5d0b5', '#deb08c', '#c98b62', '#9b6043', '#68402f', '#3f2a22'];
+  tones.forEach((tone, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'skin-option';
+    button.style.setProperty('--tone', tone);
+    button.dataset.value = tone;
+    button.setAttribute('aria-label', `Odcień skóry ${index + 1}`);
+    button.addEventListener('click', () => {
+      draft.skin = tone;
+      refreshCreatorOptions();
+      creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+    });
+    byId('skin-options').append(button);
   });
+}
+
+function refreshCreatorOptions() {
+  document.querySelectorAll('.wardrobe-option').forEach((button) => {
+    const group = button.dataset.group;
+    const value = button.dataset.value;
+    const owned = draft.inventory[group].includes(value);
+    const price = shopPrices[group]?.[value] || 0;
+    button.classList.toggle('selected', draft.outfit3d[group] === value);
+    button.classList.toggle('locked', !owned);
+    button.textContent = owned ? button.dataset.label : `${button.dataset.label} · ${price} ●`;
+    button.title = owned ? 'Masz ten przedmiot' : creatorMode === 'shop' ? `Kup za ${price} StarCoins` : 'Dostępne w Sklepie';
+  });
+  byId('skin-options').querySelectorAll('button').forEach((button) => button.classList.toggle('selected', button.dataset.value === draft.skin));
+}
+
+function openCreator(required = false, mode = 'wardrobe') {
+  if (!player) return;
+  creatorMode = mode;
+  draft = { ...player, beauty: { ...player.beauty }, outfit3d: { ...player.outfit3d }, inventory: Object.fromEntries(Object.entries(player.inventory).map(([key, items]) => [key, [...items]])) };
+  byId('nickname').value = player.created ? player.name : player.name === 'Nowa osoba' ? '' : player.name;
+  byId('creator-kicker').textContent = mode === 'shop' ? 'SKLEP ALCARY · STARCOINS' : 'STUDIO POSTACI';
+  byId('creator-title').textContent = mode === 'shop' ? 'Kup nowe rzeczy' : 'Stwórz swój styl';
+  refreshCreatorOptions();
+  document.querySelectorAll('[data-gender]').forEach((button) => button.classList.toggle('selected', button.dataset.gender === draft.gender));
   creator.dataset.required = required ? 'true' : 'false';
   creator.querySelector('.close-button').hidden = required;
-  setAvatarStyle(byId('avatar-preview'), draft);
   creator.showModal();
+  requestAnimationFrame(() => ensureCreatorViewer());
   setTimeout(() => byId('nickname').focus(), 50);
+}
+
+function createBeautyOptions() {
+  const colors = ['#5a3828', '#2e6f91', '#4f7942', '#8b693f', '#4c3d69'];
+  colors.forEach((color, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'skin-option';
+    button.style.setProperty('--tone', color);
+    button.dataset.eyes = color;
+    button.setAttribute('aria-label', `Kolor oczu ${index + 1}`);
+    button.addEventListener('click', () => {
+      draft.beauty.eyes = color;
+      refreshBeautyOptions();
+      creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+    });
+    byId('eye-options').append(button);
+  });
+}
+
+function refreshBeautyOptions() {
+  document.querySelectorAll('[data-eyes]').forEach((button) => button.classList.toggle('selected', button.dataset.eyes === draft.beauty.eyes));
+  document.querySelectorAll('[data-makeup]').forEach((button) => button.classList.toggle('selected', button.dataset.makeup === draft.beauty.makeup));
+}
+
+function openBeautyClinic() {
+  draft = { ...player, beauty: { ...player.beauty }, outfit3d: { ...player.outfit3d } };
+  refreshBeautyOptions();
+  beautyDialog.showModal();
 }
 
 function showToast(message) {
@@ -410,11 +534,44 @@ logout.addEventListener('click', async () => {
   render();
 });
 
-document.querySelectorAll('.place').forEach((button) => button.addEventListener('click', () => {
+document.querySelectorAll('.spot').forEach((button) => button.addEventListener('click', () => {
   renderLocation(button.dataset.location);
   playTone(380);
 }));
+document.querySelectorAll('[data-board]').forEach((button) => button.addEventListener('click', () => {
+  const action = button.dataset.board;
+  if (action === 'games') openTramGame();
+  if (action === 'shop') openCreator(false, 'shop');
+  if (action === 'chat') showToast('Chat dzielnicy zostanie otwarty w kolejnym etapie.');
+  if (action === 'palace') claimReward('palace', 10, 8, 'Widok z Pałacu Kultury! +10 monet');
+  if (action === 'events') claimReward('event', 12, 5, 'Bilet na wydarzenie zdobyty! +12 monet');
+  if (action === 'clinic') openBeautyClinic();
+}));
+document.querySelectorAll('[data-social]').forEach((button) => button.addEventListener('click', () => {
+  const action = button.dataset.social;
+  if (action === 'profile') openCreator();
+  else if (action === 'shop') openCreator(false, 'shop');
+  else if (action === 'games') openTramGame();
+  else if (action === 'world') worldDialog.showModal();
+  else if (action === 'home') showToast('Jesteś na stronie startowej Warszawy.');
+  else if (action === 'settings') location.hash = '#logowanie';
+  else showToast(`${button.textContent.trim()} pojawi się w kolejnym etapie.`);
+}));
+document.querySelectorAll('.friend-card:not(.add-friend)').forEach((button) => button.addEventListener('click', () => showToast(`${button.querySelector('span').textContent} jest online.`)));
+document.querySelector('.add-friend').addEventListener('click', () => showToast('Wyszukiwarka znajomych pojawi się w kolejnym etapie.'));
+document.querySelector('.mood-box').addEventListener('click', () => showToast('Status profilu: hej :3'));
+worldDialog.querySelector('.close-button').addEventListener('click', () => worldDialog.close());
+worldDialog.querySelector('.warsaw').addEventListener('click', () => { worldDialog.close(); showToast('Warszawa jest aktywnym miastem.'); });
 byId('profile-button').addEventListener('click', () => openCreator());
+document.querySelectorAll('[data-gender]').forEach((button) => button.addEventListener('click', () => {
+  draft.gender = button.dataset.gender;
+  document.querySelectorAll('[data-gender]').forEach((item) => item.classList.toggle('selected', item === button));
+  creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+}));
+document.querySelectorAll('[data-makeup]').forEach((button) => button.addEventListener('click', () => {
+  draft.beauty.makeup = button.dataset.makeup;
+  refreshBeautyOptions();
+}));
 byId('daily-button').addEventListener('click', () => {
   if (player.daily === localDate()) return;
   player.daily = localDate();
@@ -442,6 +599,15 @@ byId('creator-form').addEventListener('submit', (event) => {
   showToast('Postać zapisana. Witaj w Alcarze!');
 });
 
+byId('beauty-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  player.beauty = { ...draft.beauty };
+  queueSave();
+  updateAvatarViewers();
+  beautyDialog.close();
+  showToast('Nowy wygląd zapisany w Klinice piękna.');
+});
+
 byId('start-tram').addEventListener('click', startTramGame);
 byId('ticket').addEventListener('click', () => {
   if (!tramTimer) return;
@@ -467,6 +633,8 @@ window.addEventListener('hashchange', () => {
 });
 
 createOptionButtons();
+createSkinButtons();
+createBeautyOptions();
 render();
 status.textContent = configured ? 'Łączenie z Supabase…' : 'Supabase nie jest skonfigurowany.';
 

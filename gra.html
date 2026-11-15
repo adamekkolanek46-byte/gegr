@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#173643">
   <title>Alcara — Warszawa po godzinach</title>
   <link rel="stylesheet" href="gra/style.css">
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.181.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.181.1/examples/jsm/"}}</script>
   <script defer src="gra/config.js"></script>
   <script defer src="gra/app.js"></script>
 </head>
@@ -53,57 +54,106 @@
     </section>
 
     <section id="gra" class="game screen" hidden aria-labelledby="game-title">
-      <div class="game-head">
-        <button id="profile-button" class="player-chip" type="button" aria-label="Edytuj postać">
-          <span id="mini-avatar" class="mini-avatar" aria-hidden="true"></span>
-          <span><b id="player-name">Nowa osoba</b><small id="player-level">Poziom 1</small></span>
-        </button>
-        <div class="wallet" aria-label="Stan konta"><span title="Monety"><b>◉</b> <strong id="coins">0</strong></span><span title="Punkty doświadczenia"><b>✦</b> <strong id="xp">0</strong></span></div>
-      </div>
+      <div class="social-shell">
+        <header class="social-header">
+          <div class="social-logo">Alcara<span>✦</span></div>
+          <div class="currency-bar" aria-label="Waluty">
+            <span class="currency diamond">◆ <b>140</b><button type="button" aria-label="Kup diamenty">+</button></span>
+            <span class="currency coin">● <b id="coins">0</b><button type="button" aria-label="Kup monety">+</button></span>
+            <span class="level-progress"><i>12</i><span><b id="xp">0</b> / 5 200</span><progress value="0" max="5200"></progress></span>
+          </div>
+          <nav class="social-nav" aria-label="Menu gry">
+            <button class="active" data-social="home" type="button"><span>⌂</span>Start</button>
+            <button data-social="profile" type="button"><span>♟</span>Mój profil</button>
+            <button data-social="mail" type="button"><span>✉</span><i>1</i>Poczta</button>
+            <button data-social="friends" type="button"><span>♟♟</span>Znajomi</button>
+            <button data-social="shop" type="button"><span>▰</span>Sklep</button>
+            <button data-social="games" type="button"><span>🎮</span>Gry</button>
+            <button data-social="world" type="button"><span>◎</span>Świat</button>
+            <button data-social="settings" type="button" aria-label="Ustawienia"><span>⚙</span></button>
+          </nav>
+        </header>
 
-      <div class="game-layout">
-        <aside class="map-card" aria-labelledby="game-title">
-          <div><p class="eyebrow dark">DZIELNICA ŚRÓDMIEŚCIE</p><h1 id="game-title">Mapa miasta</h1></div>
-          <div class="city-map" role="navigation" aria-label="Lokacje w mieście">
-            <div class="map-lines" aria-hidden="true"></div>
-            <button class="place place-a active" data-location="plac" type="button"><span>☀</span> Plac Iskier</button>
-            <button class="place place-b" data-location="bulwary" type="button"><span>≈</span> Bulwary</button>
-            <button class="place place-c" data-location="metro" type="button"><span>Ⓜ</span> Metro Centrum</button>
-            <button class="place place-d" data-location="neon" type="button"><span>✧</span> Neonownia</button>
-          </div>
-          <button id="daily-button" class="daily-card" type="button"><span>Dzisiejsza iskra</span><strong>Odbierz 25 ◉</strong></button>
-        </aside>
+        <div class="social-body">
+          <aside class="profile-rail">
+            <button class="mood-box" type="button"><span>hej :3</span><b>✎</b></button>
+            <div class="avatar-rail">
+              <canvas id="avatar-canvas" aria-label="Interaktywna postać 3D"></canvas>
+              <span id="avatar-loading">Ładowanie postaci 3D…</span>
+            </div>
+            <button id="profile-button" class="vip-button" type="button"><span>♛</span> GARDEROBA</button>
+            <div class="player-tag"><span>12</span><b id="player-name">Nowa osoba</b><small id="player-level">Poziom 1</small></div>
+            <button id="daily-button" class="daily-card compact" type="button"><span>Dzisiejsza iskra</span><strong>+25 ◉</strong></button>
+          </aside>
 
-        <section class="location-card" aria-live="polite">
-          <div class="location-scene" id="location-scene" aria-hidden="true">
-            <div class="scene-cloud cloud-one"></div><div class="scene-cloud cloud-two"></div>
-            <div class="scene-buildings"></div><div id="scene-avatar" class="scene-avatar"></div>
-          </div>
-          <div class="location-copy">
-            <p id="location-kicker" class="eyebrow dark">SERCE DZIELNICY</p>
-            <h2 id="location-title">Plac Iskier</h2>
-            <p id="location-description">Tu zaczyna się każda dobra historia. Zajrzyj do kiosku, popraw styl i ruszaj w miasto.</p>
-            <div id="location-actions" class="location-actions"></div>
-          </div>
-        </section>
+          <section class="city-column">
+            <h1 id="game-title" class="visually-hidden">Warszawa</h1>
+            <div class="city-board location-scene" id="location-scene" aria-label="Mapa Warszawy">
+              <button class="map-hotspot palace" data-board="palace" type="button"><span>▥</span>Pałac Kultury</button>
+              <button class="map-hotspot mall" data-board="shop" type="button"><span>▢</span>Złote Tarasy</button>
+              <button class="map-hotspot chat" data-board="chat" type="button"><span>◌</span>Chat</button>
+              <button class="map-hotspot games" data-board="games" type="button"><span>🎮</span>Gry</button>
+              <button class="map-hotspot events" data-board="events" type="button"><span>◇</span>Wydarzenia</button>
+              <button class="map-hotspot clinic" data-board="clinic" type="button"><span>✦</span>Klinika piękna</button>
+            </div>
+
+            <div class="friends-strip" aria-label="Znajomi online">
+              <button class="friend-card" type="button"><img src="https://static.poly.pizza/46d6db5a-3c9f-4238-8cdf-8eb7194498dc.webp" alt="Julia"><span>julaax</span><b>★</b></button>
+              <button class="friend-card" type="button"><img src="https://static.poly.pizza/b8ca96a7-0aca-46b2-8b75-3a4ff404506b.jpg" alt="Martin"><span>m4rtin</span><b>★</b></button>
+              <button class="friend-card" type="button"><img src="https://static.poly.pizza/906a0cbe-b0a4-4312-b898-0f974b6f6771.jpg" alt="Oliwka"><span>olivka</span><b>☆</b></button>
+              <button class="friend-card" type="button"><img src="https://static.poly.pizza/51d5abdd-bb87-4b8d-9967-21738ffb8437.webp" alt="Kacper"><span>kacperr</span><b>★</b></button>
+              <button class="friend-card" type="button"><img src="https://static.poly.pizza/46d6db5a-3c9f-4238-8cdf-8eb7194498dc.webp" alt="Lexi"><span>lexi</span><b>☆</b></button>
+              <button class="friend-card add-friend" type="button"><strong>♟+</strong><span>Dodaj<br>znajomego</span></button>
+            </div>
+
+            <div class="location-copy visually-hidden" aria-live="polite">
+              <p id="location-kicker">WARSZAWA</p><h2 id="location-title">Start</h2>
+              <p id="location-description">Wybierz miejsce na mapie.</p><div id="location-actions"></div>
+            </div>
+          </section>
+        </div>
       </div>
     </section>
   </main>
 
   <dialog id="creator" class="creator">
     <form id="creator-form" method="dialog">
-      <div class="dialog-head"><div><p class="eyebrow dark">STUDIO POSTACI</p><h2>Stwórz swój styl</h2></div><button class="close-button" value="cancel" aria-label="Zamknij">×</button></div>
+      <div class="dialog-head"><div><p id="creator-kicker" class="eyebrow dark">STUDIO POSTACI</p><h2 id="creator-title">Stwórz swój styl</h2></div><button class="close-button" value="cancel" aria-label="Zamknij">×</button></div>
       <div class="creator-grid">
-        <div class="avatar-stage"><div id="avatar-preview" class="avatar large" aria-label="Podgląd postaci"></div></div>
+        <div class="avatar-stage"><canvas id="creator-canvas" aria-label="Podgląd postaci 3D"></canvas><p>Przeciągnij, aby obrócić postać</p></div>
         <div class="creator-controls">
           <label>Pseudonim<input id="nickname" maxlength="18" autocomplete="nickname" required></label>
-          <fieldset><legend>Odcień skóry</legend><div id="skin-options" class="swatches"></div></fieldset>
-          <fieldset><legend>Fryzura</legend><div id="hair-options" class="choices"></div></fieldset>
-          <fieldset><legend>Kolor stroju</legend><div id="outfit-options" class="swatches"></div></fieldset>
+          <fieldset><legend>Typ postaci</legend><div class="gender-options"><button type="button" data-gender="female">Damska</button><button type="button" data-gender="male">Męska</button></div></fieldset>
+          <fieldset><legend>Kolor skóry</legend><div id="skin-options" class="skin-options" aria-label="Kolor skóry"></div></fieldset>
+          <fieldset><legend>Koszulka</legend><div id="top-options" class="wardrobe-options"></div></fieldset>
+          <fieldset><legend>Spodnie</legend><div id="legs-options" class="wardrobe-options"></div></fieldset>
+          <fieldset><legend>Buty</legend><div id="feet-options" class="wardrobe-options"></div></fieldset>
+          <fieldset><legend>Włosy i dodatki</legend><div id="head-options" class="wardrobe-options"></div></fieldset>
         </div>
       </div>
       <div class="dialog-actions"><button id="save-character" class="button primary" value="default">Zapisz postać</button></div>
     </form>
+  </dialog>
+
+  <dialog id="beauty-dialog" class="beauty-dialog creator">
+    <form id="beauty-form" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow dark">KLINIKA PIĘKNA</p><h2>Oczy i makijaż</h2></div><button class="close-button" value="cancel" aria-label="Zamknij">×</button></div>
+      <div class="beauty-grid">
+        <fieldset><legend>Kolor oczu</legend><div id="eye-options" class="skin-options"></div></fieldset>
+        <fieldset><legend>Makijaż</legend><div id="makeup-options" class="gender-options"><button type="button" data-makeup="none">Bez makijażu</button><button type="button" data-makeup="rose">Różowy</button><button type="button" data-makeup="smoky">Smoky</button></div></fieldset>
+      </div>
+      <div class="dialog-actions"><button class="button primary" value="default">Zapisz wygląd</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="world-dialog" class="world-dialog">
+    <div class="dialog-head"><div><p class="eyebrow dark">ALCARA WORLD</p><h2>Mapa świata</h2></div><button class="close-button" type="button" aria-label="Zamknij">×</button></div>
+    <div class="world-map" role="navigation" aria-label="Miasta świata">
+      <button class="world-pin warsaw active" type="button"><span>★</span> Warszawa</button>
+      <button class="world-pin paris" type="button" disabled><span>🔒</span> Paryż</button>
+      <button class="world-pin new-york" type="button" disabled><span>🔒</span> Nowy Jork</button>
+      <button class="world-pin tokyo" type="button" disabled><span>🔒</span> Tokio</button>
+    </div>
   </dialog>
 
   <dialog id="tram-game" class="tram-dialog">
@@ -115,6 +165,6 @@
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
-  <footer><span>ALCARA • PIERWSZY PROTOTYP</span><span>52°13′N · 21°00′E</span></footer>
+  <footer><span>ALCARA • PIERWSZY PROTOTYP</span><span class="credits">Warszawa: <a href="https://commons.wikimedia.org/wiki/File:Skyline_of_Warsaw,_Poland.jpg">Quintin Soloviev, CC BY 4.0</a> · Postacie 3D: <a href="https://quaternius.com/packs/ultimatemodularwomen.html">damskie</a> i <a href="https://quaternius.com/packs/ultimatemodularcharacters.html">męskie</a> — Quaternius, CC0 · Mapa: Wikimedia Commons, CC0</span></footer>
 </body>
 </html>
