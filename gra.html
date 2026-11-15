@@ -1,39 +1,120 @@
 <!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alcara — Warszawa po godzinach</title>
-<link rel="stylesheet" href="gra/style.css">
-<script defer src="gra/config.js"></script>
-<script defer src="gra/app.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173643">
+  <title>Alcara — Warszawa po godzinach</title>
+  <link rel="stylesheet" href="gra/style.css">
+  <script defer src="gra/config.js"></script>
+  <script defer src="gra/app.js"></script>
 </head>
 <body>
-<header class="top"><a class="brand" href="#menu">✦ ALCARA</a><a id="nav-login" href="#logowanie">Zaloguj się</a></header>
-<main>
-<section id="menu" class="hero">
-  <div class="city" aria-hidden="true"><div class="sun"></div><div class="skyline"></div><div class="river"></div><div class="tram">▰ ▰ ▰</div></div>
-  <div class="intro">
-    <p class="eyebrow">WARSZAWA PO GODZINACH</p>
-    <h1>Twoje miasto.<br><em>Twój styl.</em></h1>
-    <p>Witaj w Alcarze, świecie 2D inspirowanym warszawskimi neonami, nocnymi tramwajami i grami, do których wracało się po szkole.</p>
-    <div class="actions"><a class="button primary" href="#rejestracja">Załóż konto</a><a class="button" href="#logowanie">Zaloguj się</a></div>
-  </div>
-</section>
-<section id="konto" class="card" hidden>
-  <a href="#menu" class="back">← Menu główne</a>
-  <h1 id="title" tabindex="-1"></h1>
-  <form id="auth" method="post">
-    <label>E-mail<input id="email" name="email" type="email" autocomplete="email" required></label>
-    <label>Hasło<input id="password" name="password" type="password" autocomplete="current-password" required></label>
-    <button class="button primary" id="submit" disabled></button>
-  </form>
-  <p id="status" role="status" aria-live="polite"></p>
-  <a id="switch"></a>
-  <button id="logout" class="button" hidden>Wyloguj się</button>
-</section>
-</main>
-<footer><span>ALCARA • PROTOTYP</span><span>52°13′N · 21°00′E</span></footer>
+  <header class="topbar">
+    <a class="brand" href="#menu" aria-label="Alcara, menu główne"><span>✦</span> ALCARA</a>
+    <nav class="top-actions" aria-label="Główna nawigacja">
+      <button id="sound-toggle" class="icon-button" type="button" aria-label="Włącz dźwięki" aria-pressed="false">♪</button>
+      <a id="nav-login" class="small-link" href="#logowanie">Zaloguj się</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="menu" class="hero screen" aria-labelledby="hero-title">
+      <div class="city-art" aria-hidden="true">
+        <div class="sun"></div><div class="skyline"></div><div class="river"></div>
+        <div class="tram">9 <span>▰ ▰ ▰</span></div>
+      </div>
+      <div class="intro">
+        <p class="eyebrow">WARSZAWA PO GODZINACH</p>
+        <h1 id="hero-title">Twoje miasto.<br><em>Twój styl.</em></h1>
+        <p class="lead">Stwórz postać, spotkaj znajomych i odkrywaj miejsca inspirowane Warszawą. Pierwsza dzielnica Alcary już czeka.</p>
+        <div class="actions">
+          <a class="button primary" href="#rejestracja">Załóż konto</a>
+          <a class="button" href="#logowanie">Zaloguj się</a>
+          <button id="guest-button" class="text-button" type="button">Zagraj jako gość</button>
+        </div>
+        <ul class="feature-list" aria-label="Funkcje prototypu"><li>Własna postać</li><li>4 lokacje</li><li>Minigra tramwajowa</li></ul>
+      </div>
+    </section>
+
+    <section id="konto" class="auth-card screen" hidden aria-labelledby="auth-title">
+      <a href="#menu" class="back">← Menu główne</a>
+      <p class="eyebrow dark">ALCARA ID</p>
+      <h1 id="auth-title" tabindex="-1"></h1>
+      <form id="auth" method="post">
+        <label>E-mail<input id="email" name="email" type="email" autocomplete="email" required></label>
+        <label>Hasło<input id="password" name="password" type="password" autocomplete="current-password" required></label>
+        <button class="button primary wide" id="submit" type="submit" disabled></button>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <a id="auth-switch" class="switch-link"></a>
+      <button id="account-play" class="button primary wide" type="button" hidden>Wejdź do miasta</button>
+      <button id="logout" class="button wide" type="button" hidden>Wyloguj się</button>
+    </section>
+
+    <section id="gra" class="game screen" hidden aria-labelledby="game-title">
+      <div class="game-head">
+        <button id="profile-button" class="player-chip" type="button" aria-label="Edytuj postać">
+          <span id="mini-avatar" class="mini-avatar" aria-hidden="true"></span>
+          <span><b id="player-name">Nowa osoba</b><small id="player-level">Poziom 1</small></span>
+        </button>
+        <div class="wallet" aria-label="Stan konta"><span title="Monety"><b>◉</b> <strong id="coins">0</strong></span><span title="Punkty doświadczenia"><b>✦</b> <strong id="xp">0</strong></span></div>
+      </div>
+
+      <div class="game-layout">
+        <aside class="map-card" aria-labelledby="game-title">
+          <div><p class="eyebrow dark">DZIELNICA ŚRÓDMIEŚCIE</p><h1 id="game-title">Mapa miasta</h1></div>
+          <div class="city-map" role="navigation" aria-label="Lokacje w mieście">
+            <div class="map-lines" aria-hidden="true"></div>
+            <button class="place place-a active" data-location="plac" type="button"><span>☀</span> Plac Iskier</button>
+            <button class="place place-b" data-location="bulwary" type="button"><span>≈</span> Bulwary</button>
+            <button class="place place-c" data-location="metro" type="button"><span>Ⓜ</span> Metro Centrum</button>
+            <button class="place place-d" data-location="neon" type="button"><span>✧</span> Neonownia</button>
+          </div>
+          <button id="daily-button" class="daily-card" type="button"><span>Dzisiejsza iskra</span><strong>Odbierz 25 ◉</strong></button>
+        </aside>
+
+        <section class="location-card" aria-live="polite">
+          <div class="location-scene" id="location-scene" aria-hidden="true">
+            <div class="scene-cloud cloud-one"></div><div class="scene-cloud cloud-two"></div>
+            <div class="scene-buildings"></div><div id="scene-avatar" class="scene-avatar"></div>
+          </div>
+          <div class="location-copy">
+            <p id="location-kicker" class="eyebrow dark">SERCE DZIELNICY</p>
+            <h2 id="location-title">Plac Iskier</h2>
+            <p id="location-description">Tu zaczyna się każda dobra historia. Zajrzyj do kiosku, popraw styl i ruszaj w miasto.</p>
+            <div id="location-actions" class="location-actions"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="creator" class="creator">
+    <form id="creator-form" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow dark">STUDIO POSTACI</p><h2>Stwórz swój styl</h2></div><button class="close-button" value="cancel" aria-label="Zamknij">×</button></div>
+      <div class="creator-grid">
+        <div class="avatar-stage"><div id="avatar-preview" class="avatar large" aria-label="Podgląd postaci"></div></div>
+        <div class="creator-controls">
+          <label>Pseudonim<input id="nickname" maxlength="18" autocomplete="nickname" required></label>
+          <fieldset><legend>Odcień skóry</legend><div id="skin-options" class="swatches"></div></fieldset>
+          <fieldset><legend>Fryzura</legend><div id="hair-options" class="choices"></div></fieldset>
+          <fieldset><legend>Kolor stroju</legend><div id="outfit-options" class="swatches"></div></fieldset>
+        </div>
+      </div>
+      <div class="dialog-actions"><button id="save-character" class="button primary" value="default">Zapisz postać</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="tram-game" class="tram-dialog">
+    <div class="dialog-head"><div><p class="eyebrow dark">LINIA 9</p><h2>Łap bilety!</h2></div><button id="close-tram" class="close-button" type="button" aria-label="Zamknij">×</button></div>
+    <p>Klikaj bilety, zanim tramwaj dojedzie do pętli. Każdy bilet daje 3 monety.</p>
+    <div class="challenge-meta"><strong id="tram-time">15 s</strong><span>Wynik: <b id="tram-score">0</b></span></div>
+    <div id="ticket-board" class="ticket-board"><button id="ticket" type="button" aria-label="Złap bilet">▰</button></div>
+    <button id="start-tram" class="button primary wide" type="button">Start</button>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <footer><span>ALCARA • PIERWSZY PROTOTYP</span><span>52°13′N · 21°00′E</span></footer>
 </body>
 </html>
-
