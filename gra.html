@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alcara — Warszawa po godzinach</title>
+<link rel="stylesheet" href="gra/style.css">
+<script defer src="gra/config.js"></script>
+<script defer src="gra/app.js"></script>
+</head>
+<body>
+<header class="top"><a class="brand" href="#menu">✦ ALCARA</a><a id="nav-login" href="#logowanie">Zaloguj się</a></header>
+<main>
+<section id="menu" class="hero">
+  <div class="city" aria-hidden="true"><div class="sun"></div><div class="skyline"></div><div class="river"></div><div class="tram">▰ ▰ ▰</div></div>
+  <div class="intro">
+    <p class="eyebrow">WARSZAWA PO GODZINACH</p>
+    <h1>Twoje miasto.<br><em>Twój styl.</em></h1>
+    <p>Witaj w Alcarze, świecie 2D inspirowanym warszawskimi neonami, nocnymi tramwajami i grami, do których wracało się po szkole.</p>
+    <div class="actions"><a class="button primary" href="#rejestracja">Załóż konto</a><a class="button" href="#logowanie">Zaloguj się</a></div>
+  </div>
+</section>
+<section id="konto" class="card" hidden>
+  <a href="#menu" class="back">← Menu główne</a>
+  <h1 id="title" tabindex="-1"></h1>
+  <form id="auth" method="post">
+    <label>E-mail<input id="email" name="email" type="email" autocomplete="email" required></label>
+    <label>Hasło<input id="password" name="password" type="password" autocomplete="current-password" required></label>
+    <button class="button primary" id="submit" disabled></button>
+  </form>
+  <p id="status" role="status" aria-live="polite"></p>
+  <a id="switch"></a>
+  <button id="logout" class="button" hidden>Wyloguj się</button>
+</section>
+</main>
+<footer><span>ALCARA • PROTOTYP</span><span>52°13′N · 21°00′E</span></footer>
+</body>
+</html>
+

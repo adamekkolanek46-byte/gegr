@@ -1,0 +1,32 @@
+/* Oprawa prototypu Alcary. */
+:root{color-scheme:light;--ink:#172c36;--paper:#fff4dc;--mint:#b9efc9;--orange:#ffb868;--night:#142b39}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100svh;display:flex;flex-direction:column;color:var(--paper);background:var(--night);font:1rem/1.55 system-ui,sans-serif}
+a{color:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #f78f53;outline-offset:4px}
+.top,footer{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem clamp(1rem,6vw,6rem)}
+.top{border-bottom:1px solid #526668}.brand{text-decoration:none;letter-spacing:.22em;font-weight:950;color:var(--mint)}
+main{flex:1;display:grid;place-items:center;padding:clamp(1rem,4vw,4rem)}
+.hero{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;width:min(100%,75rem);min-height:34rem;border:2px solid #557279;border-radius:1.6rem;background:#294a53;box-shadow:0 1rem 0 #0d202b}
+.intro{z-index:1;max-width:38rem;padding:clamp(1.4rem,6vw,5rem);background:linear-gradient(90deg,#213d47 65%,transparent)}
+.eyebrow,footer{letter-spacing:.15em;font-size:.75rem;font-weight:800;color:var(--mint)}
+h1{font-size:clamp(2.7rem,7vw,5.8rem);font-weight:950;line-height:.99;letter-spacing:-.065em;margin:.35em 0}
+em{color:var(--orange);font-style:normal}.intro p:not(.eyebrow){max-width:30ch}
+.actions{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.6rem}
+.button{display:inline-block;border:2px solid currentColor;border-radius:.7rem;padding:.65rem 1rem;color:inherit;background:transparent;text-decoration:none;font:inherit;font-weight:800;cursor:pointer}
+.primary{background:var(--orange);border-color:#532b23;color:#35211e;box-shadow:0 4px 0 #532b23}
+.button:hover:not(:disabled){transform:translateY(-2px)}.button:disabled{opacity:.62;cursor:default}
+.city{position:absolute;inset:0 0 0 34%;z-index:-1;background:linear-gradient(#316879,#e99d79 72%,#f2bd87)}
+.sun{position:absolute;width:32%;aspect-ratio:1;right:13%;top:12%;border-radius:50%;background:#ffcf87;box-shadow:0 0 0 15px #ffcf872e}
+.skyline{position:absolute;inset:10% 0 20%;background:repeating-linear-gradient(90deg,#243f48 0 16px,#365560 16px 18px);clip-path:polygon(0 100%,0 78%,8% 78%,8% 65%,16% 65%,16% 82%,25% 82%,25% 53%,33% 53%,33% 75%,43% 75%,43% 62%,51% 62%,51% 45%,56% 45%,56% 33%,60% 33%,61% 9%,62% 33%,66% 33%,66% 45%,71% 45%,71% 62%,78% 62%,78% 83%,86% 83%,86% 64%,94% 64%,94% 53%,100% 53%,100% 100%)}
+.river{position:absolute;inset:80% 0 0;background:repeating-linear-gradient(176deg,#315863 0 9px,#487885 10px 12px)}
+.tram{position:absolute;bottom:17%;right:12%;padding:.1rem .8rem;border-radius:.5rem .7rem .2rem .2rem;color:#304451;background:#ffcc77;border-bottom:8px solid #a8463f;box-shadow:0 5px 0 #26353f;font-weight:900}
+.card{width:min(100%,29rem);padding:clamp(1.4rem,5vw,2.7rem);background:var(--paper);color:var(--ink);border-radius:1.5rem;box-shadow:0 .65rem 0 #081e29}
+.card h1{font-size:clamp(2.45rem,6vw,3.6rem)}form,label{display:grid;gap:.45rem}form{gap:1rem}label{font-weight:700}
+input{width:100%;font:inherit;padding:.65rem;border:2px solid #72868a;border-radius:.55rem;background:white;color:var(--ink)}
+#status:empty{display:none}#switch,#logout{margin-top:1rem;display:inline-block}
+.hero,.card{animation:appear .22s ease-out}@keyframes appear{from{opacity:0;transform:translateY(6px)}}
+@media(max-width:650px){.hero{align-items:end;min-height:34rem}.city{inset:0 0 44%}.intro{width:100%;max-width:none;background:linear-gradient(transparent,#213d47 20%);padding-top:3rem}.intro p:not(.eyebrow){max-width:38ch}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+
