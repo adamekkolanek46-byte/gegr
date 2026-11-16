@@ -3917,25 +3917,25 @@ function logOut () {
 window.maleBodyPositionFolder = 'body_front_swaying'
 window.femaleBodyPositionFolder = 'body_front_hand-on-hip'
 
-const femaleHead = fetch('/layer/female/head_front_default/layers.json')
+const femaleHead = fetch('layer/female/head_front_default/layers.json')
 .then(function (res) {
   return res.json()
 })
 .catch(console.error)
 
-const femaleBody = fetch('/layer/female/' + window.femaleBodyPositionFolder + '/layers.json')
+const femaleBody = fetch('layer/female/' + window.femaleBodyPositionFolder + '/layers.json')
 .then(function (res) {
   return res.json()
 })
 .catch(console.error)
 
-const maleHead = fetch('/layer/male/head_front_default/layers.json')
+const maleHead = fetch('layer/male/head_front_default/layers.json')
 .then(function (res) {
   return res.json()
 })
 .catch(console.error)
 
-const maleBody = fetch('/layer/male/' + window.maleBodyPositionFolder + '/layers.json')
+const maleBody = fetch('layer/male/' + window.maleBodyPositionFolder + '/layers.json')
 .then(function (res) {
   return res.json()
 })
@@ -4545,6 +4545,7 @@ function fromPrefixGetFormSection (prefix) {
 
 function startup () {
   var choices
+  var hasSavedCharacter = Boolean(hash.get('sex'))
 
   // TODO replace "c" variable with currentCharacter variable
   if (currentUser && currentUser.cc && currentUser.cc.personnages && currentUser.cc.personnageActuel) {
@@ -4555,7 +4556,14 @@ function startup () {
   window.c = new Character(choices)
 
   interpretHash()
-  showTutorial('sex')
+  // The original creator opens on two empty silhouettes and waits for a click.
+  // In the game iframe that looked like a broken, blank creator. Start with a
+  // complete editable character instead; every layer can still be replaced.
+  if (!hasSavedCharacter) {
+    setTimeout(function () {
+      createDecentRandomCharacter()
+    }, 120)
+  }
 }
 
 function launch () {
