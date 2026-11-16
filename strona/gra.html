@@ -4,22 +4,57 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zauroczeni ♡</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap');
+:root{--berry:#8d285d;--ink:#31233a;--cream:#fff9f3;--pink:#f4bfd4;--line:#ffffff8c}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at top,#714268,#21182c 76%);color:#452842;font:16px Verdana,sans-serif}
-main{width:min(100%,760px);background:#fff0f5;border:4px solid #b96b95;border-radius:18px;box-shadow:0 12px 40px #0007;overflow:hidden}
-header{padding:14px 24px;color:white;background:linear-gradient(#a8467d,#673157);font-weight:bold}
-section{padding:clamp(15px,5vw,38px)}h1{font: bold clamp(38px,10vw,82px) Georgia;margin:0;color:#8a2d63;text-shadow:2px 3px white}h2,p{margin:0 0 15px}p{line-height:1.6}
-button,input,select{font:inherit;border:1px solid #a86489;border-radius:7px;padding:9px 12px;color:inherit}
-button{background:linear-gradient(white,#f7c9df);cursor:pointer;font-weight:bold;margin:3px}button:hover{background:#ffd9ec}button:disabled{opacity:.55;cursor:default}
-:focus-visible{outline:3px solid #753a8c;outline-offset:3px}
-label{display:grid;gap:4px;margin-bottom:10px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
-.stage{background:linear-gradient(#d6bada,#fff0df);border:1px solid #d4a7c5;border-radius:12px;text-align:center;padding:10px;margin-bottom:16px}
-.stage svg,.stage img{height:145px;max-width:100%;object-fit:contain}
-.card{padding:14px;background:#fff9fc;border:1px solid #dfb1cc;border-radius:10px}
-.actions{display:flex;flex-wrap:wrap;margin-top:12px}small{display:block;margin-top:8px}
-.map{background:linear-gradient(110deg,#f7dce8 61%,#b8dfff 62% 72%,#e8d9f2 73%);padding:14px;border-radius:10px}
+html,body{min-height:100%}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:clamp(8px,2vw,22px);overflow-x:hidden;background:#21142d;color:var(--ink);font:16px 'DM Sans',sans-serif}
+body:before{content:"";position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 18% 15%,#b14a79 0,transparent 28%),radial-gradient(circle at 84% 85%,#574699 0,transparent 30%),linear-gradient(145deg,#381d3d,#171526)}
+body:after{content:"";position:fixed;inset:0;z-index:-1;opacity:.16;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:22px 22px}
+main{position:relative;width:min(1180px,100%);height:min(760px,calc(100vh - 32px));min-height:650px;overflow:hidden;border:1px solid #ffffff59;border-radius:28px;background:#f8d8e5;box-shadow:0 26px 80px #07030b99,0 0 0 8px #ffffff0d}
+header{position:absolute;z-index:30;top:0;left:0;right:0;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;color:#fff;background:linear-gradient(180deg,#3c213ecf,#3c213e00);pointer-events:none}
+header strong{font:800 22px 'Playfair Display',serif;letter-spacing:.5px}header span{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+#screen{position:relative;height:100%;padding:72px clamp(18px,4vw,52px) 28px;overflow:auto;background-position:center;background-size:cover;isolation:isolate;transition:background .35s ease}
+#screen:before{content:"";position:absolute;inset:0;z-index:-3;background:linear-gradient(155deg,#f6d5df,#dcb9d8 50%,#9b85b9)}
+#screen.menu-bg:before{background:linear-gradient(#ffcbd6 0 50%,#e6839f 50%)}
+#screen.school-bg:before{background:linear-gradient(#92cce8 0 43%,#dae3e5 43% 49%,#b66f65 49% 64%,#777b91 64% 66%,#afbac4 66%)}
+#screen.mall-bg:before{background:linear-gradient(145deg,#bed7e5,#f4e7df 45%,#e7af91 46% 56%,#535966 57%)}
+#screen.park-bg:before{background:linear-gradient(#93cae3 0 45%,#bfd99c 45% 63%,#75974d 63%)}
+#screen.river-bg:before{background:linear-gradient(#f1b2c5 0 45%,#bba2ca 45% 53%,#658fa9 53% 72%,#7b8593 72%)}
+#screen.home-bg:before{background:linear-gradient(135deg,#8a5f77 0 36%,#d6a981 36% 58%,#6f495e 58%)}
+#screen:after{content:"";position:absolute;z-index:-2;inset:0;background:linear-gradient(180deg,#23112622 0 55%,#231126a6)}
+#screen.menu-bg:after{background:linear-gradient(100deg,#fff8f5ed 0 45%,transparent 72%),linear-gradient(0deg,#35102c8c,transparent 42%)}
+#screen.map-bg:after{background:linear-gradient(#fff9f4e8,#f9e4efe8)}
+h1{max-width:600px;margin:70px 0 8px;font:800 clamp(58px,9vw,118px)/.86 'Playfair Display',serif;color:#8d285d;letter-spacing:-.06em;text-shadow:0 4px #fff,0 8px 18px #6b315b29}
+h2{font:800 clamp(28px,4vw,48px)/1 'Playfair Display',serif;margin:0 0 14px;color:#65234d}p{max-width:700px;margin:0 0 16px;line-height:1.55}
+button,input,select{font:inherit;border:0;border-radius:14px;padding:12px 16px;color:var(--ink)}
+button{position:relative;background:linear-gradient(180deg,#fff,#f7d6e5);box-shadow:0 6px 16px #50244229,inset 0 0 0 1px #a44c7661;cursor:pointer;font-weight:700;margin:4px;transition:transform .18s,box-shadow .18s,filter .18s}
+button:hover{transform:translateY(-2px);box-shadow:0 10px 20px #5024423d,inset 0 0 0 1px #a44c76}button:active{transform:translateY(0)}button:disabled{opacity:.5;filter:grayscale(.5);cursor:default;transform:none}
+:focus-visible{outline:3px solid #fbda5e;outline-offset:3px}
+label{display:grid;gap:6px;margin-bottom:14px;font-weight:700}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px}
+.hero-copy{position:relative;z-index:2;max-width:620px}.eyebrow{display:inline-flex;padding:7px 12px;border-radius:999px;background:#ffffffb8;color:#7b345e;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 3px 12px #542b4b21}
+.menu-actions{display:grid;width:min(330px,100%);gap:7px;margin-top:28px}.menu-actions button{margin:0;padding:15px 20px;text-align:left;font-size:17px}.menu-actions button:first-child{color:white;background:linear-gradient(135deg,#a8376c,#712653);box-shadow:0 12px 24px #7d2f5766}
+.skyline{position:absolute;z-index:-1;right:0;bottom:0;width:58%;height:72%;opacity:.92;filter:drop-shadow(0 20px 20px #3d163a42)}
+.cast-strip{position:absolute;right:3%;bottom:0;width:min(55%,560px);display:flex;align-items:flex-end;justify-content:center;gap:-12px;pointer-events:none}.cast-strip .mini-person{width:24%;margin-left:-5%;filter:drop-shadow(0 12px 8px #47193440)}.cast-strip .mini-person:nth-child(2){width:28%;z-index:2}.cast-strip .mini-person:nth-child(3){width:25%}
+.stage{position:relative;min-height:370px;display:flex;align-items:flex-end;justify-content:center;margin:-20px auto 0;overflow:visible;background:none;border:0}.stage svg,.stage img{height:min(54vh,500px);max-width:100%;object-fit:contain;filter:drop-shadow(0 22px 18px #26112469)}
+.stage:after{content:"";position:absolute;bottom:5px;width:220px;height:22px;border-radius:50%;z-index:-1;background:#32152d42;filter:blur(10px)}
+.vn-layout{min-height:100%;display:grid;grid-template-columns:minmax(260px,.75fr) minmax(380px,1.25fr);align-items:end;gap:20px}
+.vn-panel{align-self:end;margin-bottom:44px;padding:24px 26px;border:1px solid #ffffff9c;border-radius:24px;background:#fff9f3e8;box-shadow:0 20px 50px #31132c57;backdrop-filter:blur(14px)}
+.speaker{display:inline-flex;margin:-52px 0 13px;padding:8px 18px;border-radius:999px;background:linear-gradient(135deg,#a8376c,#6c2853);color:white;font:800 19px 'Playfair Display',serif;box-shadow:0 8px 18px #601e4b66}
+.choices{display:grid;gap:7px}.choices button{margin:0;text-align:left;padding:13px 16px}.choices button:before{content:"♡";margin-right:9px;color:#b33570}
+.card{padding:18px;background:#fff9f4e3;border:1px solid #fff;border-radius:18px;box-shadow:0 12px 25px #6537571f;backdrop-filter:blur(8px)}
+.actions{position:relative;z-index:5;display:flex;flex-wrap:wrap;margin-top:14px}.actions button{padding:9px 13px;font-size:13px}small{display:block;margin-top:8px;color:#76536e}
+.map-shell{position:relative;min-height:510px;padding:30px;border-radius:28px;overflow:hidden;background:#f7e7de;box-shadow:inset 0 0 0 1px #c391a5,0 18px 50px #54254233}
+.map-shell:before{content:"";position:absolute;inset:0;opacity:.6;background:linear-gradient(68deg,transparent 20%,#fff 21% 24%,transparent 25% 62%,#fff 63% 66%,transparent 67%),linear-gradient(20deg,transparent 39%,#c1d8dd 40% 47%,transparent 48%),radial-gradient(circle at 38% 45%,#c9dfb5 0 11%,transparent 12%),#edcfbf}
+.map-title{position:relative}.map{position:relative;min-height:390px}.map .card{position:absolute;width:210px;padding:10px}.map .card:nth-child(1){left:7%;top:12%}.map .card:nth-child(2){left:39%;top:4%}.map .card:nth-child(3){right:5%;top:27%}.map .card:nth-child(4){left:30%;bottom:4%}.map .card:nth-child(5){right:10%;bottom:2%}.map .card button{width:100%;margin:0}.map-pin{display:block;margin:-34px auto 5px;width:46px;height:46px;line-height:42px;text-align:center;border:3px solid white;border-radius:50% 50% 50% 8px;transform:rotate(-45deg);background:#9c3064;color:white;font-size:20px;box-shadow:0 5px 12px #5d294d4d}.map-pin span{display:block;transform:rotate(45deg)}
+.location-panel{max-width:580px;margin:13vh 0 0;padding:28px;border-radius:24px;background:#fff9f3e8;box-shadow:0 20px 50px #2a152b59;backdrop-filter:blur(14px)}
+.location-cast{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0}.location-cast button{margin:0}.progress{height:9px;margin-top:12px;overflow:hidden;border-radius:99px;background:#dbbdcb}.progress i{display:block;height:100%;background:linear-gradient(90deg,#b03e72,#7e4ba2);border-radius:inherit}
+.creator{width:min(900px,100%);margin:2vh auto;padding:26px;border-radius:28px;background:#fff9f3e8;box-shadow:0 20px 60px #32152852;backdrop-filter:blur(15px)}.creator .stage{min-height:360px}.creator-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}.creator-fields{padding:20px}.creator-fields input,.creator-fields select{width:100%;background:#fff;border:1px solid #c69bad;box-shadow:inset 0 2px 5px #4f214b12}
+.relations-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.relation-head{display:flex;align-items:center;gap:11px}.avatar{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:white;font-weight:800;border:3px solid white;box-shadow:0 4px 10px #0002}.heart-meter{height:8px;margin-top:12px;border-radius:99px;background:#ead0dc;overflow:hidden}.heart-meter i{display:block;height:100%;background:linear-gradient(90deg,#df6a9c,#9c2860)}
+.toast{position:absolute;z-index:20;right:20px;top:66px;padding:9px 14px;border-radius:999px;background:#2d2134d9;color:white;font-size:12px}
+@media(max-width:760px){body{padding:0}main{height:100vh;min-height:640px;border-radius:0;border:0}.vn-layout{display:block;padding-top:170px}.vn-layout .stage{position:absolute;top:70px;left:0;right:0;height:330px;min-height:0}.vn-layout .stage svg,.vn-layout .stage img{height:320px}.vn-panel{position:relative;margin:220px 0 20px;padding:20px}.cast-strip{right:-15%;width:85%;opacity:.55}.skyline{width:90%;height:55%}.map-shell{padding:20px 12px;min-height:560px}.map{display:grid;gap:12px;min-height:0}.map .card{position:relative!important;inset:auto!important;width:auto}.map-pin{display:none}.creator{padding:16px}.creator-grid{grid-template-columns:1fr}.creator .stage{min-height:240px}.creator .stage svg{height:250px}.creator-fields{padding:0}.location-panel{margin-top:10vh}h1{margin-top:80px}}
 </style>
-<main><header>♡ Zauroczeni</header><section id="screen"></section></main>
+<main><header><strong>♡ Zauroczeni</strong><span>Warszawa · odcinek 1</span></header><section id="screen"></section></main>
 <script>
 "use strict";
 const screen = document.querySelector("#screen");
@@ -62,7 +97,31 @@ function button(text,action,parent=screen){
  control.addEventListener("click",action);
  return control;
 }
-function reset(){screen.replaceChildren();}
+function reset(){
+ screen.replaceChildren();
+ screen.className="";
+}
+function backdrop(name){ screen.className=name+"-bg"; }
+function characterSvg(person){
+ const hair=[
+  '<path d="M57 32Q78 10 101 31Q94 14 76 13Q60 14 57 32" fill="#3b2638"/>',
+  '<path d="M55 37Q54 9 80 8Q105 10 103 39L94 28Q77 31 61 23Z" fill="#35243b"/>',
+  '<path d="M52 47Q45 10 79 7Q113 9 107 54L99 39Q94 68 100 82Q72 70 55 82Q61 61 57 38Z" fill="#4a293b"/>'
+ ][person.hair] || "";
+ return `<svg class="character-art" viewBox="0 0 160 310" aria-hidden="true">
+  <defs><linearGradient id="shirt-${person.color.slice(1)}" x2="0" y2="1"><stop stop-color="${person.color}"/><stop offset="1" stop-color="#3c2742"/></linearGradient></defs>
+  <path d="M47 295Q42 239 57 191H101Q118 241 112 295" fill="#322b48" stroke="#241d31" stroke-width="5"/>
+  <path d="M54 190L33 268M103 190l28 78" fill="none" stroke="#ffd7bd" stroke-width="17" stroke-linecap="round"/>
+  <path d="M47 295L34 306M112 295l16 11" fill="none" stroke="#241d31" stroke-width="11" stroke-linecap="round"/>
+  <path d="M48 104Q38 137 45 199Q77 213 111 198Q117 140 105 104Z" fill="url(#shirt-${person.color.slice(1)})" stroke="#33213a" stroke-width="4"/>
+  <path d="M58 108Q78 132 97 108" fill="none" stroke="#fff5" stroke-width="4"/>
+  <circle cx="80" cy="62" r="43" fill="#ffd7bd" stroke="#35253a" stroke-width="4"/>
+  ${hair}
+  <ellipse cx="67" cy="64" rx="4" ry="6" fill="#382638"/><ellipse cx="93" cy="64" rx="4" ry="6" fill="#382638"/>
+  <path d="M70 81Q80 89 91 80" fill="none" stroke="#9e4961" stroke-width="3" stroke-linecap="round"/>
+  <path d="M48 112Q32 120 29 147M108 113q19 8 23 34" fill="none" stroke="${person.color}" stroke-width="20" stroke-linecap="round"/>
+ </svg>`;
+}
 function portrait(person,parent){
  const stage=node("div","",parent);
  stage.className="stage";
@@ -72,32 +131,33 @@ function portrait(person,parent){
   image.alt=person.name;
   return;
  }
- stage.innerHTML=`<svg viewBox="0 0 120 150" aria-hidden="true">
-  <g stroke="#342237" stroke-width="5" stroke-linecap="round" fill="none">
-   <path d="M60 98l-23 39m23-39 23 39M58 62 28 85m34-23 30 23"/>
-   <rect x="48" y="57" width="24" height="45" rx="8" fill="${person.color}"/>
-   <circle cx="60" cy="34" r="23" fill="#ffdfc7"/>
-   ${['','<path d="M43 22Q63 4 77 22"/>','<path d="M38 43Q29 6 62 10Q91 13 82 45"/>'][person.hair]}
-  </g>
-  <circle cx="52" cy="34" r="2"/><circle cx="68" cy="34" r="2"/>
-  <path d="M55 42q5 6 10 0" fill="none" stroke="#342237" stroke-width="2"/>
- </svg>`;
+ stage.innerHTML=characterSvg(person);
 }
 function menu(){
  reset();
- node("h1","Zauroczeni ♡");
- node("p","Warszawa. Pierwszy dzień w nowym liceum.");
- button("Nowa gra",creator);
- const resume=button("Kontynuuj",()=>{state=load() || state; play();});
+ backdrop("menu");
+ const copy=node("div",""); copy.className="hero-copy";
+ const label=node("span","Romantyczna visual novel",copy); label.className="eyebrow";
+ node("h1","Zauroczeni",copy);
+ node("p","Nowa szkoła. Siedem znajomości. Jedna Warszawa pełna sekretów.",copy);
+ const actions=node("div","",copy); actions.className="menu-actions";
+ button("▶  Nowa gra",creator,actions);
+ const resume=button("♡  Kontynuuj historię",()=>{state=load() || state; play();},actions);
  resume.disabled=!(load() || state);
+ const skyline=node("div",""); skyline.className="skyline";
+ skyline.innerHTML='<svg viewBox="0 0 600 430" preserveAspectRatio="none" aria-hidden="true"><path d="M0 430V270h57v-64h45v49h39v-98h54v113h42V95h22V54h18V95h23v174h48V196h62v74h38V146h55v124h58v-83h59v243Z" fill="#724265"/><path d="M259 55h18M251 109h34M250 130h35M250 151h35M250 172h35" stroke="#ffd8e7" stroke-width="5"/><circle cx="490" cy="70" r="44" fill="#fff3bc" opacity=".75"/></svg>';
+ const cast=node("div",""); cast.className="cast-strip";
+ [people[1],people[0],people[5]].forEach(person=>{const art=node("div","",cast);art.className="mini-person";art.innerHTML=characterSvg(person);});
 }
 function creator(){
  reset();
- node("h2","Stwórz swoją postać");
- const form=node("form","");
- const grid=node("div","",form); grid.className="grid";
+ backdrop("home");
+ const form=node("form",""); form.className="creator";
+ const label=node("span","Kreator bohatera",form);label.className="eyebrow";
+ node("h2","To twoja historia",form);
+ const grid=node("div","",form); grid.className="creator-grid";
  const preview=node("div","",grid);
- const fields=node("div","",grid);
+ const fields=node("div","",grid);fields.className="creator-fields";
  const name=node("input","",node("label","Imię",fields));
  name.required=true; name.maxLength=24; name.autocomplete="off";
  function select(label,options){
@@ -110,8 +170,8 @@ function creator(){
  function player(){return {name:name.value.trim(),hair:Number(hair.value),color:outfit.value};}
  function update(){preview.replaceChildren(); portrait(player(),preview);}
  form.addEventListener("change",update); update();
- node("button","Zacznij odcinek",form).type="submit";
- button("Wróć",menu,form);
+ const submit=node("button","Zacznij odcinek  →",fields);submit.type="submit";
+ button("Wróć",menu,fields);
  form.addEventListener("submit",event=>{
   event.preventDefault();
   if(!name.value.trim()){name.setCustomValidity("Wpisz imię.");name.reportValidity();return;}
@@ -124,14 +184,19 @@ function creator(){
 function go(scene){state.scene=scene;save();play();}
 function play(){
  reset();
- node("small","Odcinek 1 · Nowy początek · "+state.player.name);
- if(storageError) node("p","Przeglądarka blokuje zapis. Postęp jest dostępny do zamknięcia strony.");
+ const placeIndex=Number.isInteger(state.location)?state.location:0;
+ const backgrounds=["school","school","mall","park","river","home"];
+ backdrop(state.scene==="map"?"map":backgrounds[placeIndex] || "school");
+ if(storageError){const warning=node("div","Zapis jest dostępny do zamknięcia strony.");warning.className="toast";}
  switch(state.scene){
   case "intro":
-   portrait(state.player,screen);
-   node("h2","Pierwszy dzwonek");
-   node("p","Na wejściu do liceum dostajesz plan lekcji i zaproszenie na próbę szkolnego radia. Do końca dnia chcesz poznać klasę i odkryć, kto schował twoje zgłoszenie.");
-   button("Otwórz mapę Warszawy",()=>go("map"));
+   const layout=node("div","");layout.className="vn-layout";
+   portrait(state.player,layout);
+   const panel=node("div","",layout);panel.className="vn-panel";
+   const speaker=node("span",state.player.name,panel);speaker.className="speaker";
+   node("h2","Pierwszy dzwonek",panel);
+   node("p","Na wejściu do liceum dostajesz plan lekcji i zaproszenie na próbę szkolnego radia. Do końca dnia chcesz poznać klasę i odkryć, kto schował twoje zgłoszenie.",panel);
+   button("Otwórz mapę Warszawy  →",()=>go("map"),panel);
    break;
   case "map": showMap(); break;
   case "location": showLocation(); break;
@@ -139,15 +204,21 @@ function play(){
   case "evening": showEvening(); break;
   case "ending": showEnding(); break;
  }
- const nav=node("div","");nav.className="actions";
- button("Relacje",relations,nav);
- button("Menu główne",menu,nav);
+ if(state.scene!=="intro"){
+  const nav=node("div","");nav.className="actions";
+  button("♡ Relacje",relations,nav);
+  button("⌂ Menu główne",menu,nav);
+ }
 }
 function showMap(){
- node("h2","Mapa Warszawy");
- const map=node("div","");map.className="map grid";
+ const shell=node("div","");shell.className="map-shell";
+ const title=node("div","",shell);title.className="map-title";
+ const label=node("span","Wybierz cel podróży",title);label.className="eyebrow";
+ node("h2","Mapa Warszawy",title);
+ const map=node("div","",shell);map.className="map";
  locations.forEach((place,index)=>{
   const card=node("div","",map);card.className="card";
+  const pin=node("span","",card);pin.className="map-pin";pin.innerHTML="<span>"+["🏫","★","✿","≈","⌂"][index]+"</span>";
   const travel=button(place.name,()=>{state.location=index;go("location");},card);
   travel.disabled=index>0&&index<4&&!state.seen[0];
   if(travel.disabled) node("small","Najpierw porozmawiaj z Martyną w liceum.",card);
@@ -156,55 +227,79 @@ function showMap(){
 }
 function showLocation(){
  const place=locations[state.location];
- node("h2",place.name);node("p",place.detail);
+ const panel=node("div","");panel.className="location-panel";
+ const label=node("span","Teraz jesteś tutaj",panel);label.className="eyebrow";
+ node("h2",place.name,panel);node("p",place.detail,panel);
+ const cast=node("div","",panel);cast.className="location-cast";
  place.cast.forEach(id=>{
-  const talk=button(people[id].name+(state.seen[id]?" ✓":""),()=>{state.speaker=id;go("dialogue");});
+  const talk=button((state.seen[id]?"✓ ":"♡ ")+people[id].name,()=>{state.speaker=id;go("dialogue");},cast);
   talk.disabled=state.seen[id];
  });
  if(!place.cast.length){
-  button("Zakończ pierwszy dzień",()=>go("evening")).disabled=!state.seen.every(Boolean);
+  button("Zakończ pierwszy dzień",()=>go("evening"),panel).disabled=!state.seen.every(Boolean);
  }
- button("Wróć na mapę",()=>go("map"));
+ const done=state.seen.filter(Boolean).length;
+ const progress=node("div","",panel);progress.className="progress";progress.innerHTML='<i style="width:'+(done/people.length*100)+'%"></i>';
+ node("small","Poznane osoby: "+done+" / "+people.length,panel);
+ button("← Wróć na mapę",()=>go("map"),panel);
 }
 function showDialogue(){
  const id=state.speaker, person=people[id];
- portrait(person,screen);node("h2",person.name);node("p",person.intro);
+ const layout=node("div","");layout.className="vn-layout";
+ portrait(person,layout);
+ const panel=node("div","",layout);panel.className="vn-panel";
+ const speaker=node("span",person.name,panel);speaker.className="speaker";
+ node("p",person.intro,panel);
+ const choices=node("div","",panel);choices.className="choices";
  const answers=[[person.kind,35],["Możemy porozmawiać o tym później.",10],["Nie chcę się w to mieszać.",-20]];
  answers.forEach(([line,score])=>button(line,()=>{
   state.scores[id]=score;state.seen[id]=true;go("location");
- }));
- button("Wróć do lokacji",()=>go("location"));
+ },choices));
+ button("← Wróć do lokacji",()=>go("location"),panel);
 }
 function showEvening(){
- node("h2","Wiadomość wieczorem");
- node("p","Kogo chcesz zaprosić na spotkanie? Możesz wybrać osobę, z którą masz co najmniej 35 punktów sympatii.");
+ const panel=node("div","");panel.className="location-panel";
+ const label=node("span","22:14 · nowe wiadomości",panel);label.className="eyebrow";
+ node("h2","Kto chodzi ci po głowie?",panel);
+ node("p","Zaproś na spotkanie osobę, z którą masz co najmniej 35 punktów sympatii.",panel);
  people.forEach((person,id)=>{
-  button(person.name,()=>{state.route=id;go("ending");}).disabled=state.scores[id]<35;
+  button("♡ "+person.name,()=>{state.route=id;go("ending");},panel).disabled=state.scores[id]<35;
  });
- button("Spędź wieczór po swojemu",()=>{state.route=null;go("ending");});
- button("Wróć na mapę",()=>go("map"));
+ button("Spędź wieczór po swojemu",()=>{state.route=null;go("ending");},panel);
+ button("← Wróć na mapę",()=>go("map"),panel);
 }
 function showEnding(){
  const person=people[state.route];
+ const layout=node("div","");layout.className="vn-layout";
  if(person){
-  portrait(person,screen);
-  node("h2","♡ "+person.name);
-  node("p",person.date);
+  portrait(person,layout);
+  const panel=node("div","",layout);panel.className="vn-panel";
+  const speaker=node("span","♡ "+person.name,panel);speaker.className="speaker";
+  node("p",person.date,panel);
+  node("small","Koniec pierwszego odcinka",panel);
+  button("Wróć do wyboru spotkania",()=>{state.route=null;go("evening");},panel);
  }else{
-  node("h2","Wieczór dla siebie");
-  node("p","Odkładasz telefon i patrzysz przez okno. Jutro znów odezwie się szkolny dzwonek.");
+  portrait(state.player,layout);
+  const panel=node("div","",layout);panel.className="vn-panel";
+  node("h2","Wieczór dla siebie",panel);
+  node("p","Odkładasz telefon i patrzysz przez okno. Jutro znów odezwie się szkolny dzwonek.",panel);
+  node("small","Koniec pierwszego odcinka",panel);
+  button("Wróć do wyboru spotkania",()=>{state.route=null;go("evening");},panel);
  }
- node("p","Koniec pierwszego odcinka.");
- button("Wróć do wyboru spotkania",()=>{state.route=null;go("evening");});
 }
 function relations(){
  reset();
+ backdrop("map");
+ const label=node("span","Twój notes",screen);label.className="eyebrow";
  node("h2","Relacje");
- const grid=node("div","");grid.className="grid";
+ const grid=node("div","");grid.className="relations-grid";
  people.forEach((person,id)=>{
   const card=node("div","",grid);card.className="card";
-  node("strong",person.name,card);
+  const head=node("div","",card);head.className="relation-head";
+  const avatar=node("span",person.name[0],head);avatar.className="avatar";avatar.style.background=person.color;
+  node("strong",person.name,head);
   node("small",state.seen[id]?"Sympatia "+state.scores[id]+" / 100":"Jeszcze bez rozmowy",card);
+  const meter=node("div","",card);meter.className="heart-meter";meter.innerHTML='<i style="width:'+Math.max(0,state.scores[id])+'%"></i>';
   if(state.route===id) node("small","♡ Umówione spotkanie",card);
  });
  button("Wróć do gry",play);
@@ -212,3 +307,4 @@ function relations(){
 menu();
 </script>
 </html>
+
