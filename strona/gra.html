@@ -148,7 +148,7 @@ function menu(){
  const skyline=node("div",""); skyline.className="skyline";
  skyline.innerHTML='<svg viewBox="0 0 600 430" preserveAspectRatio="none" aria-hidden="true"><path d="M0 430V270h57v-64h45v49h39v-98h54v113h42V95h22V54h18V95h23v174h48V196h62v74h38V146h55v124h58v-83h59v243Z" fill="#724265"/><path d="M259 55h18M251 109h34M250 130h35M250 151h35M250 172h35" stroke="#ffd8e7" stroke-width="5"/><circle cx="490" cy="70" r="44" fill="#fff3bc" opacity=".75"/></svg>';
  const cast=node("div",""); cast.className="cast-strip";
- [people[1],people[0],people[5]].forEach(person=>{const art=node("div","",cast);art.className="mini-person";const image=node("img","",art);image.src=person.image;image.alt="";});
+ [people[1],people[0],people[2]].forEach(person=>{const art=node("div","",cast);art.className="mini-person";const image=node("img","",art);image.src=person.image;image.alt="";});
 }
 function creator(){
  reset();
