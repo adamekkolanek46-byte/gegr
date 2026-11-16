@@ -186,14 +186,25 @@ async function ensureMainViewer() {
   if (mainViewer || !player) return;
   byId('game-loader').hidden = false;
   try {
-    const { createAvatarViewer } = await avatarModule();
-    mainViewer = await createAvatarViewer(byId('avatar-canvas'), { ...player.outfit3d, skin: player.skin, gender: player.gender, ...player.beauty });
-    byId('avatar-loading').hidden = true;
+    const { createWorld } = await import('./world3d.js');
+    mainViewer = await createWorld(byId('world-canvas'), { ...player.outfit3d, skin: player.skin, gender: player.gender, ...player.beauty }, {
+      onInteract: handleWorldInteraction,
+      onCollect: (id, coins) => claimReward(id, coins, 1, `Zebrano ${coins} StarCoins!`),
+    });
   } catch {
-    byId('avatar-loading').textContent = 'Nie udało się wczytać postaci 3D.';
+    byId('world-message').textContent = 'Nie udało się wczytać świata 3D. Odśwież stronę.';
   } finally {
     byId('game-loader').hidden = true;
   }
+}
+
+function handleWorldInteraction(action, label) {
+  byId('world-location').textContent = label;
+  if (action === 'shop') shopHub.showModal();
+  else if (action === 'clinic') openBeautyClinic();
+  else if (action === 'events') creativeHub.showModal();
+  else if (action === 'games') openTramGame();
+  else if (action === 'palace') claimReward('palace', 10, 8, 'Widok z Pałacu Kultury! +10 StarCoins');
 }
 
 async function ensureCreatorViewer() {
@@ -272,7 +283,7 @@ function renderAuth(register) {
 function renderGame() {
   if (!player) return;
   byId('player-name').textContent = player.name;
-  byId('player-level').textContent = `Poziom ${Math.floor(player.xp / 50) + 1}`;
+  byId('player-level').textContent = Math.floor(player.xp / 50) + 1;
   byId('coins').textContent = player.coins;
   byId('xp').textContent = player.xp;
   ensureMainViewer();
@@ -281,6 +292,7 @@ function renderGame() {
   byId('daily-button').disabled = claimed;
   byId('daily-button').querySelector('strong').textContent = claimed ? 'Odebrano ✓' : 'Odbierz 25 ◉';
   renderLocation(currentLocation, false);
+  byId('world-message').textContent = 'Kliknij miejsce na ulicy, aby przesunąć postać';
   if (!presenceChannel) startPresence();
 }
 
@@ -826,8 +838,8 @@ document.querySelectorAll('[data-social]').forEach((button) => button.addEventLi
   else showToast(`${button.textContent.trim()} pojawi się w kolejnym etapie.`);
 }));
 document.querySelectorAll('.friend-card:not(.add-friend)').forEach((button) => button.addEventListener('click', () => showToast(`${button.querySelector('span').textContent} jest online.`)));
-document.querySelector('.add-friend').addEventListener('click', () => showToast('Wyszukiwarka znajomych pojawi się w kolejnym etapie.'));
-document.querySelector('.mood-box').addEventListener('click', () => showToast('Status profilu: hej :3'));
+document.querySelector('.add-friend')?.addEventListener('click', () => showToast('Wyszukiwarka znajomych pojawi się w kolejnym etapie.'));
+document.querySelector('.mood-box')?.addEventListener('click', () => showToast('Status profilu: hej :3'));
 worldDialog.querySelector('.close-button').addEventListener('click', () => worldDialog.close());
 worldDialog.querySelector('.warsaw').addEventListener('click', () => { worldDialog.close(); showToast('Warszawa jest aktywnym miastem.'); });
 byId('profile-button').addEventListener('click', () => openCreator());

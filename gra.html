@@ -55,64 +55,28 @@
 
     <section id="gra" class="game screen" hidden aria-labelledby="game-title">
       <div id="game-loader" class="game-loader" hidden><div class="loader-star">★</div><strong>Ładowanie Alcary…</strong><span>Przygotowujemy postać i ubrania</span></div>
-      <div class="social-shell">
-        <header class="social-header">
-          <div class="social-logo">Alcara<span>✦</span></div>
-          <div class="currency-bar" aria-label="Waluty">
-            <span class="currency diamond">◆ <b>140</b><button type="button" aria-label="Kup diamenty">+</button></span>
-            <span class="currency coin">● <b id="coins">0</b><button type="button" aria-label="Kup monety">+</button></span>
-            <span class="level-progress"><i>12</i><span><b id="xp">0</b> / 5 200</span><progress value="0" max="5200"></progress></span>
-          </div>
-          <nav class="social-nav" aria-label="Menu gry">
-            <button class="active" data-social="home" type="button"><span>⌂</span>Start</button>
-            <button data-social="profile" type="button"><span>♟</span>Mój profil</button>
-            <button data-social="mail" type="button"><span>✉</span><i>1</i>Poczta</button>
-            <button data-social="friends" type="button"><span>♟♟</span>Znajomi</button>
-            <button data-social="shop" type="button"><span>▰</span>Sklep</button>
-            <button data-social="games" type="button"><span>🎮</span>Gry</button>
-            <button data-social="world" type="button"><span>◎</span>Świat</button>
-            <button data-social="settings" type="button" aria-label="Ustawienia"><span>⚙</span></button>
-          </nav>
-        </header>
-
-        <div class="social-body">
-          <aside class="profile-rail">
-            <button class="mood-box" type="button"><span>hej :3</span><b>✎</b></button>
-            <div class="avatar-rail">
-              <canvas id="avatar-canvas" aria-label="Interaktywna postać 3D"></canvas>
-              <span id="avatar-loading">Ładowanie postaci 3D…</span>
-            </div>
-            <button id="profile-button" class="vip-button" type="button"><span>♛</span> GARDEROBA</button>
-            <div class="player-tag"><span>12</span><b id="player-name">Nowa osoba</b><small id="player-level">Poziom 1</small></div>
-            <button id="daily-button" class="daily-card compact" type="button"><span>Dzisiejsza iskra</span><strong>+25 ◉</strong></button>
-          </aside>
-
-          <section class="city-column">
-            <h1 id="game-title" class="visually-hidden">Warszawa</h1>
-            <div class="city-board location-scene" id="location-scene" aria-label="Mapa Warszawy">
-              <button class="map-hotspot palace" data-board="palace" type="button"><span>▥</span>Pałac Kultury</button>
-              <button class="map-hotspot mall" data-board="shop" type="button"><span>▢</span>Złote Tarasy</button>
-              <button class="map-hotspot chat" data-board="chat" type="button"><span>◌</span>Chat</button>
-              <button class="map-hotspot games" data-board="games" type="button"><span>🎮</span>Gry</button>
-              <button class="map-hotspot events" data-board="events" type="button"><span>◇</span>Wydarzenia</button>
-              <button class="map-hotspot clinic" data-board="clinic" type="button"><span>✦</span>Klinika piękna</button>
-            </div>
-
-            <div id="online-list" class="friends-strip" aria-label="Gracze online">
-              <button class="friend-card" type="button"><img src="https://static.poly.pizza/46d6db5a-3c9f-4238-8cdf-8eb7194498dc.webp" alt="Julia"><span>julaax</span><b>★</b></button>
-              <button class="friend-card" type="button"><img src="https://static.poly.pizza/b8ca96a7-0aca-46b2-8b75-3a4ff404506b.jpg" alt="Martin"><span>m4rtin</span><b>★</b></button>
-              <button class="friend-card" type="button"><img src="https://static.poly.pizza/906a0cbe-b0a4-4312-b898-0f974b6f6771.jpg" alt="Oliwka"><span>olivka</span><b>☆</b></button>
-              <button class="friend-card" type="button"><img src="https://static.poly.pizza/51d5abdd-bb87-4b8d-9967-21738ffb8437.webp" alt="Kacper"><span>kacperr</span><b>★</b></button>
-              <button class="friend-card" type="button"><img src="https://static.poly.pizza/46d6db5a-3c9f-4238-8cdf-8eb7194498dc.webp" alt="Lexi"><span>lexi</span><b>☆</b></button>
-              <button class="friend-card add-friend" type="button"><strong>♟+</strong><span>Dodaj<br>znajomego</span></button>
-            </div>
-
-            <div class="location-copy visually-hidden" aria-live="polite">
-              <p id="location-kicker">WARSZAWA</p><h2 id="location-title">Start</h2>
-              <p id="location-description">Wybierz miejsce na mapie.</p><div id="location-actions"></div>
-            </div>
-          </section>
+      <div class="world-shell">
+        <canvas id="world-canvas" aria-label="Trójwymiarowy świat Alcary"></canvas>
+        <h1 id="game-title" class="visually-hidden">Alcara 3D — Warszawa</h1>
+        <div class="world-brand">ALCARA <span>✦</span><small>WARSZAWA 3D</small></div>
+        <div class="world-wallet" aria-label="Waluty i poziom">
+          <span>● <b id="coins">0</b></span><span>◆ 140</span><span>LV <b id="player-level">1</b> · <b id="xp">0</b> XP</span>
         </div>
+        <div class="world-player"><b id="player-name">Nowa osoba</b><span id="world-location">Plac Iskier</span></div>
+        <div class="world-help"><b>KLIKNIJ</b> miejsce, a postać sama tam pójdzie</div>
+        <button id="world-action" class="world-action" type="button" hidden><span>↗</span><b>Wejdź</b></button>
+        <div id="world-message" class="world-message" aria-live="polite">Kliknij miejsce na ulicy</div>
+        <nav class="world-quickbar" aria-label="Skróty gry">
+          <button id="profile-button" type="button" title="Garderoba"><span>👕</span>Szafa</button>
+          <button data-social="profile" type="button" title="Profil"><span>★</span>Profil</button>
+          <button data-social="shop" type="button" title="Sklep"><span>🛍</span>Sklep</button>
+          <button data-social="friends" type="button" title="Gracze online"><span>●</span>Online</button>
+          <button data-social="settings" type="button" title="Wyjście"><span>⚙</span>Opcje</button>
+        </nav>
+        <button id="daily-button" class="world-daily" type="button"><span>Dzienna nagroda</span><strong>+25 ●</strong></button>
+        <div id="online-list" class="world-online" aria-label="Gracze online"></div>
+        <div id="location-scene" hidden></div>
+        <div class="location-copy" hidden aria-live="polite"><p id="location-kicker">WARSZAWA</p><h2 id="location-title">Start</h2><p id="location-description"></p><div id="location-actions"></div></div>
       </div>
     </section>
   </main>
