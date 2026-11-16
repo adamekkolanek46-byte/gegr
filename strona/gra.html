@@ -16,14 +16,16 @@ header{position:absolute;z-index:30;top:0;left:0;right:0;height:58px;display:fle
 header strong{font:800 22px 'Playfair Display',serif;letter-spacing:.5px}header span{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
 #screen{position:relative;height:100%;padding:72px clamp(18px,4vw,52px) 28px;overflow:auto;background-position:center;background-size:cover;isolation:isolate;transition:background .35s ease}
 #screen:before{content:"";position:absolute;inset:0;z-index:-3;background:linear-gradient(155deg,#f6d5df,#dcb9d8 50%,#9b85b9)}
-#screen.menu-bg:before{background:linear-gradient(#ffcbd6 0 50%,#e6839f 50%)}
-#screen.school-bg:before{background:linear-gradient(#92cce8 0 43%,#dae3e5 43% 49%,#b66f65 49% 64%,#777b91 64% 66%,#afbac4 66%)}
-#screen.mall-bg:before{background:linear-gradient(145deg,#bed7e5,#f4e7df 45%,#e7af91 46% 56%,#535966 57%)}
-#screen.park-bg:before{background:linear-gradient(#93cae3 0 45%,#bfd99c 45% 63%,#75974d 63%)}
-#screen.river-bg:before{background:linear-gradient(#f1b2c5 0 45%,#bba2ca 45% 53%,#658fa9 53% 72%,#7b8593 72%)}
-#screen.home-bg:before{background:linear-gradient(135deg,#8a5f77 0 36%,#d6a981 36% 58%,#6f495e 58%)}
+#screen.menu-bg:before{background:url("assets/backgrounds/home.jpg") center/cover no-repeat}
+#screen.school-bg:before{background:url("assets/backgrounds/school.jpg") center/cover no-repeat}
+#screen.corridor-bg:before{background:url("assets/backgrounds/school-corridor.jpg") center/cover no-repeat}
+#screen.mall-bg:before{background:url("assets/backgrounds/mall.jpg") center/cover no-repeat}
+#screen.park-bg:before{background:url("assets/backgrounds/park.jpg") center/cover no-repeat}
+#screen.river-bg:before{background:url("assets/backgrounds/river.jpg") center/cover no-repeat}
+#screen.home-bg:before{background:url("assets/backgrounds/home.jpg") center/cover no-repeat}
 #screen:after{content:"";position:absolute;z-index:-2;inset:0;background:linear-gradient(180deg,#23112622 0 55%,#231126a6)}
 #screen.menu-bg:after{background:linear-gradient(100deg,#fff8f5ed 0 45%,transparent 72%),linear-gradient(0deg,#35102c8c,transparent 42%)}
+#screen.menu-bg .skyline{display:none}
 #screen.map-bg:after{background:linear-gradient(#fff9f4e8,#f9e4efe8)}
 h1{max-width:600px;margin:70px 0 8px;font:800 clamp(58px,9vw,118px)/.86 'Playfair Display',serif;color:#8d285d;letter-spacing:-.06em;text-shadow:0 4px #fff,0 8px 18px #6b315b29}
 h2{font:800 clamp(28px,4vw,48px)/1 'Playfair Display',serif;margin:0 0 14px;color:#65234d}p{max-width:700px;margin:0 0 16px;line-height:1.55}
@@ -54,7 +56,12 @@ label{display:grid;gap:6px;margin-bottom:14px;font-weight:700}.grid{display:grid
 .toast{position:absolute;z-index:20;right:20px;top:66px;padding:9px 14px;border-radius:999px;background:#2d2134d9;color:white;font-size:12px}
 .phone{width:min(760px,100%);margin:2vh auto;padding:25px;border-radius:32px;background:#f8edf3e8;box-shadow:0 25px 70px #32152866;backdrop-filter:blur(16px)}.phone-list{display:grid;gap:10px;margin:18px 0}.phone-chat{display:grid;grid-template-columns:50px 1fr auto;align-items:center;gap:12px;width:100%;margin:0;text-align:left}.phone-chat .avatar{font-size:16px}.phone-chat small{margin:2px 0 0}.interaction-badge{display:inline-flex;align-items:center;gap:6px;margin:4px;padding:7px 10px;border-radius:999px;background:#fff7;color:#783456;font-size:12px;font-weight:800}
 .story-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.story-meta .eyebrow{margin:0}.clue-counter{padding:7px 12px;border-radius:999px;background:#35243bd9;color:white;font-size:12px;font-weight:800}.chapter-card{width:min(720px,100%);margin:11vh auto 0;padding:34px;border:1px solid #ffffff9c;border-radius:28px;background:#fff9f3e8;box-shadow:0 25px 70px #2e132b66;backdrop-filter:blur(16px)}.chapter-card h2{font-size:clamp(40px,7vw,76px)}.chapter-number{font:800 13px 'DM Sans',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#9a3767}.story-progress{height:6px;margin:18px 0 0;overflow:hidden;border-radius:99px;background:#dbbdcb}.story-progress i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b03670,#7a4ba4)}.route-note{margin:14px 0;padding:14px;border-left:4px solid #a7356c;border-radius:8px;background:#fff7}
-@media(max-width:760px){body{padding:0}main{height:100vh;min-height:640px;border-radius:0;border:0}.vn-layout{display:block;padding-top:170px}.vn-layout .stage{position:absolute;top:70px;left:0;right:0;height:330px;min-height:0}.vn-layout .stage svg,.vn-layout .stage img{height:320px}.vn-panel{position:relative;margin:220px 0 20px;padding:20px}.cast-strip{right:-15%;width:85%;opacity:.55}.skyline{width:90%;height:55%}.map-shell{padding:20px 12px;min-height:560px}.map{display:grid;gap:12px;min-height:0}.map .card{position:relative!important;inset:auto!important;width:auto}.map-pin{display:none}.creator{padding:16px}.creator-grid{grid-template-columns:1fr}.creator .stage{min-height:240px}.creator .stage svg{height:250px}.creator-fields{padding:0}.location-panel{margin-top:10vh}h1{margin-top:80px}}
+.mode-panel{width:min(1050px,100%);margin:2vh auto;padding:26px;border-radius:28px;background:#fff9f3e8;box-shadow:0 25px 70px #32152866;backdrop-filter:blur(16px)}.mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.mode-card{display:flex;min-height:155px;flex-direction:column;align-items:flex-start;justify-content:space-between;margin:0;padding:20px;text-align:left}.mode-card strong{font:800 24px 'Playfair Display',serif;color:#6d2852}.mode-card small{line-height:1.45}.mode-icon{font-size:30px}.credits{max-width:850px;margin:4vh auto;padding:28px;border-radius:28px;background:#fff9f3ed;box-shadow:0 20px 60px #28112866}.credits-list{display:grid;gap:10px;margin:18px 0}.credit{padding:12px 14px;border-radius:14px;background:#fff;border:1px solid #d8b5c5}.credit a{color:#8d285d;font-weight:800}.credit small{margin:3px 0 0}
+.account-panel{width:min(620px,100%);margin:5vh auto;padding:28px;border-radius:28px;background:#fff9f3ed;box-shadow:0 25px 70px #32152866;backdrop-filter:blur(16px)}.account-form{display:grid;gap:12px;margin:20px 0}.account-form input{width:100%;background:#fff;border:1px solid #c69bad}.account-status{padding:13px 15px;border-radius:14px;background:#f2dce7;color:#6c2c50}.account-buttons{display:flex;flex-wrap:wrap;gap:8px}.account-buttons button{margin:0}
+@media(max-width:1024px) and (min-width:761px){#screen{padding-left:28px;padding-right:28px}.vn-layout{grid-template-columns:minmax(220px,.65fr) minmax(360px,1.35fr)}.stage svg,.stage img{height:min(52vh,460px)}.map-shell{min-height:500px}.cast-strip{width:58%}}
+@media(max-width:760px){body{padding:0}main{height:100vh;min-height:640px;border-radius:0;border:0}.vn-layout{display:block;padding-top:170px}.vn-layout .stage{position:absolute;top:70px;left:0;right:0;height:330px;min-height:0}.vn-layout .stage svg,.vn-layout .stage img{height:320px}.vn-panel{position:relative;margin:220px 0 20px;padding:20px}.cast-strip{right:-15%;width:85%;opacity:.55}.skyline{width:90%;height:55%}.map-shell{padding:20px 12px;min-height:560px}.map{display:grid;gap:12px;min-height:0}.map .card{position:relative!important;inset:auto!important;width:auto}.map-pin{display:none}.creator{padding:16px}.creator-grid{grid-template-columns:1fr}.creator .stage{min-height:240px}.creator .stage svg{height:250px}.creator-fields{padding:0}.location-panel{margin-top:10vh}.mode-grid{grid-template-columns:1fr}.mode-card{min-height:130px}h1{margin-top:80px}}
+@media(max-width:520px){header{height:50px;padding:0 14px}header strong{font-size:18px}header span{font-size:9px;letter-spacing:.1em}#screen{padding:60px 12px max(18px,env(safe-area-inset-bottom))}h1{font-size:clamp(48px,18vw,72px)}h2{font-size:31px}.hero-copy p{max-width:92%;font-size:14px}.menu-actions{width:92%;margin-top:20px}.cast-strip{width:92%;right:-24%;opacity:.42}.vn-layout{padding-top:135px}.vn-layout .stage{top:52px;height:280px}.vn-layout .stage svg,.vn-layout .stage img{height:270px}.vn-panel{margin-top:180px;padding:17px;border-radius:20px}.speaker{font-size:17px}.choices button{font-size:14px;padding:11px 13px}.mode-panel,.credits,.account-panel{padding:18px;border-radius:20px}.mode-card{min-height:116px;padding:15px}.mode-card strong{font-size:21px}.chapter-card{margin-top:5vh;padding:21px}.story-meta{align-items:flex-start;flex-direction:column}.location-panel{margin-top:5vh;padding:20px}.actions{gap:3px}.actions button{margin:0;font-size:12px}.map-shell{border-radius:20px}.phone{padding:17px;border-radius:20px}.phone-chat{grid-template-columns:42px 1fr auto;padding:10px}.avatar{width:38px;height:38px}}
+@media(max-height:700px) and (min-width:761px){#screen{padding-top:58px;padding-bottom:14px}.stage{min-height:290px}.stage svg,.stage img{height:42vh}.vn-panel{margin-bottom:16px;padding:19px 22px}.chapter-card{margin-top:5vh}.location-panel{margin-top:5vh}.creator{margin-top:0;padding:18px}.creator .stage{min-height:270px}.creator .stage svg,.creator .stage img{height:270px}}
 </style>
 <main><header><strong>♡ Zauroczeni</strong><span id="episode-label">Warszawa · 3 odcinki</span></header><section id="screen"></section></main>
 <script>
@@ -62,6 +69,10 @@ label{display:grid;gap:6px;margin-bottom:14px;font-weight:700}.grid{display:grid
 const screen = document.querySelector("#screen");
 const episodeLabel = document.querySelector("#episode-label");
 const key = "zauroczeni.save.v1";
+const sessionKey = "zauroczeni.supabase.session.v1";
+// Uzupełnij publiczny adres projektu i klucz anon z ustawień Supabase.
+const supabaseConfig={url:"",anonKey:""};
+let cloudTimer;
 // Każdy portret jest osobnym plikiem, więc można go łatwo wymienić.
 const people = [
  {name:"Martyna",color:"#a53f73",hair:2,image:"assets/characters/martyna.png",intro:"Mam zrobić kronikę pierwszego dnia. Pomożesz mi znaleźć coś ciekawszego niż zdjęcie tablicy?",kind:"Chodźmy poszukać razem.",moment:"Martyna ustawia aparat na parapecie. Mamy jedno zdjęcie na próbę. Jaką pozę wybierasz?",momentChoices:[["Robimy zabawną minę.",20],["Stańmy trochę bliżej.",25],["Może tylko ty?",5]],message:"Zdjęcie wyszło świetnie. Wyślę ci je, ale obiecaj, że nie wrzucisz go bez mojego filtra!",date:"Mam jeszcze jedno zdjęcie. Na nim jesteś tylko ty. Może jutro zrobimy wspólne?"},
@@ -110,13 +121,66 @@ const episodes = {
   ]
  }
 };
+const gameModes={
+ romance:{icon:"♡",title:"Serce Warszawy",description:"Najwięcej prywatnych spotkań, zazdrości i decyzji dotyczących relacji.",bonus:[0,1,2,3,4],flag:"romance"},
+ mystery:{icon:"⌕",title:"Śladami sekretu",description:"Więcej tropów, zagadek i możliwości wcześniejszego odkrycia sprawcy.",bonus:[],flag:"mystery"},
+ rebel:{icon:"⚡",title:"Po godzinach",description:"Ryzykowne wejścia, śmielsze odpowiedzi i sojusz z Witkiem oraz Błażejem.",bonus:[5,6],flag:"rebel"},
+ redemption:{icon:"✦",title:"Druga szansa",description:"Historia skupiona na naprawianiu błędów antagonistów i spokojnym rozwiązaniu konfliktu.",bonus:[5,6],flag:"redemption"}
+};
+const modeScenes={
+ romance:{
+  2:[
+   {bg:"park",speaker:0,text:"Zanim rozpoczniecie śledztwo, Martyna proponuje spacer bez aparatów i telefonów. Rozmowa schodzi na to, komu naprawdę ufasz.",choices:[{label:"Mówię szczerze, kto jest mi najbliższy.",routeBoost:14},{label:"Jeszcze nie umiem tego nazwać.",routeBoost:6}]},
+   {bg:"mall",speaker:2,text:"Kasia zauważa napięcie w grupie. „Śledztwo śledztwem, ale ktoś tu patrzy na ciebie zupełnie inaczej niż reszta.”",choices:[{label:"Pytam wprost, kogo ma na myśli.",routeBoost:12},{label:"Zmieniam temat, choć serce bije szybciej.",routeBoost:5}]}
+  ],
+  3:[
+   {bg:"river",speaker:null,name:"Przed nocną akcją",text:"Wybrana osoba prosi cię o chwilę rozmowy nad Wisłą. Jeśli coś pójdzie źle, nie chce zostawić najważniejszych słów na później.",choices:[{label:"Obiecujemy sobie szczerość po zakończeniu akcji.",routeBoost:15}]},
+   {bg:"corridor",speaker:null,name:"Cisza na korytarzu",text:"Na kilka sekund zostajecie sami. Dłoń bliskiej osoby odnajduje twoją dłoń, zanim znów ruszycie w stronę studia.",choices:[{label:"Ściskam ją mocniej i idziemy razem.",routeBoost:15}]}
+  ]
+ },
+ mystery:{
+  2:[
+   {bg:"corridor",speaker:1,text:"Adam zauważa, że anonimowa wiadomość zawiera znak niewidoczny na pierwszy rzut oka. To numer komputera w szkolnej pracowni.",choices:[{label:"Sprawdzam historię logowań.",clues:2},{label:"Szukam odcisków na klawiaturze.",clues:1}]},
+   {bg:"school",speaker:3,text:"Antosia nakłada swój szkic na plan korytarza. Linie perspektywy wskazują dokładne miejsce, z którego wykonano fałszywe nagranie.",choices:[{label:"Zaznaczam miejsce na mapie dowodów.",clues:2}]}
+  ],
+  3:[
+   {bg:"corridor",speaker:1,text:"W archiwum znajduje się ukryty katalog nazwany datą pierwszej audycji Oskara. Hasło składa się z czterech cyfr.",choices:[{label:"Używam numeru kasety znalezionej przez Kasię.",clues:2},{label:"Próbuję daty ze szkicu Antosi.",clues:1}]},
+   {bg:"corridor",speaker:4,text:"Piotr odkrywa drugi mikrofon podłączony do serwera. To nim Oskar słuchał rozmów grupy i wyprzedzał każdy ruch.",choices:[{label:"Odłączam go i zapisuję numer seryjny.",clues:2}]}
+  ]
+ },
+ rebel:{
+  2:[
+   {bg:"river",speaker:6,text:"Błażej zna wejście na dach galerii. Z góry widać miejsce spotkania i osobę obserwującą zegar przez lornetkę.",choices:[{label:"Wchodzę z Błażejem na dach.",affinity:[6,14],clues:1},{label:"Proszę go, by został na dole i pilnował wyjścia.",affinity:[6,7]}]},
+   {bg:"corridor",speaker:5,text:"Witek proponuje otworzyć magazynek starą kartą biblioteczną. Alarm może się odezwać, ale za drzwiami słychać pracujący komputer.",choices:[{label:"Ryzykujemy. Otwieraj.",affinity:[5,14],flag:"bold"},{label:"Szukamy bezpieczniejszego wejścia.",affinity:[5,6]}]}
+  ],
+  3:[
+   {bg:"school",speaker:6,text:"Błażej uruchamia szkolne głośniki i puszcza przez nie fałszywy komunikat o awarii. Ochroniarz opuszcza piętro.",choices:[{label:"Plan jest szalony, ale działa.",affinity:[6,14],flag:"bold"}]},
+   {bg:"corridor",speaker:5,text:"Witek bierze odpowiedzialność za włamanie do studia, by dać reszcie czas na uratowanie plików.",choices:[{label:"Nie zostawiam go samego.",affinity:[5,16]},{label:"Obiecuję wrócić, gdy zabezpieczymy serwer.",affinity:[5,10]}]}
+  ]
+ },
+ redemption:{
+  2:[
+   {bg:"park",speaker:5,text:"Witek przynosi listę wszystkich osób, które skrzywdził swoim sabotażem. Chce przeprosić każdą z nich, nawet jeśli nikt mu nie wybaczy.",choices:[{label:"Pomogę ci zacząć od pierwszej osoby.",affinity:[5,16],flag:"mercy"},{label:"Najpierw pokaż zmianę czynami.",affinity:[5,9]}]},
+   {bg:"river",speaker:6,text:"Błażej usuwa przygotowany złośliwy wpis i publikuje sprostowanie pod własnym nazwiskiem. Wie, że straci przez to popularność.",choices:[{label:"To pierwszy naprawdę odważny ruch.",affinity:[6,16],flag:"mercy"},{label:"Dobrze. Teraz porozmawiaj z klasą.",affinity:[6,9]}]}
+  ],
+  3:[
+   {bg:"corridor",speaker:5,text:"Witek odnajduje Oskara przed wejściem do studia. Zamiast go zatrzymać siłą, opowiada mu, jak łatwo strach zamienia się w krzywdzenie innych.",choices:[{label:"Pozwalam Witkowi dokończyć rozmowę.",affinity:[5,15],flag:"mercy"}]},
+   {bg:"school",speaker:6,text:"Błażej oddaje Oskarowi telefon. „Sam zadzwoń do radia. Powiedz prawdę, zanim zrobi to za ciebie ktoś inny.”",choices:[{label:"Dajemy Oskarowi ostatnią szansę.",affinity:[6,15],flag:"mercy"}]}
+  ]
+ }
+};
 let state, storageError = false;
 function load(){
  try { const saved = JSON.parse(localStorage.getItem(key)); return saved?.version === 1 ? saved : null; }
  catch { return null; }
 }
 function save(){
- try { localStorage.setItem(key,JSON.stringify(state)); storageError = false; }
+ try {
+  state.savedAt=new Date().toISOString();
+  localStorage.setItem(key,JSON.stringify(state));
+  storageError = false;
+  queueCloudSave();
+ }
  catch { storageError = true; }
 }
 function node(tag,text,parent=screen){
@@ -179,10 +243,124 @@ function menu(){
  button("▶  Nowa gra",creator,actions);
  const resume=button("♡  Kontynuuj historię",()=>{state=load() || state; play();},actions);
  resume.disabled=!(load() || state);
+ button("☁  Konto i zapis",accountScreen,actions);
+ button("ⓘ  Zdjęcia i licencje",credits,actions);
  const skyline=node("div",""); skyline.className="skyline";
  skyline.innerHTML='<svg viewBox="0 0 600 430" preserveAspectRatio="none" aria-hidden="true"><path d="M0 430V270h57v-64h45v49h39v-98h54v113h42V95h22V54h18V95h23v174h48V196h62v74h38V146h55v124h58v-83h59v243Z" fill="#724265"/><path d="M259 55h18M251 109h34M250 130h35M250 151h35M250 172h35" stroke="#ffd8e7" stroke-width="5"/><circle cx="490" cy="70" r="44" fill="#fff3bc" opacity=".75"/></svg>';
  const cast=node("div",""); cast.className="cast-strip";
  [people[1],people[0],people[2]].forEach(person=>{const art=node("div","",cast);art.className="mini-person";const image=node("img","",art);image.src=person.image;image.alt="";});
+}
+function credits(){
+ reset();
+ backdrop("home");
+ episodeLabel.textContent="Zdjęcia · Wikimedia Commons";
+ const panel=node("div","");panel.className="credits";
+ const label=node("span","Prawdziwe miejsca",panel);label.className="eyebrow";
+ node("h2","Zdjęcia i licencje",panel);
+ node("p","Tła lokacji są fotografiami, a nie obrazami wygenerowanymi przez AI. Zostały pomniejszone i wykadrowane przez CSS na potrzeby gry.",panel);
+ const list=node("div","",panel);list.className="credits-list";
+ const items=[
+  ["Panorama Warszawy","Marcin Białek","CC BY-SA 2.5","https://commons.wikimedia.org/wiki/File:Warszawa-evening_panorama.jpg"],
+  ["III LO w Warszawie","Rev.pl","CC BY 3.0","https://commons.wikimedia.org/wiki/File:Iii_lo.jpg"],
+  ["Korytarz w Warszawie","Tomasz Bladyniec","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Ministerstwo_Edukacji_Narodowej,_Korytarz_I_pi%C4%99tro_2.jpg"],
+  ["Złote Tarasy","Fred Romero","CC BY 2.0","https://commons.wikimedia.org/wiki/File:Warszawa_-_Z%C5%82ote_Tarasy.jpg"],
+  ["Ogród Saski","Kgbo","CC BY-SA 4.0","https://commons.wikimedia.org/wiki/File:Saxon_Garden,_Warsaw,_Poland.jpg"],
+  ["Bulwary Wiślane","Artinpl","CC0 1.0","https://commons.wikimedia.org/wiki/File:Vistula_Boulevards_in_Warsaw_07.jpg"]
+ ];
+ items.forEach(([title,author,license,url])=>{
+  const card=node("div","",list);card.className="credit";
+  const link=node("a",title,card);link.href=url;link.target="_blank";link.rel="noopener";
+  node("small","Autor: "+author+" · "+license,card);
+ });
+ button("← Wróć do menu",menu,panel);
+}
+function cloudEnabled(){
+ return Boolean(supabaseConfig.url&&supabaseConfig.anonKey);
+}
+function cloudSession(){
+ try{return JSON.parse(localStorage.getItem(sessionKey))}catch{return null}
+}
+async function supabaseRequest(path,options={},token=""){
+ const headers={
+  "apikey":supabaseConfig.anonKey,
+  "Authorization":"Bearer "+(token||supabaseConfig.anonKey),
+  "Content-Type":"application/json",
+  ...(options.headers||{})
+ };
+ const response=await fetch(supabaseConfig.url.replace(/\/$/,"")+"/"+path,{...options,headers});
+ const data=response.status===204?null:await response.json().catch(()=>null);
+ if(!response.ok) throw new Error(data?.msg||data?.message||data?.error_description||"Nie udało się połączyć z Supabase.");
+ return data;
+}
+function queueCloudSave(){
+ const session=cloudSession();
+ if(!cloudEnabled()||!session?.access_token||!session?.user?.id) return;
+ clearTimeout(cloudTimer);
+ cloudTimer=setTimeout(()=>cloudSave().catch(()=>{}),700);
+}
+async function cloudSave(){
+ const session=cloudSession();
+ if(!session?.access_token||!state) return;
+ await supabaseRequest("rest/v1/game_saves?on_conflict=user_id",{
+  method:"POST",
+  headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},
+  body:JSON.stringify({user_id:session.user.id,save_data:state,updated_at:new Date().toISOString()})
+ },session.access_token);
+}
+async function cloudLoad(){
+ const session=cloudSession();
+ if(!session?.access_token) throw new Error("Najpierw zaloguj się na konto.");
+ const rows=await supabaseRequest("rest/v1/game_saves?select=save_data&user_id=eq."+encodeURIComponent(session.user.id)+"&limit=1",{},session.access_token);
+ if(!rows?.[0]?.save_data) throw new Error("Na tym koncie nie ma jeszcze zapisu.");
+ state=rows[0].save_data;
+ localStorage.setItem(key,JSON.stringify(state));
+}
+async function accountLogin(email,password){
+ const session=await supabaseRequest("auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email,password})});
+ localStorage.setItem(sessionKey,JSON.stringify(session));
+ if(state) await cloudSave();
+}
+async function accountRegister(email,password){
+ const result=await supabaseRequest("auth/v1/signup",{method:"POST",body:JSON.stringify({email,password})});
+ if(result?.access_token) localStorage.setItem(sessionKey,JSON.stringify(result));
+ return result;
+}
+function accountLogout(){
+ localStorage.removeItem(sessionKey);
+ accountScreen();
+}
+function accountScreen(){
+ reset();
+ backdrop("home");
+ episodeLabel.textContent="Konto i zapis";
+ const panel=node("div","");panel.className="account-panel";
+ const label=node("span","Synchronizacja gry",panel);label.className="eyebrow";
+ node("h2","Konto gracza",panel);
+ const local=load();
+ const localStatus=node("div",local?"Zapis lokalny jest aktywny. Ostatni zapis: "+new Date(local.savedAt||Date.now()).toLocaleString("pl-PL"):"Nie ma jeszcze lokalnego zapisu.",panel);localStatus.className="account-status";
+ if(!cloudEnabled()){
+  node("p","Obsługa Supabase jest przygotowana. Po wpisaniu adresu projektu i publicznego klucza anon pojawi się rejestracja, logowanie i synchronizacja zapisu.",panel);
+  button("← Wróć do menu",menu,panel);
+  return;
+ }
+ const session=cloudSession();
+ if(session?.user?.email){
+  node("p","Zalogowano jako "+session.user.email+". Postęp zapisuje się lokalnie i w chmurze.",panel);
+  const status=node("div","Gotowe do synchronizacji.",panel);status.className="account-status";
+  const buttons=node("div","",panel);buttons.className="account-buttons";
+  button("Wyślij zapis do chmury",async()=>{status.textContent="Zapisywanie…";try{await cloudSave();status.textContent="Zapis wysłany do chmury."}catch(error){status.textContent=error.message}},buttons);
+  button("Pobierz zapis z chmury",async()=>{status.textContent="Pobieranie…";try{await cloudLoad();status.textContent="Zapis pobrany. Możesz kontynuować grę."}catch(error){status.textContent=error.message}},buttons);
+  button("Wyloguj",accountLogout,buttons);
+ }else{
+  const form=node("form","",panel);form.className="account-form";
+  const email=node("input","",node("label","E-mail",form));email.type="email";email.required=true;email.autocomplete="email";
+  const password=node("input","",node("label","Hasło",form));password.type="password";password.required=true;password.minLength=8;password.autocomplete="current-password";
+  const status=node("div","Hasło powinno mieć co najmniej 8 znaków.",form);status.className="account-status";
+  const buttons=node("div","",form);buttons.className="account-buttons";
+  button("Zaloguj się",async()=>{if(!email.reportValidity()||!password.reportValidity())return;status.textContent="Logowanie…";try{await accountLogin(email.value,password.value);accountScreen()}catch(error){status.textContent=error.message}},buttons);
+  button("Załóż konto",async()=>{if(!email.reportValidity()||!password.reportValidity())return;status.textContent="Tworzenie konta…";try{const result=await accountRegister(email.value,password.value);status.textContent=result?.access_token?"Konto utworzone i zalogowane.":"Sprawdź e-mail, aby potwierdzić konto."}catch(error){status.textContent=error.message}},buttons);
+ }
+ button("← Wróć do menu",menu,panel);
 }
 function creator(){
  reset();
@@ -211,10 +389,35 @@ function creator(){
   event.preventDefault();
   if(!name.value.trim()){name.setCustomValidity("Wpisz imię.");name.reportValidity();return;}
   if((load() || state) && !confirm("Rozpocząć nową grę i zastąpić poprzedni zapis?")) return;
-  state={version:1,player:player(),scores:people.map(()=>0),seen:people.map(()=>false),moments:people.map(()=>false),messages:people.map(()=>false),route:null,scene:"intro",location:0,chapter:1,storyIndex:0,clues:0,flags:[]};
-  go("intro");
+  state={version:1,player:player(),scores:people.map(()=>0),seen:people.map(()=>false),moments:people.map(()=>false),messages:people.map(()=>false),route:null,scene:"mode",location:0,chapter:1,storyIndex:0,clues:0,flags:[],gameMode:"",modeIndex:0};
+  go("mode");
  });
  name.addEventListener("input",()=>name.setCustomValidity(""));
+}
+function showModeSelect(){
+ backdrop("home");
+ const panel=node("div","");panel.className="mode-panel";
+ const label=node("span","Wybierz wersję rozgrywki",panel);label.className="eyebrow";
+ node("h2","Jak potoczy się twoja historia?",panel);
+ node("p","Każda wersja ma własne sceny w odcinkach 2 i 3, inne premie do relacji oraz odmienny finał.",panel);
+ const grid=node("div","",panel);grid.className="mode-grid";
+ Object.entries(gameModes).forEach(([id,mode])=>{
+  const card=button("",()=>chooseMode(id),grid);card.className="mode-card";
+  const icon=node("span",mode.icon,card);icon.className="mode-icon";
+  node("strong",mode.title,card);
+  node("small",mode.description,card);
+ });
+ button("← Wróć do kreatora",creator,panel);
+}
+function chooseMode(id){
+ state.gameMode=id;
+ state.flags=[gameModes[id].flag];
+ state.clues=id==="mystery"?2:0;
+ go("intro");
+}
+function modeAffinityBonus(id){
+ const mode=gameModes[state.gameMode];
+ return mode&&mode.bonus.includes(id)?8:0;
 }
 function go(scene){state.scene=scene;save();play();}
 function play(){
@@ -225,6 +428,7 @@ function play(){
  state.storyIndex=Number.isInteger(state.storyIndex)?state.storyIndex:0;
  state.clues=state.clues || 0;
  state.flags=state.flags || [];
+ if(!state.gameMode&&state.scene!=="mode") state.gameMode="romance";
  episodeLabel.textContent="Warszawa · odcinek "+state.chapter;
  const placeIndex=Number.isInteger(state.location)?state.location:0;
  const backgrounds=["school","school","mall","park","river","home"];
@@ -240,12 +444,14 @@ function play(){
    node("p","Na wejściu do liceum dostajesz plan lekcji i zaproszenie na próbę szkolnego radia. Do końca dnia chcesz poznać klasę i odkryć, kto schował twoje zgłoszenie.",panel);
    button("Otwórz mapę Warszawy  →",()=>go("map"),panel);
    break;
+  case "mode": showModeSelect(); break;
   case "map": showMap(); break;
   case "location": showLocation(); break;
   case "dialogue": showDialogue(); break;
   case "phone": showPhone(); break;
   case "message": showMessage(); break;
   case "storyIntro": showStoryIntro(); break;
+  case "modeStory": showModeStory(); break;
   case "story": showStory(); break;
   case "chapterComplete": showChapterComplete(); break;
   case "finale": showFinale(); break;
@@ -306,7 +512,7 @@ function showDialogue(){
  const choices=node("div","",panel);choices.className="choices";
  const answers=isMoment?person.momentChoices:[[person.kind,35],["Możemy porozmawiać o tym później.",10],["Nie chcę się w to mieszać.",-20]];
  answers.forEach(([line,score])=>button(line,()=>{
-  state.scores[id]=isMoment?Math.min(100,state.scores[id]+score):score;
+  state.scores[id]=isMoment?Math.min(100,state.scores[id]+score):Math.min(100,score+modeAffinityBonus(id));
   state.seen[id]=true;
   if(isMoment) state.moments[id]=true;
   go("location");
@@ -385,6 +591,7 @@ function showEnding(){
 function startEpisode(chapter){
  state.chapter=chapter;
  state.storyIndex=0;
+ state.modeIndex=0;
  state.scene="storyIntro";
  save();
  play();
@@ -398,13 +605,40 @@ function showStoryIntro(){
  node("p",episode.subtitle,card);
  const route=people[activeRoute()];
  const note=node("div","W tej części najbliżej będzie ci do: "+route.name+". Twoje kolejne decyzje mogą jeszcze zmienić poziom sympatii.",card);note.className="route-note";
- button("Zaczynamy  →",()=>go("story"),card);
+ button("Zaczynamy  →",()=>go("modeStory"),card);
 }
 function activeRoute(){
  if(Number.isInteger(state.route)) return state.route;
  let best=0;
  state.scores.forEach((score,id)=>{if(score>state.scores[best]) best=id;});
  return best;
+}
+function showModeStory(){
+ const scenes=modeScenes[state.gameMode]?.[state.chapter] || [];
+ const scene=scenes[state.modeIndex];
+ if(!scene){go("story");return;}
+ backdrop(scene.bg || "school");
+ let panel;
+ if(Number.isInteger(scene.speaker)){
+  const layout=node("div","");layout.className="vn-layout";
+  portrait(people[scene.speaker],layout);
+  panel=node("div","",layout);panel.className="vn-panel";
+  const speaker=node("span",people[scene.speaker].name,panel);speaker.className="speaker";
+ }else{
+  panel=node("div","");panel.className="chapter-card";
+  const speaker=node("span",scene.name || gameModes[state.gameMode].title,panel);speaker.className="speaker";
+ }
+ const label=node("span","Scena specjalna · "+gameModes[state.gameMode].title,panel);label.className="eyebrow";
+ node("p",scene.text,panel);
+ const choices=node("div","",panel);choices.className="choices";
+ scene.choices.forEach(choice=>button(choice.label,()=>advanceModeStory(choice,scenes.length),choices));
+}
+function advanceModeStory(choice,total){
+ applyChoiceEffects(choice);
+ state.modeIndex+=1;
+ state.scene=state.modeIndex>=total?"story":"modeStory";
+ save();
+ play();
 }
 function showStory(){
  const episode=episodes[state.chapter];
@@ -431,6 +665,14 @@ function showStory(){
  const bar=node("div","",panel);bar.className="story-progress";bar.innerHTML='<i style="width:'+progress+'%"></i>';
 }
 function advanceStory(choice){
+ applyChoiceEffects(choice);
+ if(choice.finish){state.scene="finale";save();play();return;}
+ state.storyIndex+=1;
+ state.scene=state.storyIndex>=episodes[state.chapter].scenes.length?"chapterComplete":"story";
+ save();
+ play();
+}
+function applyChoiceEffects(choice){
  if(choice.affinity){
   const [id,points]=choice.affinity;
   state.scores[id]=Math.min(100,state.scores[id]+points);
@@ -439,13 +681,12 @@ function advanceStory(choice){
   const [id,points]=choice.extraAffinity;
   state.scores[id]=Math.min(100,state.scores[id]+points);
  }
+ if(choice.routeBoost){
+  const id=activeRoute();
+  state.scores[id]=Math.min(100,state.scores[id]+choice.routeBoost);
+ }
  if(choice.clues) state.clues+=choice.clues;
  if(choice.flag&&!state.flags.includes(choice.flag)) state.flags.push(choice.flag);
- if(choice.finish){state.scene="finale";save();play();return;}
- state.storyIndex+=1;
- state.scene=state.storyIndex>=episodes[state.chapter].scenes.length?"chapterComplete":"story";
- save();
- play();
 }
 function showChapterComplete(){
  const episode=episodes[state.chapter];
@@ -473,7 +714,14 @@ function showFinale(){
   "Witek patrzy na światła odbite w Wiśle. „Nie cofnę swoich błędów, ale mogę codziennie pokazywać ci, że umiem być lepszy.”",
   "Błażej przestaje żartować. „Pierwszy raz nie chcę niczego udawać. Zależy mi na tobie. Naprawdę.”"
  ];
+ const variantEndings={
+  romance:"Wasza relacja stała się sercem całej historii. Kolejny sezon zacznie się od pierwszej prawdziwej randki.",
+  mystery:"Dzięki zebranym dowodom odkrywasz każdy szczegół spisku. Szkolne radio proponuje ci prowadzenie własnego programu śledczego.",
+  rebel:"Nocna akcja przechodzi do szkolnej legendy. Witek i Błażej stają się twoimi najbardziej nieprzewidywalnymi sojusznikami.",
+  redemption:"Witek i Błażej zaczynają naprawiać szkody, a Oskar dostaje szansę powiedzenia prawdy bez kolejnego publicznego upokorzenia."
+ };
  node("p",lines[id],panel);
+ const variant=node("div",variantEndings[state.gameMode] || variantEndings.romance,panel);variant.className="route-note";
  const ending=state.flags.includes("mercy")?"Oskar przyjechał do studia i przyznał się na antenie. Radio ocalało, a prawda wybrzmiała bez publicznego upokorzenia.":"Dowody zostały wyemitowane, zanim Oskar zdążył usunąć archiwum. Następnego dnia szkoła rozpoczęła oficjalne wyjaśnianie sprawy.";
  const note=node("div",ending,panel);note.className="route-note";
  node("small","Koniec sezonu 1 · zebrane tropy: "+state.clues,panel);
