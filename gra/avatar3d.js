@@ -14,6 +14,7 @@ const modelFiles = {
 };
 
 const sourceFor = (value) => value === 'base' ? 'casual' : value;
+const thumbnailCache = new Map();
 
 export async function createAvatarViewer(canvas, initialSelection) {
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -30,7 +31,7 @@ export async function createAvatarViewer(canvas, initialSelection) {
 
   const controls = new OrbitControls(camera, canvas);
   controls.enablePan = false;
-  controls.enableDamping = true;
+  controls.enableDamping = false;
   controls.minDistance = 3.2;
   controls.maxDistance = 6;
   controls.minPolarAngle = Math.PI * .28;
@@ -126,6 +127,11 @@ export async function createAvatarViewer(canvas, initialSelection) {
       });
     });
     recolorBase();
+    renderNow();
+  }
+
+  function renderNow() {
+    renderer.render(scene, camera);
   }
 
   function resize() {
@@ -134,29 +140,80 @@ export async function createAvatarViewer(canvas, initialSelection) {
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    renderNow();
   }
 
   const observer = new ResizeObserver(resize);
   observer.observe(canvas);
   resize();
   applySelection(selection);
-
-  let active = true;
-  function frame() {
-    if (!active) return;
-    controls.update();
-    renderer.render(scene, camera);
-    requestAnimationFrame(frame);
-  }
-  frame();
+  controls.addEventListener('change', renderNow);
 
   return {
     update: applySelection,
     dispose() {
-      active = false;
       observer.disconnect();
+      controls.removeEventListener('change', renderNow);
       controls.dispose();
       renderer.dispose();
     },
   };
+}
+
+export async function makeCatalogThumbnail(selection, group, value) {
+  const style = sourceFor(value);
+  const gender = selection.gender || 'female';
+  const filename = modelFiles[`${gender}:${style}`] || modelFiles[`${gender}:casual`];
+  const cacheKey = `${gender}:${style}:${group}:${selection.skin || ''}`;
+  if (thumbnailCache.has(cacheKey)) return thumbnailCache.get(cacheKey);
+  const canvas = document.createElement('canvas');
+  canvas.width = 300;
+  canvas.height = 240;
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.08;
+  renderer.setSize(300, 240, false);
+
+  const scene = new THREE.Scene();
+  scene.add(new THREE.HemisphereLight(0xfff4dd, 0x263c49, 2.6));
+  const key = new THREE.DirectionalLight(0xffffff, 3.8);
+  key.position.set(3, 5, 4);
+  scene.add(key);
+
+  const loader = new GLTFLoader();
+  const url = new URL(`assets/characters/${filename}`, import.meta.url).href;
+  const gltf = await loader.loadAsync(url);
+  const root = gltf.scene;
+  root.traverse((object) => {
+    if (object.isBone && /^UpperArm.*L$/.test(object.name)) object.rotation.x -= 1.08;
+    if (object.isBone && /^UpperArm.*R$/.test(object.name)) object.rotation.x -= 1.08;
+    if (!object.isMesh) return;
+    object.material = Array.isArray(object.material) ? object.material.map((material) => material.clone()) : object.material.clone();
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    materials.forEach((material) => {
+      material.roughness = .82;
+      material.metalness = 0;
+      if (material.name === 'Skin') material.color.set(selection.skin || '#c98b62');
+    });
+  });
+  const bounds = new THREE.Box3().setFromObject(root);
+  const size = bounds.getSize(new THREE.Vector3());
+  const center = bounds.getCenter(new THREE.Vector3());
+  const scale = 2.35 / Math.max(size.y, .001);
+  root.scale.setScalar(scale);
+  root.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+  scene.add(root);
+
+  const targets = { head: 1.82, top: 1.43, legs: .85, feet: .25 };
+  const distances = { head: 2.5, top: 2.85, legs: 3.05, feet: 2.6 };
+  const targetY = targets[group] ?? 1.1;
+  const camera = new THREE.PerspectiveCamera(27, 300 / 240, .1, 100);
+  camera.position.set(1.55, targetY + .12, distances[group] ?? 3);
+  camera.lookAt(0, targetY, 0);
+  renderer.render(scene, camera);
+  const dataUrl = canvas.toDataURL('image/png');
+  renderer.dispose();
+  thumbnailCache.set(cacheKey, dataUrl);
+  return dataUrl;
 }

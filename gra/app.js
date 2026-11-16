@@ -11,6 +11,9 @@ const creator = byId('creator');
 const beautyDialog = byId('beauty-dialog');
 const shopHub = byId('shop-hub');
 const creativeHub = byId('creative-hub');
+const catalogDialog = byId('catalog-dialog');
+const cartDialog = byId('cart-dialog');
+const profileDialog = byId('profile-dialog');
 const tramDialog = byId('tram-game');
 const worldDialog = byId('world-dialog');
 
@@ -18,9 +21,11 @@ const defaultPlayer = {
   version: 1,
   created: false,
   name: 'Nowa osoba',
+  preset: 'nova',
   gender: 'female',
   skin: '#c98b62',
   beauty: { eyes: '#5a3828', makeup: 'none' },
+  profile: { status: 'Hej! Witaj na moim profilu ✦', description: '', posts: [], likes: 0 },
   outfit3d: { top: 'base', legs: 'base', feet: 'base', head: 'casual' },
   inventory: { top: ['base'], legs: ['base'], feet: ['base'], head: ['casual'] },
   coins: 80,
@@ -35,6 +40,13 @@ const shopPrices = {
   legs: { casual: 100, punk: 175, formal: 220 },
   feet: { casual: 75, punk: 145, formal: 190 },
   head: { punk: 120, formal: 180, suit: 210 },
+};
+
+const catalogLabels = {
+  top: { casual: ['T-shirt miejski', '👕'], punk: ['Kurtka neon', '🧥'], formal: ['Koszula wieczorowa', '👔'] },
+  legs: { casual: ['Jeansy centrum', '👖'], punk: ['Spodnie punk', '⭐'], formal: ['Spodnie klasyczne', '🩳'] },
+  feet: { casual: ['Sneakersy', '👟'], punk: ['Trapery', '🥾'], formal: ['Półbuty', '👞'] },
+  head: { punk: ['Fryzura punk', '💇'], formal: ['Upięcie', '🎀'], suit: ['Krótkie włosy', '✂'] },
 };
 
 const locations = {
@@ -91,8 +103,16 @@ let tramScore = 0;
 let tramTime = 15;
 let mainViewer;
 let creatorViewer;
+let shopViewer;
+let profileViewer;
 let avatarModulePromise;
 let creatorMode = 'wardrobe';
+let catalogGender = 'female';
+let catalogTab = 'top';
+let cart = [];
+let catalogDraft;
+let presenceChannel;
+const presenceId = crypto.randomUUID();
 
 function route() {
   const hash = location.hash;
@@ -122,6 +142,7 @@ function normalizePlayer(value) {
     outfit3d: savedOutfit,
     inventory: Object.fromEntries(Object.entries(defaultPlayer.inventory).map(([key, items]) => [key, Array.from(new Set([...items, savedOutfit[key], ...(Array.isArray(savedInventory[key]) ? savedInventory[key] : [])]))])),
     beauty: { ...defaultPlayer.beauty, ...(value?.beauty || {}) },
+    profile: { ...defaultPlayer.profile, ...(value?.profile || {}), posts: Array.isArray(value?.profile?.posts) ? value.profile.posts : [] },
   };
 }
 
@@ -163,12 +184,15 @@ function avatarModule() {
 
 async function ensureMainViewer() {
   if (mainViewer || !player) return;
+  byId('game-loader').hidden = false;
   try {
     const { createAvatarViewer } = await avatarModule();
     mainViewer = await createAvatarViewer(byId('avatar-canvas'), { ...player.outfit3d, skin: player.skin, gender: player.gender, ...player.beauty });
     byId('avatar-loading').hidden = true;
   } catch {
     byId('avatar-loading').textContent = 'Nie udało się wczytać postaci 3D.';
+  } finally {
+    byId('game-loader').hidden = true;
   }
 }
 
@@ -181,10 +205,32 @@ async function ensureCreatorViewer() {
   creatorViewer = await createAvatarViewer(byId('creator-canvas'), { ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
 }
 
+async function ensureShopViewer() {
+  const selection = { ...catalogDraft.outfit3d, skin: catalogDraft.skin, gender: catalogGender, ...catalogDraft.beauty };
+  if (shopViewer) {
+    shopViewer.update(selection);
+    return;
+  }
+  const { createAvatarViewer } = await avatarModule();
+  shopViewer = await createAvatarViewer(byId('shop-avatar-canvas'), selection);
+}
+
+async function ensureProfileViewer() {
+  const selection = { ...player.outfit3d, skin: player.skin, gender: player.gender, ...player.beauty };
+  if (profileViewer) {
+    profileViewer.update(selection);
+    return;
+  }
+  const { createAvatarViewer } = await avatarModule();
+  profileViewer = await createAvatarViewer(byId('profile-avatar-canvas'), selection);
+}
+
 function updateAvatarViewers(source = player) {
   if (!source) return;
   mainViewer?.update({ ...source.outfit3d, skin: source.skin, gender: source.gender, ...source.beauty });
   creatorViewer?.update({ ...source.outfit3d, skin: source.skin, gender: source.gender, ...source.beauty });
+  shopViewer?.update({ ...source.outfit3d, skin: source.skin, gender: source.gender, ...source.beauty });
+  profileViewer?.update({ ...source.outfit3d, skin: source.skin, gender: source.gender, ...source.beauty });
 }
 
 function render() {
@@ -235,6 +281,53 @@ function renderGame() {
   byId('daily-button').disabled = claimed;
   byId('daily-button').querySelector('strong').textContent = claimed ? 'Odebrano ✓' : 'Odbierz 25 ◉';
   renderLocation(currentLocation, false);
+  if (!presenceChannel) startPresence();
+}
+
+function renderOnline(users) {
+  const list = byId('online-list');
+  const unique = Array.from(new Map(users.map((user) => [user.id || user.name, user])).values());
+  list.replaceChildren();
+  unique.forEach((user) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'friend-card online-card';
+    const avatar = document.createElement('span');
+    avatar.className = 'online-avatar';
+    avatar.textContent = (user.name || 'G').slice(0, 1).toUpperCase();
+    const name = document.createElement('span');
+    name.textContent = user.id === presenceId ? `${user.name} (Ty)` : user.name;
+    const dot = document.createElement('b');
+    dot.textContent = '●';
+    dot.title = 'Aktywny teraz';
+    button.append(avatar, name, dot);
+    button.addEventListener('click', () => showToast(`${user.name} jest teraz aktywny/a.`));
+    list.append(button);
+  });
+  const add = document.createElement('button');
+  add.type = 'button';
+  add.className = 'friend-card add-friend';
+  add.innerHTML = '<strong>♟+</strong><span>Dodaj<br>znajomego</span>';
+  add.addEventListener('click', () => showToast('Wyszukiwarka znajomych pojawi się w kolejnym etapie.'));
+  list.append(add);
+}
+
+function startPresence() {
+  if (!player) return;
+  const me = { id: presenceId, name: player.name, online_at: new Date().toISOString() };
+  renderOnline([me]);
+  if (!client) return;
+  presenceChannel = client.channel('alcara-online', { config: { presence: { key: presenceId } } });
+  presenceChannel.on('presence', { event: 'sync' }, () => {
+    const users = Object.values(presenceChannel.presenceState()).flat();
+    renderOnline(users.length ? users : [me]);
+  }).subscribe(async (state) => {
+    if (state === 'SUBSCRIBED') await presenceChannel.track(me);
+  });
+}
+
+function updatePresence() {
+  if (presenceChannel && player) presenceChannel.track({ id: presenceId, name: player.name, online_at: new Date().toISOString() });
 }
 
 function renderLocation(id, countVisit = true) {
@@ -343,16 +436,34 @@ function createSkinButtons() {
   });
 }
 
+async function ensureWardrobeThumbnail(button, group, value) {
+  const key = `${draft.gender}:${group}:${value}:${draft.skin}`;
+  if (button.dataset.thumbKey === key) return;
+  button.dataset.thumbKey = key;
+  button.classList.add('thumb-loading');
+  try {
+    const { makeCatalogThumbnail } = await avatarModule();
+    const dataUrl = await makeCatalogThumbnail({ gender: draft.gender, skin: draft.skin }, group, value);
+    if (button.dataset.thumbKey === key) button.style.setProperty('--item-thumb', `url("${dataUrl}")`);
+  } finally {
+    if (button.dataset.thumbKey === key) button.classList.remove('thumb-loading');
+  }
+}
+
 function refreshCreatorOptions() {
   document.querySelectorAll('.wardrobe-option').forEach((button) => {
     const group = button.dataset.group;
     const value = button.dataset.value;
     const owned = draft.inventory[group].includes(value);
     const price = shopPrices[group]?.[value] || 0;
+    const ownedIndex = draft.inventory[group].indexOf(value);
+    button.hidden = creatorMode === 'wardrobe' && !owned;
+    button.style.order = creatorMode === 'wardrobe' ? String(-ownedIndex) : '0';
     button.classList.toggle('selected', draft.outfit3d[group] === value);
     button.classList.toggle('locked', !owned);
     button.textContent = owned ? button.dataset.label : `${button.dataset.label} · ${price} ●`;
     button.title = owned ? 'Masz ten przedmiot' : creatorMode === 'shop' ? `Kup za ${price} StarCoins` : 'Dostępne w Sklepie';
+    if (!button.hidden) ensureWardrobeThumbnail(button, group, value);
   });
   byId('skin-options').querySelectorAll('button').forEach((button) => button.classList.toggle('selected', button.dataset.value === draft.skin));
 }
@@ -365,6 +476,7 @@ function openCreator(required = false, mode = 'wardrobe') {
   byId('creator-kicker').textContent = mode === 'shop' ? 'SKLEP ALCARY · STARCOINS' : 'STUDIO POSTACI';
   byId('creator-title').textContent = mode === 'shop' ? 'Kup nowe rzeczy' : 'Stwórz swój styl';
   refreshCreatorOptions();
+  document.querySelectorAll('[data-preset]').forEach((button) => button.classList.toggle('selected', button.dataset.preset === draft.preset));
   document.querySelectorAll('[data-gender]').forEach((button) => button.classList.toggle('selected', button.dataset.gender === draft.gender));
   creator.dataset.required = required ? 'true' : 'false';
   creator.querySelector('.close-button').hidden = required;
@@ -400,6 +512,158 @@ function openBeautyClinic() {
   draft = { ...player, beauty: { ...player.beauty }, outfit3d: { ...player.outfit3d } };
   refreshBeautyOptions();
   beautyDialog.showModal();
+}
+
+function openCatalog(gender) {
+  catalogGender = gender;
+  catalogTab = 'top';
+  cart = [];
+  catalogDraft = { ...player, beauty: { ...player.beauty }, outfit3d: { ...player.outfit3d }, inventory: Object.fromEntries(Object.entries(player.inventory).map(([key, items]) => [key, [...items]])) };
+  byId('catalog-title').textContent = gender === 'male' ? 'Moda męska' : 'Moda damska';
+  byId('catalog-search').value = '';
+  renderCatalog();
+  renderCart();
+  catalogDialog.showModal();
+  requestAnimationFrame(() => ensureShopViewer());
+}
+
+function renderCatalog() {
+  document.querySelectorAll('[data-catalog-tab]').forEach((button) => button.classList.toggle('active', button.dataset.catalogTab === catalogTab));
+  byId('catalog-coins').textContent = player.coins;
+  const filter = byId('catalog-search').value.trim().toLowerCase();
+  const container = byId('catalog-items');
+  container.replaceChildren();
+  Object.entries(catalogLabels[catalogTab]).forEach(([value, [label, icon]]) => {
+    if (filter && !label.toLowerCase().includes(filter)) return;
+    const price = shopPrices[catalogTab][value];
+    const owned = player.inventory[catalogTab].includes(value);
+    const inCart = cart.some((item) => item.group === catalogTab && item.value === value);
+    const card = document.createElement('article');
+    card.className = `catalog-card${owned ? ' owned' : ''}`;
+    const art = document.createElement('div');
+    art.className = 'catalog-art loading';
+    art.textContent = 'Ładowanie…';
+    const name = document.createElement('strong');
+    name.textContent = label;
+    const priceText = document.createElement('span');
+    priceText.textContent = owned ? 'Zakupione' : `● ${price} StarCoins`;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.disabled = owned;
+    button.textContent = owned ? 'Masz' : inCart ? 'W koszyku ✓' : 'Dodaj do kosza';
+    button.addEventListener('click', () => {
+      if (!cart.some((item) => item.group === catalogTab && item.value === value)) cart.push({ group: catalogTab, value, label, price });
+      catalogDraft.outfit3d[catalogTab] = value;
+      shopViewer?.update({ ...catalogDraft.outfit3d, skin: catalogDraft.skin, gender: catalogGender, ...catalogDraft.beauty });
+      renderCatalog();
+      renderCart();
+    });
+    card.append(art, name, priceText, button);
+    container.append(card);
+    avatarModule().then(({ makeCatalogThumbnail }) => makeCatalogThumbnail({ gender: catalogGender, skin: catalogDraft.skin }, catalogTab, value)).then((dataUrl) => {
+      if (!art.isConnected) return;
+      const image = document.createElement('img');
+      image.src = dataUrl;
+      image.alt = label;
+      art.replaceChildren(image);
+      art.classList.remove('loading');
+    }).catch(() => { art.textContent = icon; art.classList.remove('loading'); });
+  });
+}
+
+function renderCart() {
+  byId('cart-count').textContent = cart.length;
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  byId('cart-total').textContent = total;
+  const container = byId('cart-items');
+  container.replaceChildren();
+  if (!cart.length) {
+    const empty = document.createElement('p');
+    empty.className = 'cart-empty';
+    empty.textContent = 'Koszyk jest pusty. Dodaj coś z katalogu.';
+    container.append(empty);
+  }
+  cart.forEach((item) => {
+    const row = document.createElement('div');
+    const text = document.createElement('span');
+    text.textContent = `${item.label} · ${item.price} ●`;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'Usuń';
+    remove.addEventListener('click', () => {
+      cart = cart.filter((candidate) => candidate !== item);
+      renderCart();
+      renderCatalog();
+    });
+    row.append(text, remove);
+    container.append(row);
+  });
+  byId('buy-cart').disabled = !cart.length;
+}
+
+function buyCart() {
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
+  if (!cart.length) return;
+  if (player.coins < total) {
+    showToast(`Brakuje ${total - player.coins} StarCoins.`);
+    return;
+  }
+  player.coins -= total;
+  cart.forEach((item) => {
+    if (!player.inventory[item.group].includes(item.value)) player.inventory[item.group].push(item.value);
+  });
+  player.gender = catalogGender;
+  player.outfit3d = { ...catalogDraft.outfit3d };
+  cart = [];
+  queueSave();
+  renderGame();
+  renderCart();
+  renderCatalog();
+  cartDialog.close();
+  showToast(`Zakupy zakończone! Wydano ${total} StarCoins.`);
+}
+
+function openProfile() {
+  byId('profile-book-name').textContent = player.name;
+  byId('profile-status').value = '';
+  byId('profile-description').value = player.profile.description || '';
+  renderActivity();
+  profileDialog.showModal();
+  requestAnimationFrame(() => ensureProfileViewer());
+}
+
+function renderActivity() {
+  const posts = player.profile.posts.length ? player.profile.posts : [
+    { text: player.profile.status, likes: 1, time: 'Dzisiaj' },
+    { text: 'Odkrywam Warszawę i kompletuję nowy strój ✦', likes: 2, time: 'Wczoraj' },
+  ];
+  const feed = byId('activity-feed');
+  feed.replaceChildren();
+  posts.forEach((post, index) => {
+    const card = document.createElement('article');
+    const avatar = document.createElement('div');
+    avatar.className = 'feed-avatar';
+    avatar.textContent = player.name.slice(0, 1).toUpperCase();
+    const body = document.createElement('div');
+    const name = document.createElement('strong');
+    name.textContent = player.name;
+    const text = document.createElement('p');
+    text.textContent = post.text;
+    const time = document.createElement('small');
+    time.textContent = post.time;
+    body.append(name, text, time);
+    const like = document.createElement('button');
+    like.type = 'button';
+    like.textContent = `LOVE IT! ♥ ${post.likes || 0}`;
+    like.addEventListener('click', () => {
+      if (!player.profile.posts.length) return showToast('Opublikuj własny status, aby zbierać serduszka.');
+      player.profile.posts[index].likes = (player.profile.posts[index].likes || 0) + 1;
+      queueSave();
+      renderActivity();
+    });
+    card.append(avatar, body, like);
+    feed.append(card);
+  });
 }
 
 function showToast(message) {
@@ -527,6 +791,8 @@ logout.addEventListener('click', async () => {
   if (busy) return;
   busy = true;
   if (session && client) await client.auth.signOut();
+  if (presenceChannel && client) await client.removeChannel(presenceChannel);
+  presenceChannel = null;
   session = null;
   guest = false;
   player = null;
@@ -551,7 +817,7 @@ document.querySelectorAll('[data-board]').forEach((button) => button.addEventLis
 }));
 document.querySelectorAll('[data-social]').forEach((button) => button.addEventListener('click', () => {
   const action = button.dataset.social;
-  if (action === 'profile') openCreator();
+  if (action === 'profile') openProfile();
   else if (action === 'shop') shopHub.showModal();
   else if (action === 'games') openTramGame();
   else if (action === 'world') worldDialog.showModal();
@@ -576,10 +842,7 @@ document.querySelectorAll('[data-hub-action]').forEach((button) => button.addEve
   }
   if (action === 'fashion-female' || action === 'fashion-male') {
     shopHub.close();
-    openCreator(false, 'shop');
-    draft.gender = action === 'fashion-male' ? 'male' : 'female';
-    document.querySelectorAll('[data-gender]').forEach((item) => item.classList.toggle('selected', item.dataset.gender === draft.gender));
-    creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+    openCatalog(action === 'fashion-male' ? 'male' : 'female');
     return;
   }
   showToast(`${button.querySelector('b').textContent}: dział pojawi się w następnym etapie.`);
@@ -603,10 +866,52 @@ document.querySelectorAll('[data-gender]').forEach((button) => button.addEventLi
   document.querySelectorAll('[data-gender]').forEach((item) => item.classList.toggle('selected', item === button));
   creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
 }));
+document.querySelectorAll('[data-preset]').forEach((button) => button.addEventListener('click', () => {
+  const presets = {
+    nova: { gender: 'female', skin: '#c98b62' },
+    luna: { gender: 'female', skin: '#f5d0b5' },
+    alex: { gender: 'male', skin: '#9b6043' },
+    maks: { gender: 'male', skin: '#deb08c' },
+  };
+  draft.preset = button.dataset.preset;
+  Object.assign(draft, presets[draft.preset]);
+  document.querySelectorAll('[data-preset]').forEach((item) => item.classList.toggle('selected', item === button));
+  document.querySelectorAll('[data-gender]').forEach((item) => item.classList.toggle('selected', item.dataset.gender === draft.gender));
+  refreshCreatorOptions();
+  creatorViewer?.update({ ...draft.outfit3d, skin: draft.skin, gender: draft.gender, ...draft.beauty });
+}));
 document.querySelectorAll('[data-makeup]').forEach((button) => button.addEventListener('click', () => {
   draft.beauty.makeup = button.dataset.makeup;
   refreshBeautyOptions();
 }));
+catalogDialog.querySelector('.catalog-close').addEventListener('click', () => catalogDialog.close());
+document.querySelectorAll('[data-catalog-tab]').forEach((button) => button.addEventListener('click', () => {
+  catalogTab = button.dataset.catalogTab;
+  renderCatalog();
+}));
+byId('catalog-search').addEventListener('input', renderCatalog);
+byId('open-cart').addEventListener('click', () => { renderCart(); cartDialog.showModal(); });
+cartDialog.querySelector('.cart-head button').addEventListener('click', () => cartDialog.close());
+byId('buy-cart').addEventListener('click', buyCart);
+profileDialog.querySelector('.profile-close').addEventListener('click', () => profileDialog.close());
+byId('status-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const text = byId('profile-status').value.trim();
+  if (!text) return;
+  player.profile.status = text;
+  player.profile.posts.unshift({ text, likes: 0, time: 'Teraz' });
+  player.profile.posts = player.profile.posts.slice(0, 8);
+  byId('profile-status').value = '';
+  queueSave();
+  renderActivity();
+  showToast('Status opublikowany!');
+});
+byId('description-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  player.profile.description = byId('profile-description').value.trim();
+  queueSave();
+  showToast('Opis profilu zapisany.');
+});
 byId('daily-button').addEventListener('click', () => {
   if (player.daily === localDate()) return;
   player.daily = localDate();
@@ -629,6 +934,7 @@ byId('creator-form').addEventListener('submit', (event) => {
   byId('nickname').setCustomValidity('');
   player = { ...player, ...draft, name: nickname, created: true };
   queueSave();
+  updatePresence();
   renderGame();
   creator.close();
   showToast('Postać zapisana. Witaj w Alcarze!');

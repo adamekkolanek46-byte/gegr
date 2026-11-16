@@ -54,6 +54,7 @@
     </section>
 
     <section id="gra" class="game screen" hidden aria-labelledby="game-title">
+      <div id="game-loader" class="game-loader" hidden><div class="loader-star">★</div><strong>Ładowanie Alcary…</strong><span>Przygotowujemy postać i ubrania</span></div>
       <div class="social-shell">
         <header class="social-header">
           <div class="social-logo">Alcara<span>✦</span></div>
@@ -97,7 +98,7 @@
               <button class="map-hotspot clinic" data-board="clinic" type="button"><span>✦</span>Klinika piękna</button>
             </div>
 
-            <div class="friends-strip" aria-label="Znajomi online">
+            <div id="online-list" class="friends-strip" aria-label="Gracze online">
               <button class="friend-card" type="button"><img src="https://static.poly.pizza/46d6db5a-3c9f-4238-8cdf-8eb7194498dc.webp" alt="Julia"><span>julaax</span><b>★</b></button>
               <button class="friend-card" type="button"><img src="https://static.poly.pizza/b8ca96a7-0aca-46b2-8b75-3a4ff404506b.jpg" alt="Martin"><span>m4rtin</span><b>★</b></button>
               <button class="friend-card" type="button"><img src="https://static.poly.pizza/906a0cbe-b0a4-4312-b898-0f974b6f6771.jpg" alt="Oliwka"><span>olivka</span><b>☆</b></button>
@@ -123,6 +124,7 @@
         <div class="avatar-stage"><canvas id="creator-canvas" aria-label="Podgląd postaci 3D"></canvas><p>Przeciągnij, aby obrócić postać</p></div>
         <div class="creator-controls">
           <label>Pseudonim<input id="nickname" maxlength="18" autocomplete="nickname" required></label>
+          <fieldset><legend>Baza postaci</legend><div class="character-presets"><button type="button" data-preset="nova">Nova</button><button type="button" data-preset="luna">Luna</button><button type="button" data-preset="alex">Alex</button><button type="button" data-preset="maks">Maks</button></div></fieldset>
           <fieldset><legend>Typ postaci</legend><div class="gender-options"><button type="button" data-gender="female">Damska</button><button type="button" data-gender="male">Męska</button></div></fieldset>
           <fieldset><legend>Kolor skóry</legend><div id="skin-options" class="skin-options" aria-label="Kolor skóry"></div></fieldset>
           <fieldset><legend>Koszulka</legend><div id="top-options" class="wardrobe-options"></div></fieldset>
@@ -157,6 +159,54 @@
       <button type="button" data-hub-action="animations"><span>🎬</span><b>Animacje</b><small>Ruchy postaci</small></button>
       <button type="button" data-hub-action="backgrounds"><span>🌆</span><b>Tła</b><small>Warszawskie scenerie</small></button>
       <button type="button" data-hub-action="music"><span>🎧</span><b>Muzyka</b><small>Dźwięki profilu</small></button>
+    </div>
+  </dialog>
+
+  <dialog id="catalog-dialog" class="catalog-dialog">
+    <div class="catalog-head">
+      <div><p class="eyebrow">ALCARA FASHION</p><h2 id="catalog-title">Moda</h2></div>
+      <div class="catalog-tabs" role="tablist" aria-label="Kategorie sklepu">
+        <button class="active" type="button" data-catalog-tab="top">Koszulki</button>
+        <button type="button" data-catalog-tab="legs">Spodnie</button>
+        <button type="button" data-catalog-tab="feet">Buty</button>
+        <button type="button" data-catalog-tab="head">Włosy</button>
+      </div>
+      <button class="catalog-close" type="button" aria-label="Zamknij">×</button>
+    </div>
+    <div class="catalog-layout">
+      <section class="catalog-shelves" aria-label="Katalog ubrań">
+        <div class="catalog-tools"><span>Nowości i popularne</span><label>🔎 <input id="catalog-search" placeholder="Szukaj rzeczy"></label></div>
+        <div id="catalog-items" class="catalog-items"></div>
+      </section>
+      <aside class="catalog-preview">
+        <canvas id="shop-avatar-canvas" aria-label="Podgląd stroju 3D"></canvas>
+        <div class="catalog-wallet"><span>● <b id="catalog-coins">0</b> StarCoins</span><button id="open-cart" type="button">🛍️ Kosz <b id="cart-count">0</b></button></div>
+      </aside>
+    </div>
+  </dialog>
+
+  <dialog id="cart-dialog" class="cart-dialog">
+    <div class="cart-head"><h2>Twój koszyk</h2><button type="button" aria-label="Zamknij">×</button></div>
+    <div id="cart-items" class="cart-items"></div>
+    <div class="cart-total"><span>Razem: <b id="cart-total">0</b> StarCoins</span><button id="buy-cart" class="button primary" type="button">Kup wszystko</button></div>
+  </dialog>
+
+  <dialog id="profile-dialog" class="profile-dialog">
+    <div class="profile-book">
+      <button class="profile-close" type="button" aria-label="Zamknij">×</button>
+      <section class="profile-page profile-left">
+        <div class="profile-polaroid"><canvas id="profile-avatar-canvas" aria-label="Postać na profilu"></canvas><strong id="profile-book-name">Nowa osoba</strong></div>
+        <form id="description-form" class="description-form"><label>Opis profilu<textarea id="profile-description" maxlength="180" placeholder="Napisz kilka słów o sobie…"></textarea></label><button type="submit">Zapisz opis</button></form>
+        <h3>Mój pokój</h3><div class="room-placeholder">🛋️ ✦ 🪴</div>
+        <h3>Najlepsi znajomi</h3>
+        <div class="best-friends"><span>Julia ★</span><span>Martin ★</span><span>Oliwka ☆</span><span>Kacper ★</span></div>
+        <h3>Ulubione</h3><div class="favorites"><span>🌆 Warszawa</span><span>🎬 Filmy</span><span>🎧 Muzyka</span></div>
+      </section>
+      <section class="profile-page profile-right">
+        <p class="eyebrow dark">MÓJ PROFIL</p><h2>Aktywność</h2>
+        <form id="status-form" class="status-form"><input id="profile-status" maxlength="90" placeholder="Napisz status…"><button type="submit">Opublikuj</button></form>
+        <div id="activity-feed" class="activity-feed"></div>
+      </section>
     </div>
   </dialog>
 
