@@ -35,7 +35,7 @@ label{display:grid;gap:6px;margin-bottom:14px;font-weight:700}.grid{display:grid
 .hero-copy{position:relative;z-index:2;max-width:620px}.eyebrow{display:inline-flex;padding:7px 12px;border-radius:999px;background:#ffffffb8;color:#7b345e;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 3px 12px #542b4b21}
 .menu-actions{display:grid;width:min(330px,100%);gap:7px;margin-top:28px}.menu-actions button{margin:0;padding:15px 20px;text-align:left;font-size:17px}.menu-actions button:first-child{color:white;background:linear-gradient(135deg,#a8376c,#712653);box-shadow:0 12px 24px #7d2f5766}
 .skyline{position:absolute;z-index:-1;right:0;bottom:0;width:58%;height:72%;opacity:.92;filter:drop-shadow(0 20px 20px #3d163a42)}
-.cast-strip{position:absolute;right:3%;bottom:0;width:min(55%,560px);display:flex;align-items:flex-end;justify-content:center;gap:-12px;pointer-events:none}.cast-strip .mini-person{width:24%;margin-left:-5%;filter:drop-shadow(0 12px 8px #47193440)}.cast-strip .mini-person:nth-child(2){width:28%;z-index:2}.cast-strip .mini-person:nth-child(3){width:25%}
+.cast-strip{position:absolute;right:3%;bottom:0;width:min(55%,560px);display:flex;align-items:flex-end;justify-content:center;gap:-12px;pointer-events:none}.cast-strip .mini-person{width:36%;margin-left:-12%;filter:drop-shadow(0 12px 8px #47193440)}.cast-strip .mini-person img{display:block;width:100%;height:auto}.cast-strip .mini-person:nth-child(2){width:42%;z-index:2}.cast-strip .mini-person:nth-child(3){width:37%}
 .stage{position:relative;min-height:370px;display:flex;align-items:flex-end;justify-content:center;margin:-20px auto 0;overflow:visible;background:none;border:0}.stage svg,.stage img{height:min(54vh,500px);max-width:100%;object-fit:contain;filter:drop-shadow(0 22px 18px #26112469)}
 .stage:after{content:"";position:absolute;bottom:5px;width:220px;height:22px;border-radius:50%;z-index:-1;background:#32152d42;filter:blur(10px)}
 .vn-layout{min-height:100%;display:grid;grid-template-columns:minmax(260px,.75fr) minmax(380px,1.25fr);align-items:end;gap:20px}
@@ -52,6 +52,7 @@ label{display:grid;gap:6px;margin-bottom:14px;font-weight:700}.grid{display:grid
 .creator{width:min(900px,100%);margin:2vh auto;padding:26px;border-radius:28px;background:#fff9f3e8;box-shadow:0 20px 60px #32152852;backdrop-filter:blur(15px)}.creator .stage{min-height:360px}.creator-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center}.creator-fields{padding:20px}.creator-fields input,.creator-fields select{width:100%;background:#fff;border:1px solid #c69bad;box-shadow:inset 0 2px 5px #4f214b12}
 .relations-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.relation-head{display:flex;align-items:center;gap:11px}.avatar{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;color:white;font-weight:800;border:3px solid white;box-shadow:0 4px 10px #0002}.heart-meter{height:8px;margin-top:12px;border-radius:99px;background:#ead0dc;overflow:hidden}.heart-meter i{display:block;height:100%;background:linear-gradient(90deg,#df6a9c,#9c2860)}
 .toast{position:absolute;z-index:20;right:20px;top:66px;padding:9px 14px;border-radius:999px;background:#2d2134d9;color:white;font-size:12px}
+.phone{width:min(760px,100%);margin:2vh auto;padding:25px;border-radius:32px;background:#f8edf3e8;box-shadow:0 25px 70px #32152866;backdrop-filter:blur(16px)}.phone-list{display:grid;gap:10px;margin:18px 0}.phone-chat{display:grid;grid-template-columns:50px 1fr auto;align-items:center;gap:12px;width:100%;margin:0;text-align:left}.phone-chat .avatar{font-size:16px}.phone-chat small{margin:2px 0 0}.interaction-badge{display:inline-flex;align-items:center;gap:6px;margin:4px;padding:7px 10px;border-radius:999px;background:#fff7;color:#783456;font-size:12px;font-weight:800}
 @media(max-width:760px){body{padding:0}main{height:100vh;min-height:640px;border-radius:0;border:0}.vn-layout{display:block;padding-top:170px}.vn-layout .stage{position:absolute;top:70px;left:0;right:0;height:330px;min-height:0}.vn-layout .stage svg,.vn-layout .stage img{height:320px}.vn-panel{position:relative;margin:220px 0 20px;padding:20px}.cast-strip{right:-15%;width:85%;opacity:.55}.skyline{width:90%;height:55%}.map-shell{padding:20px 12px;min-height:560px}.map{display:grid;gap:12px;min-height:0}.map .card{position:relative!important;inset:auto!important;width:auto}.map-pin{display:none}.creator{padding:16px}.creator-grid{grid-template-columns:1fr}.creator .stage{min-height:240px}.creator .stage svg{height:250px}.creator-fields{padding:0}.location-panel{margin-top:10vh}h1{margin-top:80px}}
 </style>
 <main><header><strong>♡ Zauroczeni</strong><span>Warszawa · odcinek 1</span></header><section id="screen"></section></main>
@@ -59,15 +60,15 @@ label{display:grid;gap:6px;margin-bottom:14px;font-weight:700}.grid{display:grid
 "use strict";
 const screen = document.querySelector("#screen");
 const key = "zauroczeni.save.v1";
-// Wpisz ścieżkę lub adres data: w polu image, aby podmienić portret.
+// Każdy portret jest osobnym plikiem, więc można go łatwo wymienić.
 const people = [
- {name:"Martyna",color:"#a53f73",hair:2,image:"",intro:"Mam zrobić kronikę pierwszego dnia. Pomożesz mi znaleźć coś ciekawszego niż zdjęcie tablicy?",kind:"Chodźmy poszukać razem.",date:"Mam jeszcze jedno zdjęcie. Na nim jesteś tylko ty. Może jutro zrobimy wspólne?"},
- {name:"Adam",color:"#395e99",hair:1,image:"",intro:"Zgubiłem kartkę z planem zajęć. Znasz już drogę do sali od historii?",kind:"Pokażę ci. I tak idę w tamtą stronę.",date:"Dzięki tobie już znam drogę. Jutro mogę poczekać przed szkołą specjalnie na ciebie?"},
- {name:"Kasia",color:"#9b4b31",hair:2,image:"",intro:"Mam dwa bilety do kina w Złotych. Koleżanka się rozchorowała. Lubisz beznadziejne komedie?",kind:"Jeśli idziemy razem, to nawet bardzo.",date:"Dobra, film był tragiczny. Za to z tobą chcę się spotkać jeszcze raz."},
- {name:"Antosia",color:"#347459",hair:1,image:"",intro:"Szkicuję ławkę w Ogrodzie Saskim. Usiądziesz na chwilę, żebym mogła dorysować postać?",kind:"Usiądę. Pokażesz mi potem szkic?",date:"Masz, zatrzymaj rysunek. Następnym razem chciałabym się tu spotkać bez szkicownika."},
- {name:"Piotr",color:"#794a9b",hair:0,image:"",intro:"Przyniosłem termos herbaty na próbę szkolnego radia. Chcesz spróbować? Jest z goździkami.",kind:"Tak! Opowiesz mi przy okazji o audycji?",date:"Jutro też przyniosę herbatę. Może tym razem spotkamy się tylko we dwoje?"},
- {name:"Witek",color:"#51616a",hair:1,image:"",intro:"To ja schowałem twoje zgłoszenie do radia. Była jedna wolna rola, a mnie zależało na tej audycji.",kind:"Oddaj zgłoszenie i wyjaśnij to Piotrowi. Potem możemy pogadać.",date:"Oddałem kartkę i powiedziałem Piotrowi prawdę. Chcę zacząć od nowa. Spotkamy się jutro?"},
- {name:"Błażej",color:"#a73741",hair:0,image:"",intro:"Powiedziałem klasie, że uciekasz z pierwszej próby. Byłem zazdrosny, że zaprosili cię od razu.",kind:"Sprostuj plotkę. Jeśli to zrobisz, możemy zacząć od nowa.",date:"Sprostowałem to na grupie klasowej. Przepraszam. Dasz się jutro zaprosić na spacer?"}
+ {name:"Martyna",color:"#a53f73",hair:2,image:"assets/characters/martyna.png",intro:"Mam zrobić kronikę pierwszego dnia. Pomożesz mi znaleźć coś ciekawszego niż zdjęcie tablicy?",kind:"Chodźmy poszukać razem.",moment:"Martyna ustawia aparat na parapecie. Mamy jedno zdjęcie na próbę. Jaką pozę wybierasz?",momentChoices:[["Robimy zabawną minę.",20],["Stańmy trochę bliżej.",25],["Może tylko ty?",5]],message:"Zdjęcie wyszło świetnie. Wyślę ci je, ale obiecaj, że nie wrzucisz go bez mojego filtra!",date:"Mam jeszcze jedno zdjęcie. Na nim jesteś tylko ty. Może jutro zrobimy wspólne?"},
+ {name:"Adam",color:"#395e99",hair:1,image:"assets/characters/adam.png",intro:"Zgubiłem kartkę z planem zajęć. Znasz już drogę do sali od historii?",kind:"Pokażę ci. I tak idę w tamtą stronę.",moment:"Adam zatrzymuje się przy automacie z napojami. Wypada z niego ostatnie kakao. Co robisz?",momentChoices:[["Dzielimy się po połowie.",25],["Weź je, ja wybiorę herbatę.",15],["Wygrywa szybszy!",10]],message:"Dzięki za oprowadzenie. Jutro to ja pokażę ci najlepsze miejsce na przerwie.",date:"Dzięki tobie już znam drogę. Jutro mogę poczekać przed szkołą specjalnie na ciebie?"},
+ {name:"Kasia",color:"#9b4b31",hair:2,image:"assets/characters/kasia.png",intro:"Mam dwa bilety do kina w Złotych. Koleżanka się rozchorowała. Lubisz beznadziejne komedie?",kind:"Jeśli idziemy razem, to nawet bardzo.",moment:"Przed seansem Kasia wyciąga cię do fotobudki. Na ekranie migają trzy motywy zdjęcia.",momentChoices:[["Serca i brokat.",25],["Klasyczne czarno-białe.",15],["Najdziwniejszy filtr.",20]],message:"Zachowałam oba paski z fotobudki. Twój dostaniesz przy następnym spotkaniu.",date:"Dobra, film był tragiczny. Za to z tobą chcę się spotkać jeszcze raz."},
+ {name:"Antosia",color:"#347459",hair:1,image:"assets/characters/antosia.png",intro:"Szkicuję ławkę w Ogrodzie Saskim. Usiądziesz na chwilę, żebym mogła dorysować postać?",kind:"Usiądę. Pokażesz mi potem szkic?",moment:"Podmuch wiatru wyrywa szkic z notesu Antosi. Kartka ląduje przy fontannie.",momentChoices:[["Biegnę ją złapać.",20],["Osłaniam notes przed wiatrem.",15],["Proponuję narysować coś razem.",25]],message:"Dorysowałam na szkicu małe serce. Udawajmy, że znalazło się tam przypadkiem.",date:"Masz, zatrzymaj rysunek. Następnym razem chciałabym się tu spotkać bez szkicownika."},
+ {name:"Piotr",color:"#794a9b",hair:0,image:"assets/characters/piotr.png",intro:"Przyniosłem termos herbaty na próbę szkolnego radia. Chcesz spróbować? Jest z goździkami.",kind:"Tak! Opowiesz mi przy okazji o audycji?",moment:"Piotr podaje ci słuchawki. Do rozpoczęcia próbnej audycji zostało dziesięć sekund.",momentChoices:[["Witam słuchaczy pewnym głosem.",20],["Przedstawiam nas jako duet.",25],["Oddaję mikrofon Piotrowi.",10]],message:"Twój głos brzmi świetnie w słuchawkach. Mam dla nas pomysł na stały duet.",date:"Jutro też przyniosę herbatę. Może tym razem spotkamy się tylko we dwoje?"},
+ {name:"Witek",color:"#51616a",hair:1,image:"assets/characters/witek.png",intro:"To ja schowałem twoje zgłoszenie do radia. Była jedna wolna rola, a mnie zależało na tej audycji.",kind:"Oddaj zgłoszenie i wyjaśnij to Piotrowi. Potem możemy pogadać.",moment:"Witek przynosi zmiętą kartkę zgłoszenia. Widać, że trudno mu przyznać się do błędu.",momentChoices:[["Pomogę ci to wyjaśnić.",25],["Najpierw chcę szczerych przeprosin.",15],["Oddaj kartkę. Resztę załatwię.",5]],message:"Powiedziałem prawdę na grupie. Nie oczekuję, że od razu mi zaufasz, ale dzięki za szansę.",date:"Oddałem kartkę i powiedziałem Piotrowi prawdę. Chcę zacząć od nowa. Spotkamy się jutro?"},
+ {name:"Błażej",color:"#a73741",hair:0,image:"assets/characters/blazej.png",intro:"Powiedziałem klasie, że uciekasz z pierwszej próby. Byłem zazdrosny, że zaprosili cię od razu.",kind:"Sprostuj plotkę. Jeśli to zrobisz, możemy zacząć od nowa.",moment:"Błażej pokazuje ci przygotowaną wiadomość z wyjaśnieniem plotki. Palec zatrzymuje mu się nad przyciskiem „wyślij”.",momentChoices:[["Wyślij. Zostanę obok.",25],["Poprawmy ją razem.",20],["To twoja odpowiedzialność.",10]],message:"Wiadomość wysłana. To było trudniejsze, niż chcę przyznać. Dzięki, że nie odeszłaś/odszedłeś.",date:"Sprostowałem to na grupie klasowej. Przepraszam. Dasz się jutro zaprosić na spacer?"}
 ];
 const locations = [
  {name:"Liceum • Śródmieście",detail:"Tu zaczyna się pierwszy dzień i próba szkolnego radia.",cast:[0,1,4,5]},
@@ -147,7 +148,7 @@ function menu(){
  const skyline=node("div",""); skyline.className="skyline";
  skyline.innerHTML='<svg viewBox="0 0 600 430" preserveAspectRatio="none" aria-hidden="true"><path d="M0 430V270h57v-64h45v49h39v-98h54v113h42V95h22V54h18V95h23v174h48V196h62v74h38V146h55v124h58v-83h59v243Z" fill="#724265"/><path d="M259 55h18M251 109h34M250 130h35M250 151h35M250 172h35" stroke="#ffd8e7" stroke-width="5"/><circle cx="490" cy="70" r="44" fill="#fff3bc" opacity=".75"/></svg>';
  const cast=node("div",""); cast.className="cast-strip";
- [people[1],people[0],people[5]].forEach(person=>{const art=node("div","",cast);art.className="mini-person";art.innerHTML=characterSvg(person);});
+ [people[1],people[0],people[5]].forEach(person=>{const art=node("div","",cast);art.className="mini-person";const image=node("img","",art);image.src=person.image;image.alt="";});
 }
 function creator(){
  reset();
@@ -176,7 +177,7 @@ function creator(){
   event.preventDefault();
   if(!name.value.trim()){name.setCustomValidity("Wpisz imię.");name.reportValidity();return;}
   if((load() || state) && !confirm("Rozpocząć nową grę i zastąpić poprzedni zapis?")) return;
-  state={version:1,player:player(),scores:people.map(()=>0),seen:people.map(()=>false),route:null,scene:"intro",location:0};
+  state={version:1,player:player(),scores:people.map(()=>0),seen:people.map(()=>false),moments:people.map(()=>false),messages:people.map(()=>false),route:null,scene:"intro",location:0};
   go("intro");
  });
  name.addEventListener("input",()=>name.setCustomValidity(""));
@@ -184,6 +185,8 @@ function creator(){
 function go(scene){state.scene=scene;save();play();}
 function play(){
  reset();
+ state.moments=state.moments || people.map(()=>false);
+ state.messages=state.messages || people.map(()=>false);
  const placeIndex=Number.isInteger(state.location)?state.location:0;
  const backgrounds=["school","school","mall","park","river","home"];
  backdrop(state.scene==="map"?"map":backgrounds[placeIndex] || "school");
@@ -201,12 +204,15 @@ function play(){
   case "map": showMap(); break;
   case "location": showLocation(); break;
   case "dialogue": showDialogue(); break;
+  case "phone": showPhone(); break;
+  case "message": showMessage(); break;
   case "evening": showEvening(); break;
   case "ending": showEnding(); break;
  }
  if(state.scene!=="intro"){
   const nav=node("div","");nav.className="actions";
   button("♡ Relacje",relations,nav);
+  button("▣ Telefon",()=>go("phone"),nav);
   button("⌂ Menu główne",menu,nav);
  }
 }
@@ -232,8 +238,11 @@ function showLocation(){
  node("h2",place.name,panel);node("p",place.detail,panel);
  const cast=node("div","",panel);cast.className="location-cast";
  place.cast.forEach(id=>{
-  const talk=button((state.seen[id]?"✓ ":"♡ ")+people[id].name,()=>{state.speaker=id;go("dialogue");},cast);
-  talk.disabled=state.seen[id];
+  let text="♡ Poznaj: "+people[id].name;
+  if(state.seen[id]&&!state.moments[id]) text="✦ Dodatkowa scena: "+people[id].name;
+  if(state.moments[id]) text="✓ "+people[id].name;
+  const talk=button(text,()=>{state.speaker=id;state.interaction=state.seen[id]?"moment":"intro";go("dialogue");},cast);
+  talk.disabled=state.moments[id];
  });
  if(!place.cast.length){
   button("Zakończ pierwszy dzień",()=>go("evening"),panel).disabled=!state.seen.every(Boolean);
@@ -249,13 +258,54 @@ function showDialogue(){
  portrait(person,layout);
  const panel=node("div","",layout);panel.className="vn-panel";
  const speaker=node("span",person.name,panel);speaker.className="speaker";
- node("p",person.intro,panel);
+ const isMoment=state.interaction==="moment";
+ node("p",isMoment?person.moment:person.intro,panel);
  const choices=node("div","",panel);choices.className="choices";
- const answers=[[person.kind,35],["Możemy porozmawiać o tym później.",10],["Nie chcę się w to mieszać.",-20]];
+ const answers=isMoment?person.momentChoices:[[person.kind,35],["Możemy porozmawiać o tym później.",10],["Nie chcę się w to mieszać.",-20]];
  answers.forEach(([line,score])=>button(line,()=>{
-  state.scores[id]=score;state.seen[id]=true;go("location");
+  state.scores[id]=isMoment?Math.min(100,state.scores[id]+score):score;
+  state.seen[id]=true;
+  if(isMoment) state.moments[id]=true;
+  go("location");
  },choices));
  button("← Wróć do lokacji",()=>go("location"),panel);
+}
+function showPhone(){
+ backdrop("home");
+ const phone=node("div","");phone.className="phone";
+ const label=node("span","Twój telefon",phone);label.className="eyebrow";
+ node("h2","Wiadomości",phone);
+ const list=node("div","",phone);list.className="phone-list";
+ people.forEach((person,id)=>{
+  if(!state.seen[id]) return;
+  const chat=button("",()=>{state.phoneSpeaker=id;go("message");},list);chat.className="phone-chat";
+  const avatar=node("span",person.name[0],chat);avatar.className="avatar";avatar.style.background=person.color;
+  const copy=node("span","",chat);
+  node("strong",person.name,copy);
+  node("small",state.messages[id]?"Odpowiedź wysłana ✓":"Nowa wiadomość",copy);
+  node("span",state.messages[id]?"✓":"›",chat);
+ });
+ if(!state.seen.some(Boolean)) node("p","Poznaj kogoś na mapie, aby rozpocząć rozmowę.",phone);
+ button("← Wróć do gry",play,phone);
+}
+function showMessage(){
+ const id=state.phoneSpeaker,person=people[id];
+ const layout=node("div","");layout.className="vn-layout";
+ portrait(person,layout);
+ const panel=node("div","",layout);panel.className="vn-panel";
+ const speaker=node("span",person.name+" · online",panel);speaker.className="speaker";
+ node("p",person.message,panel);
+ if(!state.messages[id]){
+  const choices=node("div","",panel);choices.className="choices";
+  [["Odpisuję ciepło i proponuję kolejne spotkanie.",8],["Wysyłam zabawne emoji i krótką odpowiedź.",5],["Odczytuję wiadomość bez odpowiedzi.",0]].forEach(([line,score])=>button(line,()=>{
+   state.scores[id]=Math.min(100,state.scores[id]+score);
+   state.messages[id]=true;
+   go("phone");
+  },choices));
+ }else{
+  const badge=node("span","✓ Odpowiedź została wysłana",panel);badge.className="interaction-badge";
+  button("← Wróć do wiadomości",()=>go("phone"),panel);
+ }
 }
 function showEvening(){
  const panel=node("div","");panel.className="location-panel";
@@ -300,6 +350,8 @@ function relations(){
   node("strong",person.name,head);
   node("small",state.seen[id]?"Sympatia "+state.scores[id]+" / 100":"Jeszcze bez rozmowy",card);
   const meter=node("div","",card);meter.className="heart-meter";meter.innerHTML='<i style="width:'+Math.max(0,state.scores[id])+'%"></i>';
+  if(state.moments[id]) node("span","✦ wspólna scena",card).className="interaction-badge";
+  if(state.messages[id]) node("span","▣ wiadomość",card).className="interaction-badge";
   if(state.route===id) node("small","♡ Umówione spotkanie",card);
  });
  button("Wróć do gry",play);
@@ -307,4 +359,3 @@ function relations(){
 menu();
 </script>
 </html>
-
